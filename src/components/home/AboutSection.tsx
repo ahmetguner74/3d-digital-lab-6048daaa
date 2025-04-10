@@ -42,7 +42,7 @@ Yüksek hassasiyetli 3D mimari dijitalleştirme hizmeti sunuyoruz. Lazer tarama 
             
             
             
-            <h3 className="text-2xl font-semibold mt-8">Hizmetlerim</h3>
+            <h3 className="text-2xl font-semibold mt-8 my-0 py-[27px]">Hizmetlerim</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="p-4 rounded-lg border border-border bg-card/50 hover:bg-card/80 transition-colors">
                 <Globe className="h-8 w-8 text-primary mb-3" />
