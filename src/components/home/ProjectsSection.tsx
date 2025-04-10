@@ -1,19 +1,17 @@
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
 export default function ProjectsSection() {
-  return (
-    <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
+  return <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
       <div className="section-container min-h-screen flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           {/* Left content */}
           <div className="space-y-6 reveal">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight my-[25px] py-[20px]">
               Mimari objeler
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-muted-foreground py-[34px] my-[48px]">
               Mimari ve arkeolojik araştırmaların yürütülmesinde mimari eserlerin taranması 
               zorunlu bir aşamadır. Bu alanda sürekli çalışarak, hızlı ve kaliteli sonuçlara 
               ulaşmanızı sağlayacak en iyi çözümleri geliştirdik.
@@ -49,6 +47,5 @@ export default function ProjectsSection() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }
