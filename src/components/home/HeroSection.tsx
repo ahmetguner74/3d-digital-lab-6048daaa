@@ -30,7 +30,7 @@ export default function HeroSection() {
             <div className="aspect-square rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur p-1">
               <div className="h-full w-full rounded-full overflow-hidden bg-muted/50">
                 {/* Replace with your profile image */}
-                <img alt="Profile" className="h-full w-full object-cover" src="https://photos.app.goo.gl/Q2NQMUjKUQEKH2Po7" />
+                <img alt="Profile" className="h-full w-full object-cover" src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" />
               </div>
             </div>
             
