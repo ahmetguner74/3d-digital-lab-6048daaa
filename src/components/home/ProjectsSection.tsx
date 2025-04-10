@@ -1,99 +1,52 @@
-
-import { ExternalLink, Github } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const projects = [
-  {
-    id: 1,
-    title: "Modern E-ticaret Sitesi",
-    description: "Next.js, Tailwind CSS ve Stripe ile geliştirilmiş tam kapsamlı bir e-ticaret çözümü.",
-    image: "https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    tags: ["Next.js", "Tailwind CSS", "Stripe", "MongoDB"],
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com",
-  },
-  {
-    id: 2,
-    title: "İçerik Yönetim Sistemi",
-    description: "GraphQL API ve React ile geliştirilmiş özelleştirilebilir içerik yönetim sistemi.",
-    image: "https://images.unsplash.com/photo-1626908013351-800ddd734b8a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    tags: ["React", "GraphQL", "Node.js", "PostgreSQL"],
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com",
-  },
-  {
-    id: 3,
-    title: "SaaS Gösterge Paneli",
-    description: "TypeScript ve React ile geliştirilmiş, veri görselleştirme odaklı admin paneli.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    tags: ["TypeScript", "React", "Recharts", "Firebase"],
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com",
-  },
-];
+import { Link } from "react-router-dom";
 
 export default function ProjectsSection() {
   return (
-    <section id="projects" className="bg-muted/50 dark:bg-muted/20">
-      <div className="section-container">
-        <h2 className="section-title reveal">Projeler</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow reveal"
-            >
-              <div className="aspect-video w-full overflow-hidden">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                />
-              </div>
-              
-              <div className="p-6 space-y-4">
-                <h3 className="text-xl font-semibold">{project.title}</h3>
-                <p className="text-muted-foreground text-sm">{project.description}</p>
-                
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {project.tags.map((tag) => (
-                    <span key={tag} className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                
-                <div className="flex items-center gap-4 pt-4">
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Demo
-                  </a>
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    <Github className="h-4 w-4" />
-                    GitHub
-                  </a>
-                </div>
+    <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
+      <div className="section-container min-h-screen flex items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Left content */}
+          <div className="space-y-6 reveal">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Mimari objeler
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Mimari ve arkeolojik araştırmaların yürütülmesinde mimari eserlerin taranması 
+              zorunlu bir aşamadır. Bu alanda sürekli çalışarak, hızlı ve kaliteli sonuçlara 
+              ulaşmanızı sağlayacak en iyi çözümleri geliştirdik.
+            </p>
+            
+            <div className="pt-4">
+              <Button asChild size="lg" className="group">
+                <Link to="/demo">
+                  Demoyu görüntüle
+                  <Play className="ml-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+          
+          {/* Right content - Video area */}
+          <div className="relative w-full reveal">
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted">
+              {/* Video placeholder - Will be replaced with actual video later */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10">
+                <h3 className="text-xl font-medium text-center max-w-md mb-8 px-4">
+                  Lazer tarama, binaların inşasında ve restorasyonunda, fotogrametri ise müze sergilerinin 
+                  dijitalleştirilmesinde kullanılır; teknolojileri birleştirerek uygulama kapsamını genişletiyoruz.
+                </h3>
+                <Play className="h-16 w-16 text-primary opacity-60" />
+                <p className="mt-4 text-sm text-muted-foreground">Video buraya eklenecek</p>
               </div>
             </div>
-          ))}
-        </div>
-        
-        <div className="flex justify-center mt-12 reveal">
-          <Button asChild variant="secondary">
-            <Link to="/projects">Tüm Projeleri Gör</Link>
-          </Button>
+            
+            {/* Decorative elements */}
+            <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/20 blur-xl"></div>
+            <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-secondary/20 blur-xl"></div>
+          </div>
         </div>
       </div>
     </section>
