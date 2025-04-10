@@ -38,7 +38,7 @@ Yüksek hassasiyetli 3D mimari dijitalleştirme hizmeti sunuyoruz. Lazer tarama 
             </div>
           </div>
           
-          <div className="space-y--28 reveal py-[12px]">
+          <div className="space-y--28 reveal py-0">
             
             
             
