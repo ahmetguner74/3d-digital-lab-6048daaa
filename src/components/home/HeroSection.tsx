@@ -9,7 +9,7 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div className="space-y-8">
             <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight">
-              Farklı türdeki nesneleri tarıyoruz
+              Mimari
             </h1>
             
             <div className="pt-6">
