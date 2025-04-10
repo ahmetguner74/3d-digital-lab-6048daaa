@@ -9,10 +9,10 @@ export default function HeroSection() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
               <span className="text-gradient">3D Mimari</span> Dijitalleştirme Atölyesi
             </h1>
-            <p className="max-w-lg text-left text-2xl font-normal text-sky-500">En yenilikçi gelişmiş teknolojileri kullanarak verilerinizi oluşturuyoruz.</p>
+            <p className="text-gradient py-[10px] px-0 mx-0 my-[22px]">En yenilikçi gelişmiş teknolojileri kullanarak verilerinizi oluşturuyoruz.</p>
             <div className="flex flex-wrap gap-4">
               <Button asChild size="lg" className="group">
-                <Link to="/contact">
+                <Link to="/contact" className="mx-[6px] my-[85px] py-[26px] px-[45px]">
                   İletişime Geç
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
