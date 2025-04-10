@@ -1,4 +1,5 @@
-import { ArrowRight, FileText } from "lucide-react";
+
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 export default function HeroSection() {
@@ -16,12 +17,6 @@ export default function HeroSection() {
                   İletişime Geç
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="group">
-                <a href="/cv.pdf" download>
-                  CV İndir
-                  <FileText className="ml-2 h-4 w-4" />
-                </a>
               </Button>
             </div>
           </div>
