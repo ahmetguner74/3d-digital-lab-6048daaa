@@ -38,13 +38,9 @@ Yüksek hassasiyetli 3D mimari dijitalleştirme hizmeti sunuyoruz. Lazer tarama 
             </div>
           </div>
           
-          <div className="space-y-8 reveal">
-            <h3 className="text-2xl font-semibold">Yeteneklerim</h3>
-            <div className="flex flex-wrap gap-3">
-              {skills.map(skill => <span key={skill.name} className="skill-tag">
-                  {skill.name}
-                </span>)}
-            </div>
+          <div className="space-y--28 reveal">
+            
+            
             
             <h3 className="text-2xl font-semibold mt-8">Hizmetlerim</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
