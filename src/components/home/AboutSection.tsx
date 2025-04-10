@@ -21,7 +21,7 @@ const skills = [{
 export default function AboutSection() {
   return <section id="about" className="bg-background">
       <div className="section-container">
-        <h2 className="section-title reveal">Hakkımızda</h2>
+        <h2 className="section-title reveal px-0 py-0 my-0 mx-0 text-4xl font-medium">Hakkımızda</h2>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
           <div className="space-y-6 reveal">
