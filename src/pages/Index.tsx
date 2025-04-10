@@ -1,14 +1,22 @@
-// Update this page (the content is just a fallback if you fail to update the page)
 
-const Index = () => {
+import Layout from "@/components/layout/Layout";
+import HeroSection from "@/components/home/HeroSection";
+import AboutSection from "@/components/home/AboutSection";
+import ProjectsSection from "@/components/home/ProjectsSection";
+import ContactSection from "@/components/home/ContactSection";
+import { Helmet } from "react-helmet-async";
+
+export default function Index() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Layout>
+      <Helmet>
+        <title>Anasayfa | Modern Minimalist Portfolyo</title>
+        <meta name="description" content="Modern ve minimalist bir kişisel portfolyo sitesi. Profesyonel deneyimler, projeler ve iletişim bilgileri." />
+      </Helmet>
+      <HeroSection />
+      <AboutSection />
+      <ProjectsSection />
+      <ContactSection />
+    </Layout>
   );
-};
-
-export default Index;
+}
