@@ -1,16 +1,13 @@
-
 import { ArrowRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
 export default function HeroSection() {
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-muted/20">
+  return <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-muted/20">
       <div className="section-container min-h-[90vh] flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 reveal">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-              Merhaba, ben <span className="text-gradient">İsim Soyisim</span>
+              Merhaba, ben <span className="text-gradient">Dijitalleştirme Atölyesi</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-lg">
               Front-end geliştirici ve UI/UX tasarımcısı olarak modern ve kullanıcı dostu web deneyimleri oluşturuyorum.
@@ -35,11 +32,7 @@ export default function HeroSection() {
             <div className="aspect-square rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur p-1">
               <div className="h-full w-full rounded-full overflow-hidden bg-muted/50">
                 {/* Replace with your profile image */}
-                <img
-                  src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1050&q=80"
-                  alt="Profile"
-                  className="h-full w-full object-cover"
-                />
+                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1050&q=80" alt="Profile" className="h-full w-full object-cover" />
               </div>
             </div>
             
@@ -56,6 +49,5 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }
