@@ -10,8 +10,8 @@ export default function Index() {
   return (
     <Layout>
       <Helmet>
-        <title>Anasayfa | Dijitalleştirme Atölyesi</title>
-        <meta name="description" content="Farklı türdeki nesneleri tarıyoruz. Mimari objelerin dijitalleştirilmesi ve 3D tarama hizmetleri." />
+        <title>Anasayfa | Modern Minimalist Portfolyo</title>
+        <meta name="description" content="Modern ve minimalist bir kişisel portfolyo sitesi. Profesyonel deneyimler, projeler ve iletişim bilgileri." />
       </Helmet>
       <HeroSection />
       <AboutSection />
