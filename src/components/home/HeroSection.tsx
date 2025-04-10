@@ -1,53 +1,56 @@
-import { ArrowRight, FileText } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+
 export default function HeroSection() {
-  return <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-muted/20">
-      <div className="section-container min-h-[90vh] flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 reveal">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-              Merhaba, ben <span className="text-gradient">Dijitalleştirme Atölyesi</span>
+  return (
+    <section className="relative overflow-hidden bg-[#212121] text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-28">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          <div className="space-y-8">
+            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight">
+              Farklı türdeki nesneleri tarıyoruz
             </h1>
-            <p className="text-xl text-muted-foreground max-w-lg">
-              Front-end geliştirici ve UI/UX tasarımcısı olarak modern ve kullanıcı dostu web deneyimleri oluşturuyorum.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button asChild size="lg" className="group">
-                <Link to="/contact">
-                  İletişime Geç
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="group">
-                <a href="/cv.pdf" download>
-                  CV İndir
-                  <FileText className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            </div>
-          </div>
-          
-          <div className="relative w-full max-w-md mx-auto lg:max-w-none reveal">
-            <div className="aspect-square rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur p-1">
-              <div className="h-full w-full rounded-full overflow-hidden bg-muted/50">
-                {/* Replace with your profile image */}
-                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1050&q=80" alt="Profile" className="h-full w-full object-cover" />
-              </div>
+            
+            <div className="pt-6">
+              <h2 className="text-3xl font-bold mb-6">Mimari objeler</h2>
+              <p className="text-lg text-gray-300 max-w-lg">
+                Mimari ve arkeolojik araştırmaların yürütülmesinde mimari eserlerin taranması zorunlu bir aşamadır.
+                Bu alanda sürekli çalışarak, hızlı ve kaliteli sonuçlara ulaşmanızı sağlayacak en iyi çözümleri
+                geliştirdik.
+              </p>
             </div>
             
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/30 blur-2xl"></div>
-            <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-secondary/30 blur-2xl"></div>
+            <Button asChild size="lg" className="bg-[#8cd3a4] hover:bg-[#7bc393] text-black font-medium mt-8">
+              <Link to="/demo">
+                Demoyu görüntüle
+              </Link>
+            </Button>
+          </div>
+          
+          <div className="relative w-full">
+            <div className="aspect-[4/3] w-full">
+              <img 
+                src="/lovable-uploads/bf99b9c1-46c7-43d4-9b86-6fa9a25a8382.png" 
+                alt="3D Tarama Örneği - Tarihi Kilise" 
+                className="w-full h-full object-cover rounded-md"
+              />
+            </div>
+            
+            <div className="absolute right-0 bottom-0 transform translate-y-1/2 -translate-x-1/4 rotate-90 text-xs text-gray-400">
+              <p className="whitespace-nowrap">Bakire Meryem'in Göğe Kabul Kilisesi Subbino</p>
+            </div>
           </div>
         </div>
         
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
-          <span className="text-sm text-muted-foreground mb-2">Kaydır</span>
-          <div className="h-10 w-6 rounded-full border-2 border-muted-foreground/30 flex justify-center">
-            <div className="h-2 w-2 rounded-full bg-muted-foreground mt-2"></div>
-          </div>
+        <div className="mt-16 max-w-3xl">
+          <p className="text-xl text-gray-300">
+            Lazer tarama, binaların inşasında ve restorasyonunda, fotogrametri ise müze sergilerinin
+            dijitalleştirilmesinde kullanılır; teknolojileri birleştirerek uygulama kapsamını
+            genişletiyoruz
+          </p>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 }
