@@ -1,3 +1,4 @@
+
 import { ArrowRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -7,7 +8,7 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 reveal">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-              Merhaba, ben <span className="text-gradient">Dijitalleştirme Atölyesi</span>
+              <span className="text-gradient">Mimari</span> Dijitalleştirme Atölyesi
             </h1>
             <p className="text-xl text-muted-foreground max-w-lg">
               Front-end geliştirici ve UI/UX tasarımcısı olarak modern ve kullanıcı dostu web deneyimleri oluşturuyorum.
