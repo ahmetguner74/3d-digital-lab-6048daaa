@@ -1,36 +1,35 @@
-
 import { Code, Database, Globe, Palette } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
-const skills = [
-  { name: "React" },
-  { name: "TypeScript" },
-  { name: "Next.js" },
-  { name: "Tailwind CSS" },
-  { name: "Node.js" },
-  { name: "GraphQL" },
-  { name: "Figma" },
-  { name: "Git" },
-];
-
+const skills = [{
+  name: "React"
+}, {
+  name: "TypeScript"
+}, {
+  name: "Next.js"
+}, {
+  name: "Tailwind CSS"
+}, {
+  name: "Node.js"
+}, {
+  name: "GraphQL"
+}, {
+  name: "Figma"
+}, {
+  name: "Git"
+}];
 export default function AboutSection() {
-  return (
-    <section id="about" className="bg-background">
+  return <section id="about" className="bg-background">
       <div className="section-container">
-        <h2 className="section-title reveal">Hakkımda</h2>
+        <h2 className="section-title reveal">Hakkımızda</h2>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
           <div className="space-y-6 reveal">
-            <p className="text-lg text-muted-foreground">
-              5 yıllık deneyimli bir front-end geliştirici olarak, kullanıcı deneyimini ön planda tutan modern ve etkileyici web uygulamaları geliştiriyorum. 
-            </p>
-            <p className="text-lg text-muted-foreground">
-              React, TypeScript ve modern CSS teknolojileri konusunda uzmanlık sahibiyim. Ayrıca UI/UX tasarım prensiplerini benimseyerek, hem görsel hem de işlevsel açıdan mükemmel ürünler ortaya çıkarmak için çalışıyorum.
-            </p>
-            <p className="text-lg text-muted-foreground">
-              Proje geliştirme süreçlerinde çevik metodolojileri benimseyerek, müşteri ihtiyaçlarına hızlı ve etkili çözümler üretmeye odaklanıyorum.
-            </p>
+            <p className="text-lg text-muted-foreground">Gerçeği dijitale taşıyoruz.
+
+Yüksek hassasiyetli 3D mimari dijitalleştirme hizmeti sunuyoruz. Lazer tarama ve fotogrametri teknolojilerini bir araya getirerek binaların, yapısal elemanların ve alanların dijital ikizlerini milimetre hassasiyetinde oluşturuyoruz. Her projede, fiziksel dünyanın en doğru temsilini üretmeyi hedefliyoruz.</p>
+            <p className="text-lg text-muted-foreground">Mimarlık, mühendislik, restorasyon ve şehir planlama gibi birçok alanda, dijital veri üretimiyle süreçleri hızlandırıyor, hata payını azaltıyoruz. Gerçeklik yakalama teknolojilerine hâkim ekibimiz, dijital dönüşüm yolculuğunuzda size güvenilir bir ortak olmayı amaçlar.</p>
+            <p className="text-lg text-muted-foreground">Geleceği, bugünden modelliyoruz.</p>
             
             <div>
               <Button asChild variant="secondary">
@@ -42,11 +41,9 @@ export default function AboutSection() {
           <div className="space-y-8 reveal">
             <h3 className="text-2xl font-semibold">Yeteneklerim</h3>
             <div className="flex flex-wrap gap-3">
-              {skills.map((skill) => (
-                <span key={skill.name} className="skill-tag">
+              {skills.map(skill => <span key={skill.name} className="skill-tag">
                   {skill.name}
-                </span>
-              ))}
+                </span>)}
             </div>
             
             <h3 className="text-2xl font-semibold mt-8">Hizmetlerim</h3>
@@ -86,6 +83,5 @@ export default function AboutSection() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }

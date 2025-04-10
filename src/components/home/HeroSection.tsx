@@ -1,4 +1,3 @@
-
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,7 +7,7 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 reveal">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-              <span className="text-gradient">Mimari</span> Dijitalleştirme Atölyesi
+              <span className="text-gradient">3D Mimari</span> Dijitalleştirme Atölyesi
             </h1>
             <p className="max-w-lg text-left text-2xl font-normal text-sky-500">En yenilikçi gelişmiş teknolojileri kullanarak verilerinizi oluşturuyoruz.</p>
             <div className="flex flex-wrap gap-4">
@@ -25,7 +24,7 @@ export default function HeroSection() {
             <div className="aspect-square rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur p-1">
               <div className="h-full w-full rounded-full overflow-hidden bg-muted/50">
                 {/* Replace with your profile image */}
-                <img alt="Profile" className="h-full w-full object-cover" src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" />
+                <img alt="Profile" src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" className="h-full w-full object-cover" />
               </div>
             </div>
             
