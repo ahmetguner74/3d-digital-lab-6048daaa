@@ -1,11 +1,8 @@
-
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
 export default function HeroSection() {
-  return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-muted/20">
+  return <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-muted/20">
       <div className="section-container min-h-[90vh] flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 reveal">
@@ -25,15 +22,11 @@ export default function HeroSection() {
             </div>
           </div>
           
-          <div className="relative w-full max-w-md mx-auto lg:max-w-none reveal">
+          <div className="relative w-full max-w-md lg:max-w-none reveal rounded-full bg-stone-200 px-0 mx-0 my-0 py-0">
             <div className="aspect-square rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur p-1">
               <div className="h-full w-full rounded-full overflow-hidden bg-muted/50">
                 {/* Replace with your profile image */}
-                <img 
-                  alt="Mimari Görsel" 
-                  src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" 
-                  className="h-full w-full object-cover" 
-                />
+                <img alt="Mimari Görsel" src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" className="h-full w-full object-none" />
               </div>
             </div>
             
@@ -50,6 +43,5 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }
