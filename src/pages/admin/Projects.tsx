@@ -9,72 +9,26 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { ProjectsFilter } from "@/components/admin/ProjectsFilter";
 import { ProjectsTable, Project } from "@/components/admin/ProjectsTable";
 import { supabase } from "@/integrations/supabase/client";
-
-// Örnek proje verisi - İlerleyen adımda Supabase'den çekilecek
-const initialProjects = [
-  {
-    id: 1,
-    title: "Sivil Mimari Örneği",
-    category: "Mimari",
-    status: "Yayında",
-    featured: true,
-    lastUpdated: "2024-04-05"
-  },
-  {
-    id: 2,
-    title: "Arkeolojik Eserler",
-    category: "Arkeoloji",
-    status: "Yayında",
-    featured: false,
-    lastUpdated: "2024-04-02"
-  },
-  {
-    id: 3,
-    title: "Tarihi Yapılar",
-    category: "Restorasyon",
-    status: "Yayında",
-    featured: true,
-    lastUpdated: "2024-03-28"
-  },
-  {
-    id: 4,
-    title: "Modern Mimari",
-    category: "Mimari",
-    status: "Taslak",
-    featured: false,
-    lastUpdated: "2024-03-25"
-  },
-  {
-    id: 5,
-    title: "Müze Sergileri",
-    category: "Müze",
-    status: "Yayında",
-    featured: false,
-    lastUpdated: "2024-03-20"
-  },
-  {
-    id: 6,
-    title: "Kültürel Miras",
-    category: "Koruma",
-    status: "Taslak",
-    featured: false,
-    lastUpdated: "2024-03-15"
-  }
-];
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminProjects() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>(initialProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
   const [sortConfig, setSortConfig] = useState({
     key: "lastUpdated",
     direction: "desc"
   });
+  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
 
   // Filtreleme ve sıralama mantığı
   useEffect(() => {
+    if (!projects.length) return;
+    
     let result = [...projects];
     
     // Arama filtresi
@@ -112,40 +66,70 @@ export default function AdminProjects() {
   }, [searchTerm, categoryFilter, statusFilter, projects, sortConfig]);
 
   // Supabase'den projeleri çekme
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        // Note: This is commented out until the database schema is fully implemented
-        // The original code was causing a TypeScript error because the 'projects' table
-        // isn't defined in the Database type
-        /*
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .order('created_at', { ascending: false });
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('updated_at', { ascending: false });
 
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          // Convert data to the Project format
-          // setProjects(data);
-        }
-        */
-        
-        // For now, we'll continue using the sample data
-        console.log("Using sample project data until Supabase schema is implemented");
-      } catch (error) {
-        console.error('Error fetching projects:', error);
+      if (error) {
+        throw error;
       }
-    };
 
+      if (data) {
+        // Supabase'den gelen veriyi Project tipine dönüştür
+        const formattedProjects: Project[] = data.map(item => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          status: item.status,
+          featured: item.featured || false,
+          lastUpdated: new Date(item.updated_at).toISOString().split('T')[0]
+        }));
+        
+        setProjects(formattedProjects);
+        
+        // Benzersiz kategorileri ayarla
+        const categories = Array.from(new Set(formattedProjects.map(project => project.category)));
+        setUniqueCategories(categories);
+      }
+    } catch (error: any) {
+      console.error('Error fetching projects:', error);
+      toast({
+        title: "Hata",
+        description: "Projeler yüklenirken bir hata oluştu: " + (error.message || error),
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProjects();
+    
+    // Realtime güncellemeleri dinle
+    const channel = supabase
+      .channel('public:projects')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'projects' 
+        }, 
+        () => {
+          // Herhangi bir değişiklikte projeleri tekrar çek
+          fetchProjects();
+        })
+      .subscribe();
+    
+    // Cleanup
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
-
-  // Benzersiz kategori listesini elde et
-  const uniqueCategories = Array.from(new Set(projects.map(project => project.category)));
 
   return (
     <AdminLayout title="Projeler">
@@ -174,6 +158,8 @@ export default function AdminProjects() {
         setStatusFilter={setStatusFilter}
         sortConfig={sortConfig}
         setSortConfig={setSortConfig}
+        loading={loading}
+        onRefresh={fetchProjects}
       />
       
       {filteredProjects.length > 0 && (
