@@ -14,6 +14,7 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
+import PointCloudViewer from "@/components/PointCloudViewer";
 
 interface Project {
   id: string;
@@ -24,6 +25,7 @@ interface Project {
   category: string;
   cover_image: string;
   hasPointCloud?: boolean;
+  pointCloudPath?: string;
 }
 
 interface ProjectImage {
@@ -143,7 +145,14 @@ export default function ProjectDetail() {
 
   // Karşılaştırma için kapak görseli ve ilk proje görseli
   const beforeImage = project.cover_image || "/placeholder.svg";
-  const afterImage = projectImages.length > 0 ? projectImages[0].image_url : "/placeholder.svg";
+  
+  // Before-After için görselleri bul
+  const beforeImageFromSet = projectImages.find(img => img.alt_text === "before");
+  const afterImageFromSet = projectImages.find(img => img.alt_text === "after");
+  
+  const afterImage = afterImageFromSet ? afterImageFromSet.image_url : 
+                     projectImages.length > 0 ? projectImages[0].image_url : 
+                     "/placeholder.svg";
 
   return (
     <Layout>
@@ -223,13 +232,10 @@ export default function ProjectDetail() {
           <div className="section-container py-20">
             <h2 className="text-2xl sm:text-3xl font-bold mb-8 reveal">Nokta Bulutu Görüntüleyici</h2>
             
-            <div className="aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden reveal">
-              {/* Bu div Potree görüntüleyici ile değiştirilecek */}
-              <div className="w-full h-full flex items-center justify-center bg-black/10">
-                <p className="text-lg text-muted-foreground">
-                  Potree nokta bulutu görüntüleyici buraya eklenecek
-                </p>
-              </div>
+            <div className="w-full rounded-lg overflow-hidden reveal">
+              <PointCloudViewer 
+                pointCloudPath={project.pointCloudPath || "https://cdn.rawgit.com/potree/potree/develop/pointclouds/lion_takanawa/cloud.js"} 
+              />
             </div>
             
             <p className="text-lg text-center mt-8 max-w-3xl mx-auto text-muted-foreground reveal">

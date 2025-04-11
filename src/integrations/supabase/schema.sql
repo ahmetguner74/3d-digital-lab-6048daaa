@@ -10,6 +10,8 @@ CREATE TABLE public.projects (
   featured BOOLEAN DEFAULT false,
   content TEXT,
   cover_image VARCHAR,
+  hasPointCloud BOOLEAN DEFAULT false,
+  pointCloudPath VARCHAR,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -58,3 +60,17 @@ CREATE POLICY "Authenticated users can manage project images" ON public.project_
 CREATE POLICY "Authenticated users can manage settings" ON public.admin_settings
   FOR ALL USING (auth.role() = 'authenticated')
   WITH CHECK (auth.role() = 'authenticated');
+
+-- Add trigger for automatic updated_at
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER projects_set_updated_at
+BEFORE UPDATE ON public.projects
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();

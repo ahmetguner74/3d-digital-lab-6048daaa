@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -24,26 +25,34 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { X, Save, Loader2, Upload, ImagePlus, Check, AlertTriangle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-// Örnek proje verisi
-const sampleProject = {
-  id: 1,
-  title: "Sivil Mimari Örneği",
-  slug: "sivil-mimari",
-  description: "Modern ve tarihi yapıların detaylı 3D tarama ve modellemesi",
-  category: "Mimari",
-  status: "Yayında",
-  content: "Bu projede sivil mimari yapısının hem dış hem de iç kısımlarının lazer tarama teknolojisi kullanılarak milimetrik hassasiyetle 3D modelleri oluşturulmuştur. Tarama sonuçları, yapının mevcut durumunu detaylı şekilde belgelemekte ve olası restorasyon çalışmalarına temel oluşturmaktadır.",
-  tags: ["Lazer Tarama", "3D Modelleme", "Mimari"],
-  images: [
-    { id: 1, url: "/placeholder.svg", alt: "Örnek görsel 1", type: "main" },
-    { id: 2, url: "/placeholder.svg", alt: "Örnek görsel 2", type: "before" },
-    { id: 3, url: "/placeholder.svg", alt: "Örnek görsel 3", type: "after" }
-  ],
-  additionalImages: [],
-  hasPointCloud: true,
-  lastUpdated: "2024-04-05"
-};
+interface Project {
+  id: string | null;
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  status: string;
+  content: string;
+  featured: boolean;
+  tags: string[];
+  images: {
+    id: number;
+    url: string;
+    alt: string;
+    type: string;
+  }[];
+  additionalImages: {
+    id: number;
+    url: string;
+    alt: string;
+    type: string;
+  }[];
+  cover_image: string;
+  hasPointCloud: boolean;
+  lastUpdated: string;
+}
 
 export default function ProjectEdit() {
   const { id } = useParams();
@@ -51,7 +60,7 @@ export default function ProjectEdit() {
   const { toast } = useToast();
   const isNew = id === "new";
   
-  const [project, setProject] = useState(isNew ? {
+  const [project, setProject] = useState<Project>({
     id: null,
     title: "",
     slug: "",
@@ -59,12 +68,14 @@ export default function ProjectEdit() {
     category: "",
     status: "Taslak",
     content: "",
+    featured: false,
     tags: [],
     images: [],
     additionalImages: [],
+    cover_image: "",
     hasPointCloud: false,
     lastUpdated: new Date().toISOString().split('T')[0]
-  } : sampleProject);
+  });
   
   const [loading, setLoading] = useState(false);
   const [tagInput, setTagInput] = useState("");
@@ -75,26 +86,107 @@ export default function ProjectEdit() {
   const afterImageInputRef = useRef<HTMLInputElement>(null);
   const additionalImageInputRef = useRef<HTMLInputElement>(null);
   
+  // Fetch project data if editing an existing project
   useEffect(() => {
     if (!isNew && id) {
-      // Gerçek uygulamada Supabase'den proje verisini çekecek
-      setLoading(true);
-      setTimeout(() => {
-        setProject(sampleProject);
-        setLoading(false);
-      }, 500);
+      fetchProject(id);
     }
   }, [id, isNew]);
+  
+  // Fetch project data from Supabase
+  const fetchProject = async (projectId: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        // Fetch project images
+        const { data: imagesData, error: imagesError } = await supabase
+          .from('project_images')
+          .select('*')
+          .eq('project_id', data.id)
+          .order('sequence_order', { ascending: true });
+          
+        if (imagesError) {
+          console.error('Proje görselleri yüklenirken hata:', imagesError);
+        }
+        
+        // Process project data
+        setProject({
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          description: data.description || "",
+          category: data.category,
+          status: data.status,
+          content: data.content || "",
+          featured: data.featured || false,
+          tags: [], // Şu an için tag özelliği yok
+          cover_image: data.cover_image || "",
+          images: data.cover_image ? [
+            { id: 0, url: data.cover_image, alt: data.title, type: "main" }
+          ] : [],
+          additionalImages: imagesData ? imagesData.map((img: any, index: number) => ({
+            id: img.id,
+            url: img.image_url,
+            alt: img.alt_text || `Görsel ${index + 1}`,
+            type: "additional"
+          })) : [],
+          hasPointCloud: data.hasPointCloud || false,
+          lastUpdated: new Date(data.updated_at).toISOString().split('T')[0]
+        });
+        
+        // Set preview images
+        if (data.cover_image) {
+          setPreviewImages(prev => ({ ...prev, main: data.cover_image }));
+        }
+        
+        if (imagesData && imagesData.length > 0) {
+          // Set before and after images if they exist
+          const beforeImage = imagesData.find(img => img.alt_text === "before");
+          const afterImage = imagesData.find(img => img.alt_text === "after");
+          
+          if (beforeImage) {
+            setPreviewImages(prev => ({ ...prev, before: beforeImage.image_url }));
+          }
+          
+          if (afterImage) {
+            setPreviewImages(prev => ({ ...prev, after: afterImage.image_url }));
+          }
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Hata",
+        description: `Proje yüklenirken bir sorun oluştu: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setProject(prev => ({ ...prev, [name]: value }));
     
     // Slug otomatik oluşturma
-    if (name === "title" && isNew) {
+    if (name === "title" && (isNew || !project.slug)) {
       const slug = value
         .toLowerCase()
-        .replace(/[^\w\s-]/g, "") // Özel karakterleri kaldır
+        .replace(/[^\w\s-ğüşıöçĞÜŞİÖÇ]/g, "") // Özel karakterleri kaldır
+        .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s") // Türkçe karakterleri İngilizce'ye çevir
+        .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
+        .replace(/Ğ/g, "G").replace(/Ü/g, "U").replace(/Ş/g, "S")
+        .replace(/İ/g, "I").replace(/Ö/g, "O").replace(/Ç/g, "C")
         .replace(/\s+/g, "-") // Boşlukları tire ile değiştir
         .replace(/--+/g, "-"); // Çoklu tireleri tek tire yap
       setProject(prev => ({ ...prev, slug }));
@@ -129,7 +221,12 @@ export default function ProjectEdit() {
         setPreviewImages(prev => ({...prev, [type]: imageUrl}));
         
         // Resim türüne göre projeyi güncelle
-        if (type === "additional") {
+        if (type === "main") {
+          setProject(prev => ({
+            ...prev,
+            cover_image: imageUrl
+          }));
+        } else if (type === "additional") {
           // Ek görseller dizisine ekle
           const newImage = {
             id: Date.now(), // Geçici ID
@@ -143,7 +240,7 @@ export default function ProjectEdit() {
             additionalImages: [...(prev.additionalImages || []), newImage]
           }));
         } else {
-          // Ana resimleri güncelle
+          // Ana resimleri güncelle (before/after)
           const imageIndex = project.images.findIndex(img => img.type === type);
           
           if (imageIndex >= 0) {
@@ -185,8 +282,21 @@ export default function ProjectEdit() {
         ...prev,
         additionalImages: prev.additionalImages.filter(img => img.id !== id)
       }));
+    } else if (type === "main") {
+      // Ana görseli sil
+      setProject(prev => ({
+        ...prev,
+        cover_image: ""
+      }));
+      
+      // Önizleme resmini temizle
+      setPreviewImages(prev => {
+        const newPreviews = {...prev};
+        delete newPreviews[type];
+        return newPreviews;
+      });
     } else {
-      // Ana görsellerden birini sil
+      // Ana görsellerden birini sil (before/after)
       setProject(prev => ({
         ...prev,
         images: prev.images.filter(img => img.type !== type)
@@ -208,6 +318,11 @@ export default function ProjectEdit() {
       return previewImages[type];
     }
     
+    // Ana kapak görseli kontrolü
+    if (type === "main" && project.cover_image) {
+      return project.cover_image;
+    }
+    
     // Varolan proje resmini kontrol et
     const image = project.images.find(img => img.type === type);
     if (image) {
@@ -223,7 +338,7 @@ export default function ProjectEdit() {
     }
   };
   
-  const handleSave = () => {
+  const handleSave = async () => {
     setLoading(true);
     
     // Zorunlu alanların kontrolü
@@ -236,16 +351,133 @@ export default function ProjectEdit() {
       setLoading(false);
       return;
     }
-    
-    // Gerçek uygulamada, bu fonksiyon Supabase'e veri kaydedecek
-    setTimeout(() => {
-      setLoading(false);
+
+    try {
+      // Proje verileri için hazırlık
+      const projectData = {
+        title: project.title,
+        slug: project.slug,
+        description: project.description,
+        category: project.category,
+        status: project.status,
+        content: project.content,
+        featured: project.featured,
+        cover_image: project.cover_image,
+        hasPointCloud: project.hasPointCloud,
+        updated_at: new Date().toISOString()
+      };
+      
+      let projectId = project.id;
+      
+      // Eğer yeni proje ise oluştur, değilse güncelle
+      if (isNew) {
+        const { data, error } = await supabase
+          .from('projects')
+          .insert([projectData])
+          .select('id');
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data && data.length > 0) {
+          projectId = data[0].id;
+        } else {
+          throw new Error("Proje kaydedildi ancak ID alınamadı");
+        }
+      } else {
+        const { error } = await supabase
+          .from('projects')
+          .update(projectData)
+          .eq('id', project.id);
+        
+        if (error) {
+          throw error;
+        }
+      }
+      
+      // Proje ID'si olmadan devam edemeyiz
+      if (!projectId) {
+        throw new Error("Proje ID'si alınamadı");
+      }
+
+      // Before/After görsellerini kaydet
+      for (const imageType of ['before', 'after']) {
+        const imageUrl = getImageUrl(imageType);
+        if (imageUrl) {
+          // Önce mevcut görselleri kontrol et
+          const { data: existingImages } = await supabase
+            .from('project_images')
+            .select('id')
+            .eq('project_id', projectId)
+            .eq('alt_text', imageType);
+          
+          if (existingImages && existingImages.length > 0) {
+            // Varolan görseli güncelle
+            await supabase
+              .from('project_images')
+              .update({ image_url: imageUrl })
+              .eq('id', existingImages[0].id);
+          } else {
+            // Yeni görsel ekle
+            await supabase
+              .from('project_images')
+              .insert({
+                project_id: projectId,
+                image_url: imageUrl,
+                alt_text: imageType,
+                sequence_order: imageType === 'before' ? 0 : 1
+              });
+          }
+        }
+      }
+
+      // Ek görselleri kaydet
+      if (project.additionalImages && project.additionalImages.length > 0) {
+        // Tüm ek görselleri çek ve DB'de olmayan yeni görselleri ekle
+        const { data: existingImages } = await supabase
+          .from('project_images')
+          .select('*')
+          .eq('project_id', projectId)
+          .neq('alt_text', 'before')
+          .neq('alt_text', 'after');
+        
+        const existingIds = existingImages ? existingImages.map(img => img.id) : [];
+        
+        // Önizlemeden gelen ve henüz DB'ye kaydedilmemiş görseller için
+        const newImages = project.additionalImages.filter(img => 
+          typeof img.id === 'number' || !existingIds.includes(img.id as string));
+        
+        if (newImages.length > 0) {
+          const imagesToInsert = newImages.map((img, index) => ({
+            project_id: projectId,
+            image_url: img.url,
+            alt_text: img.alt,
+            sequence_order: existingImages ? existingImages.length + index + 2 : index + 2  // Before ve After'dan sonra
+          }));
+          
+          await supabase
+            .from('project_images')
+            .insert(imagesToInsert);
+        }
+      }
+      
       toast({
-        title: "Proje kaydedildi",
+        title: "Başarılı",
         description: "Proje başarıyla kaydedildi.",
       });
+      
       navigate("/admin/projects");
-    }, 1000);
+    } catch (error: any) {
+      console.error("Proje kaydedilirken hata:", error);
+      toast({
+        title: "Hata",
+        description: `Proje kaydedilirken bir sorun oluştu: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePreview = () => {
@@ -614,7 +846,7 @@ export default function ProjectEdit() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {/* Ek görselleri göster */}
                       {project.additionalImages && project.additionalImages.map((image) => (
-                        <div key={image.id} className="aspect-square relative bg-background rounded-md border border-border overflow-hidden">
+                        <div key={typeof image.id === 'number' ? `temp-${image.id}` : image.id} className="aspect-square relative bg-background rounded-md border border-border overflow-hidden">
                           <img 
                             src={image.url} 
                             alt={image.alt} 
@@ -652,12 +884,10 @@ export default function ProjectEdit() {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
+                  <Switch 
                     id="hasPointCloud" 
                     checked={project.hasPointCloud}
-                    onChange={(e) => setProject(prev => ({ ...prev, hasPointCloud: e.target.checked }))}
-                    className="h-4 w-4"
+                    onCheckedChange={(checked) => setProject(prev => ({ ...prev, hasPointCloud: checked }))}
                   />
                   <Label htmlFor="hasPointCloud">Nokta bulutu görüntüleyici içerir</Label>
                 </div>
@@ -704,33 +934,12 @@ export default function ProjectEdit() {
                   <h3 className="text-lg font-medium">Görünürlük Ayarları</h3>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center space-x-2">
-                      <input 
-                        type="checkbox" 
+                      <Switch 
                         id="featured" 
-                        className="h-4 w-4"
+                        checked={project.featured}
+                        onCheckedChange={(checked) => setProject(prev => ({ ...prev, featured: checked }))}
                       />
                       <Label htmlFor="featured">Öne çıkan proje</Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="checkbox" 
-                        id="hideFromListing" 
-                        className="h-4 w-4"
-                      />
-                      <Label htmlFor="hideFromListing">Liste sayfasında gizle</Label>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/30 rounded-lg">
-                  <div className="flex items-start">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mr-3 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-yellow-800 dark:text-yellow-300">Dikkat</h4>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                        Bu bölümdeki ayarlar henüz geliştirilme aşamasındadır. İleride daha fazla özellik eklenecektir.
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -745,7 +954,7 @@ export default function ProjectEdit() {
           </Button>
           
           <div className="flex items-center space-x-2">
-            <Button variant="outline" onClick={handlePreview}>
+            <Button variant="outline" onClick={handlePreview} disabled={!project.slug}>
               Önizle
             </Button>
             <Button onClick={handleSave} disabled={loading}>
