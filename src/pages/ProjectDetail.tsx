@@ -117,7 +117,7 @@ export default function ProjectDetail() {
       </Helmet>
       
       <section className="min-h-screen bg-muted/50 dark:bg-muted/20 flex items-center">
-        <div className="bg-zinc-600">
+        <div className="bg-zinc-50">
           <h1 className="text-3xl sm:text-4xl font-bold mb-8 reveal">{project.title}</h1>
           
           <div className="relative aspect-video w-full max-w-5xl mx-auto border border-border rounded-lg overflow-hidden reveal">
