@@ -10,6 +10,7 @@ interface Project {
   title: string;
   slug: string;
   cover_image: string;
+  category: string;
 }
 
 export default function AllProjectsSection() {
@@ -25,7 +26,7 @@ export default function AllProjectsSection() {
         // Supabase'den yayında olan projeleri çek
         const { data, error } = await supabase
           .from('projects')
-          .select('id, title, slug, cover_image')
+          .select('id, title, slug, cover_image, category')
           .eq('status', 'Yayında')
           .order('created_at', { ascending: false })
           .limit(6);
@@ -34,6 +35,7 @@ export default function AllProjectsSection() {
           throw error;
         }
         
+        console.log("Ana sayfa projeleri:", data);
         setProjects(data || []);
       } catch (err) {
         console.error('Projeler yüklenirken hata oluştu:', err);
@@ -52,37 +54,43 @@ export default function AllProjectsSection() {
       id: "1",
       title: "Sivil Mimari Örneği",
       cover_image: "/placeholder.svg",
-      slug: "sivil-mimari"
+      slug: "sivil-mimari",
+      category: "Mimari"
     },
     {
       id: "2",
       title: "Arkeolojik Eserler",
       cover_image: "/placeholder.svg",
-      slug: "arkeolojik-eserler"
+      slug: "arkeolojik-eserler",
+      category: "Arkeoloji"
     },
     {
       id: "3",
       title: "Tarihi Yapılar",
       cover_image: "/placeholder.svg",
-      slug: "tarihi-yapilar"
+      slug: "tarihi-yapilar",
+      category: "Koruma"
     },
     {
       id: "4",
       title: "Modern Mimari",
       cover_image: "/placeholder.svg",
-      slug: "modern-mimari"
+      slug: "modern-mimari",
+      category: "Mimari"
     },
     {
       id: "5",
       title: "Müze Sergileri",
       cover_image: "/placeholder.svg",
-      slug: "muze-sergileri"
+      slug: "muze-sergileri",
+      category: "Müze"
     },
     {
       id: "6",
       title: "Kültürel Miras",
       cover_image: "/placeholder.svg",
-      slug: "kulturel-miras"
+      slug: "kulturel-miras",
+      category: "Koruma"
     }
   ];
 
@@ -131,6 +139,9 @@ export default function AllProjectsSection() {
                 <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
                   {project.title}
                 </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {project.category}
+                </p>
               </div>
             </Link>
           ))}

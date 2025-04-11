@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from "react";
 
 interface PointCloudViewerProps {
@@ -12,10 +13,14 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
     // Check if container exists
     if (!containerRef.current) return;
     
+    console.log("PointCloudViewer yükleniyor, path:", pointCloudPath);
+    
     // Load Potree scripts dynamically
     const loadPotreeScripts = async () => {
       try {
         if (!document.getElementById('potree-script')) {
+          console.log("Potree scriptleri yükleniyor...");
+          
           // Potree stylesheets
           const potreeStyle = document.createElement('link');
           potreeStyle.rel = 'stylesheet';
@@ -38,6 +43,8 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
           
           // Potree main script
           await loadScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/build/potree/potree.js', 'potree-script');
+          
+          console.log("Potree scriptleri yüklendi");
         }
         
         // Initialize Potree viewer once scripts are loaded
@@ -64,6 +71,8 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
       if (!containerRef.current || viewerInitialized.current || typeof (window as any).Potree === 'undefined') return;
 
       try {
+        console.log("Potree görüntüleyici başlatılıyor");
+        
         const Potree = (window as any).Potree;
         const THREE = (window as any).THREE;
         
@@ -76,7 +85,9 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
         viewer.loadSettingsFromURL();
         
         // Load point cloud
+        console.log("Nokta bulutu yükleniyor:", pointCloudPath);
         Potree.loadPointCloud(pointCloudPath, "point_cloud", (e: any) => {
+          console.log("Nokta bulutu yüklendi");
           viewer.scene.addPointCloud(e.pointcloud);
           
           // Set camera position
@@ -104,6 +115,7 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
 
         // Mark as initialized
         viewerInitialized.current = true;
+        console.log("Potree görüntüleyici başlatıldı");
         
       } catch (error) {
         console.error('Potree görüntüleyici başlatılırken hata:', error);

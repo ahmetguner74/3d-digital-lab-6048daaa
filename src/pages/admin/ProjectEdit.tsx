@@ -80,11 +80,14 @@ export default function ProjectEdit() {
   const [loading, setLoading] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [previewImages, setPreviewImages] = useState<{[key: string]: string}>({});
+  const [uploadingPointCloud, setUploadingPointCloud] = useState(false);
+  const [pointCloudError, setPointCloudError] = useState<string | null>(null);
   
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const beforeImageInputRef = useRef<HTMLInputElement>(null);
   const afterImageInputRef = useRef<HTMLInputElement>(null);
   const additionalImageInputRef = useRef<HTMLInputElement>(null);
+  const pointCloudFileInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
     if (!isNew && id) {
@@ -317,6 +320,57 @@ export default function ProjectEdit() {
     }
   };
   
+  const handlePointCloudUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    setUploadingPointCloud(true);
+    setPointCloudError(null);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const simulatedUrl = `https://storage.example.com/pointclouds/${file.name}`;
+      setProject(prev => ({
+        ...prev,
+        pointcloudpath: simulatedUrl,
+        haspointcloud: true
+      }));
+      toast({
+        title: "Dosya Yüklendi",
+        description: "Nokta bulutu dosyası başarıyla yüklendi.",
+      });
+    } catch (error: any) {
+      console.error("Nokta bulutu yüklenirken hata:", error);
+      setPointCloudError(error.message || "Nokta bulutu yüklenirken bir hata oluştu");
+      toast({
+        title: "Hata",
+        description: `Nokta bulutu yüklenirken bir sorun oluştu: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingPointCloud(false);
+    }
+  };
+  
+  const triggerPointCloudUpload = () => {
+    if (pointCloudFileInputRef.current) {
+      pointCloudFileInputRef.current.click();
+    }
+  };
+  
+  const removePointCloud = () => {
+    setProject(prev => ({
+      ...prev,
+      pointcloudpath: "",
+      haspointcloud: false
+    }));
+    
+    toast({
+      title: "Nokta Bulutu Kaldırıldı",
+      description: "Nokta bulutu dosyası başarıyla kaldırıldı.",
+    });
+  };
+  
   const handleSave = async () => {
     setLoading(true);
     
@@ -470,6 +524,7 @@ export default function ProjectEdit() {
           <TabsTrigger value="general">Genel</TabsTrigger>
           <TabsTrigger value="content">İçerik</TabsTrigger>
           <TabsTrigger value="media">Medya</TabsTrigger>
+          <TabsTrigger value="pointcloud">Nokta Bulutu</TabsTrigger>
           <TabsTrigger value="settings">Ayarlar</TabsTrigger>
         </TabsList>
         
@@ -857,6 +912,154 @@ export default function ProjectEdit() {
                   <Label htmlFor="haspointcloud">Nokta bulutu görüntüleyici içerir</Label>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="pointcloud">
+          <Card>
+            <CardHeader>
+              <CardTitle>Nokta Bulutu Yönetimi</CardTitle>
+              <CardDescription>
+                3D nokta bulutu dosyalarınızı bu alandan yükleyebilir ve yönetebilirsiniz.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="haspointcloud" 
+                    checked={project.haspointcloud}
+                    onCheckedChange={(checked) => setProject(prev => ({ ...prev, haspointcloud: checked }))}
+                  />
+                  <Label htmlFor="haspointcloud">Bu proje nokta bulutu görüntüleyici içerir</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Nokta bulutu görüntüleyici etkinleştirildiğinde, proje detay sayfasında interaktif 3D nokta bulutu görüntüleyicisi gösterilir.
+                </p>
+              </div>
+              
+              {project.haspointcloud && (
+                <div className="space-y-4">
+                  <div className="border border-dashed border-border rounded-lg p-6 bg-muted/50">
+                    {project.pointcloudpath ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">Yüklenen Nokta Bulutu</h4>
+                            <p className="text-sm text-muted-foreground break-all mt-1">
+                              {project.pointcloudpath}
+                            </p>
+                          </div>
+                          <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            onClick={removePointCloud}
+                          >
+                            <X className="h-4 w-4 mr-1" /> Kaldır
+                          </Button>
+                        </div>
+                        
+                        <div className="bg-primary/5 p-4 rounded-md border border-primary/20">
+                          <h4 className="font-medium text-sm flex items-center">
+                            <Check className="h-4 w-4 text-primary mr-1" />
+                            Dosya Yüklendi
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Bu dosya proje kaydedildiğinde kullanılacaktır.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-6">
+                        <div className="bg-primary/5 rounded-full p-4 mb-4">
+                          <Upload className="h-8 w-8 text-primary" />
+                        </div>
+                        <h4 className="font-medium mb-2">Nokta Bulutu Yükleme</h4>
+                        <p className="text-sm text-muted-foreground text-center max-w-md mb-4">
+                          Potree formatında nokta bulutu dosyasını (.js uzantılı cloud.js dosyası) yükleyin veya doğrudan URL'sini aşağıdaki alana girin.
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md">
+                          <Button 
+                            onClick={triggerPointCloudUpload}
+                            disabled={uploadingPointCloud}
+                            className="flex-1"
+                          >
+                            {uploadingPointCloud ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Yükleniyor...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Dosya Seç
+                              </>
+                            )}
+                          </Button>
+                          
+                          <div className="text-center text-muted-foreground py-2">veya</div>
+                          
+                          <Input
+                            placeholder="Nokta bulutu URL'si"
+                            value={project.pointcloudpath || ""}
+                            onChange={(e) => setProject(prev => ({ ...prev, pointcloudpath: e.target.value }))}
+                            className="flex-1"
+                          />
+                        </div>
+                        
+                        <input
+                          ref={pointCloudFileInputRef}
+                          type="file"
+                          accept=".js"
+                          className="hidden"
+                          onChange={handlePointCloudUpload}
+                        />
+                        
+                        {pointCloudError && (
+                          <div className="mt-4 text-destructive text-sm flex items-center">
+                            <AlertTriangle className="h-4 w-4 mr-1" />
+                            {pointCloudError}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="pointcloudpath">Nokta Bulutu URL</Label>
+                    <Input
+                      id="pointcloudpath"
+                      placeholder="https://example.com/pointclouds/project/cloud.js"
+                      value={project.pointcloudpath || ""}
+                      onChange={(e) => setProject(prev => ({ ...prev, pointcloudpath: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Potree formatında nokta bulutu dosyasının URL'sini girin. Dosya cloud.js ile bitmelidir.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-muted/50 p-4 rounded-md border border-border">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <AlertTriangle className="h-4 w-4 mr-1 text-yellow-500" />
+                      Önemli Bilgi
+                    </h4>
+                    <div className="text-sm text-muted-foreground space-y-2">
+                      <p>
+                        Nokta bulutu dosyaları büyük olabilir ve özel bir sunucu yapılandırması gerektirebilir. 
+                        Aşağıdaki hususları dikkate alın:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Potree formatında bir nokta bulutu dosyası kullanın</li>
+                        <li>Ana dosya cloud.js olmalı ve tüm ilgili veri dosyalarına erişilebilmelidir</li>
+                        <li>Dosyalar CORS erişimine izin veren bir sunucuda barındırılmalıdır</li>
+                        <li>Büyük dosyalar için CDN kullanımı önerilir</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -41,6 +41,7 @@ export default function ProjectsSection() {
         }
 
         if (data) {
+          console.log("Öne çıkan proje verileri:", data);
           setFeaturedProject(data);
         }
       } catch (err) {
