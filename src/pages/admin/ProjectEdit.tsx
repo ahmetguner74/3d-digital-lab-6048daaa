@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -50,8 +49,8 @@ interface Project {
     type: string;
   }[];
   cover_image: string;
-  hasPointCloud: boolean;
-  pointCloudPath?: string;
+  haspointcloud: boolean;
+  pointcloudpath?: string;
   lastUpdated: string;
 }
 
@@ -74,7 +73,7 @@ export default function ProjectEdit() {
     images: [],
     additionalImages: [],
     cover_image: "",
-    hasPointCloud: false,
+    haspointcloud: false,
     lastUpdated: new Date().toISOString().split('T')[0]
   });
   
@@ -87,14 +86,12 @@ export default function ProjectEdit() {
   const afterImageInputRef = useRef<HTMLInputElement>(null);
   const additionalImageInputRef = useRef<HTMLInputElement>(null);
   
-  // Fetch project data if editing an existing project
   useEffect(() => {
     if (!isNew && id) {
       fetchProject(id);
     }
   }, [id, isNew]);
   
-  // Fetch project data from Supabase
   const fetchProject = async (projectId: string) => {
     setLoading(true);
     try {
@@ -109,7 +106,6 @@ export default function ProjectEdit() {
       }
       
       if (data) {
-        // Fetch project images
         const { data: imagesData, error: imagesError } = await supabase
           .from('project_images')
           .select('*')
@@ -120,7 +116,6 @@ export default function ProjectEdit() {
           console.error('Proje görselleri yüklenirken hata:', imagesError);
         }
         
-        // Process project data
         setProject({
           id: data.id,
           title: data.title,
@@ -130,7 +125,7 @@ export default function ProjectEdit() {
           status: data.status,
           content: data.content || "",
           featured: data.featured || false,
-          tags: [], // Şu an için tag özelliği yok
+          tags: [],
           cover_image: data.cover_image || "",
           images: data.cover_image ? [
             { id: 0, url: data.cover_image, alt: data.title, type: "main" }
@@ -141,17 +136,16 @@ export default function ProjectEdit() {
             alt: img.alt_text || `Görsel ${index + 1}`,
             type: "additional"
           })) : [],
-          hasPointCloud: data.hasPointCloud || false,
+          haspointcloud: data.haspointcloud || false,
+          pointcloudpath: data.pointcloudpath || "",
           lastUpdated: new Date(data.updated_at).toISOString().split('T')[0]
         });
         
-        // Set preview images
         if (data.cover_image) {
           setPreviewImages(prev => ({ ...prev, main: data.cover_image }));
         }
         
         if (imagesData && imagesData.length > 0) {
-          // Set before and after images if they exist
           const beforeImage = imagesData.find(img => img.alt_text === "before");
           const afterImage = imagesData.find(img => img.alt_text === "after");
           
@@ -179,17 +173,16 @@ export default function ProjectEdit() {
     const { name, value } = e.target;
     setProject(prev => ({ ...prev, [name]: value }));
     
-    // Slug otomatik oluşturma
     if (name === "title" && (isNew || !project.slug)) {
       const slug = value
         .toLowerCase()
-        .replace(/[^\w\s-ğüşıöçĞÜŞİÖÇ]/g, "") // Özel karakterleri kaldır
-        .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s") // Türkçe karakterleri İngilizce'ye çevir
+        .replace(/[^\w\s-ğüşıöçĞÜŞİÖÇ]/g, "")
+        .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
         .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
         .replace(/Ğ/g, "G").replace(/Ü/g, "U").replace(/Ş/g, "S")
         .replace(/İ/g, "I").replace(/Ö/g, "O").replace(/Ç/g, "C")
-        .replace(/\s+/g, "-") // Boşlukları tire ile değiştir
-        .replace(/--+/g, "-"); // Çoklu tireleri tek tire yap
+        .replace(/\s+/g, "-")
+        .replace(/--+/g, "-");
       setProject(prev => ({ ...prev, slug }));
     }
   };
@@ -217,20 +210,17 @@ export default function ProjectEdit() {
       const reader = new FileReader();
       
       reader.onloadend = () => {
-        // URL oluştur ve önizleme için kaydet
         const imageUrl = reader.result as string;
         setPreviewImages(prev => ({...prev, [type]: imageUrl}));
         
-        // Resim türüne göre projeyi güncelle
         if (type === "main") {
           setProject(prev => ({
             ...prev,
             cover_image: imageUrl
           }));
         } else if (type === "additional") {
-          // Ek görseller dizisine ekle
           const newImage = {
-            id: Date.now(), // Geçici ID
+            id: Date.now(),
             url: imageUrl,
             alt: "Ek görsel",
             type: "additional"
@@ -241,11 +231,9 @@ export default function ProjectEdit() {
             additionalImages: [...(prev.additionalImages || []), newImage]
           }));
         } else {
-          // Ana resimleri güncelle (before/after)
           const imageIndex = project.images.findIndex(img => img.type === type);
           
           if (imageIndex >= 0) {
-            // Varolan resmi güncelle
             setProject(prev => {
               const updatedImages = [...prev.images];
               updatedImages[imageIndex] = {
@@ -255,13 +243,12 @@ export default function ProjectEdit() {
               return { ...prev, images: updatedImages };
             });
           } else {
-            // Yeni resim ekle
             setProject(prev => ({
               ...prev,
               images: [
                 ...prev.images,
                 {
-                  id: Date.now(), // Geçici ID
+                  id: Date.now(),
                   url: imageUrl,
                   alt: `${type} görsel`,
                   type
@@ -278,32 +265,27 @@ export default function ProjectEdit() {
   
   const removeImage = (type: string, id?: number) => {
     if (type === "additional" && id) {
-      // Ek görseli sil
       setProject(prev => ({
         ...prev,
         additionalImages: prev.additionalImages.filter(img => img.id !== id)
       }));
     } else if (type === "main") {
-      // Ana görseli sil
       setProject(prev => ({
         ...prev,
         cover_image: ""
       }));
       
-      // Önizleme resmini temizle
       setPreviewImages(prev => {
         const newPreviews = {...prev};
         delete newPreviews[type];
         return newPreviews;
       });
     } else {
-      // Ana görsellerden birini sil (before/after)
       setProject(prev => ({
         ...prev,
         images: prev.images.filter(img => img.type !== type)
       }));
       
-      // Önizleme resmini temizle
       setPreviewImages(prev => {
         const newPreviews = {...prev};
         delete newPreviews[type];
@@ -312,19 +294,15 @@ export default function ProjectEdit() {
     }
   };
   
-  // Ön izleme URL'si al
   const getImageUrl = (type: string) => {
-    // Önce yeni yüklenen resmi kontrol et
     if (previewImages[type]) {
       return previewImages[type];
     }
     
-    // Ana kapak görseli kontrolü
     if (type === "main" && project.cover_image) {
       return project.cover_image;
     }
     
-    // Varolan proje resmini kontrol et
     const image = project.images.find(img => img.type === type);
     if (image) {
       return image.url;
@@ -342,7 +320,6 @@ export default function ProjectEdit() {
   const handleSave = async () => {
     setLoading(true);
     
-    // Zorunlu alanların kontrolü
     if (!project.title || !project.category || !project.description) {
       toast({
         title: "Hata",
@@ -354,7 +331,6 @@ export default function ProjectEdit() {
     }
 
     try {
-      // Proje verileri için hazırlık
       const projectData = {
         title: project.title,
         slug: project.slug,
@@ -364,13 +340,13 @@ export default function ProjectEdit() {
         content: project.content,
         featured: project.featured,
         cover_image: project.cover_image,
-        hasPointCloud: project.hasPointCloud,
+        haspointcloud: project.haspointcloud,
+        pointcloudpath: project.pointcloudpath,
         updated_at: new Date().toISOString()
       };
       
       let projectId = project.id;
       
-      // Eğer yeni proje ise oluştur, değilse güncelle
       if (isNew) {
         const { data, error } = await supabase
           .from('projects')
@@ -397,16 +373,13 @@ export default function ProjectEdit() {
         }
       }
       
-      // Proje ID'si olmadan devam edemeyiz
       if (!projectId) {
         throw new Error("Proje ID'si alınamadı");
       }
 
-      // Before/After görsellerini kaydet
       for (const imageType of ['before', 'after']) {
         const imageUrl = getImageUrl(imageType);
         if (imageUrl) {
-          // Önce mevcut görselleri kontrol et
           const { data: existingImages } = await supabase
             .from('project_images')
             .select('id')
@@ -414,13 +387,11 @@ export default function ProjectEdit() {
             .eq('alt_text', imageType);
           
           if (existingImages && existingImages.length > 0) {
-            // Varolan görseli güncelle
             await supabase
               .from('project_images')
               .update({ image_url: imageUrl })
               .eq('id', existingImages[0].id);
           } else {
-            // Yeni görsel ekle
             await supabase
               .from('project_images')
               .insert({
@@ -433,9 +404,7 @@ export default function ProjectEdit() {
         }
       }
 
-      // Ek görselleri kaydet
       if (project.additionalImages && project.additionalImages.length > 0) {
-        // Tüm ek görselleri çek ve DB'de olmayan yeni görselleri ekle
         const { data: existingImages } = await supabase
           .from('project_images')
           .select('*')
@@ -445,7 +414,6 @@ export default function ProjectEdit() {
         
         const existingIds = existingImages ? existingImages.map(img => img.id) : [];
         
-        // Önizlemeden gelen ve henüz DB'ye kaydedilmemiş görseller için
         const newImages = project.additionalImages.filter(img => 
           typeof img.id === 'number' || !existingIds.includes(img.id as string));
         
@@ -454,7 +422,7 @@ export default function ProjectEdit() {
             project_id: projectId,
             image_url: img.url,
             alt_text: img.alt,
-            sequence_order: existingImages ? existingImages.length + index + 2 : index + 2  // Before ve After'dan sonra
+            sequence_order: existingImages ? existingImages.length + index + 2 : index + 2
           }));
           
           await supabase
@@ -482,8 +450,6 @@ export default function ProjectEdit() {
   };
 
   const handlePreview = () => {
-    // Yeni sekmede önizleme için
-    // Gerçek uygulamada, dinamik proje detay sayfasına yönlendirecek
     window.open(`/projects/${project.slug}`, '_blank');
   };
 
@@ -845,7 +811,6 @@ export default function ProjectEdit() {
                   <Label className="block mb-2">Ek Görseller</Label>
                   <div className="border border-dashed border-border rounded-lg p-6 bg-muted/50">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {/* Ek görselleri göster */}
                       {project.additionalImages && project.additionalImages.map((image) => (
                         <div key={typeof image.id === 'number' ? `temp-${image.id}` : image.id} className="aspect-square relative bg-background rounded-md border border-border overflow-hidden">
                           <img 
@@ -864,7 +829,6 @@ export default function ProjectEdit() {
                         </div>
                       ))}
                       
-                      {/* Yeni görsel ekleme butonu */}
                       <div 
                         className="aspect-square flex flex-col items-center justify-center bg-muted rounded-md border border-dashed border-border cursor-pointer hover:bg-muted/80 transition-colors"
                         onClick={() => triggerImageUpload(additionalImageInputRef)}
@@ -886,11 +850,11 @@ export default function ProjectEdit() {
                 
                 <div className="flex items-center space-x-2">
                   <Switch 
-                    id="hasPointCloud" 
-                    checked={project.hasPointCloud}
-                    onCheckedChange={(checked) => setProject(prev => ({ ...prev, hasPointCloud: checked }))}
+                    id="haspointcloud" 
+                    checked={project.haspointcloud}
+                    onCheckedChange={(checked) => setProject(prev => ({ ...prev, haspointcloud: checked }))}
                   />
-                  <Label htmlFor="hasPointCloud">Nokta bulutu görüntüleyici içerir</Label>
+                  <Label htmlFor="haspointcloud">Nokta bulutu görüntüleyici içerir</Label>
                 </div>
               </div>
             </CardContent>
@@ -944,6 +908,22 @@ export default function ProjectEdit() {
                     </div>
                   </div>
                 </div>
+                
+                {project.haspointcloud && (
+                  <div className="space-y-2">
+                    <Label htmlFor="pointcloudpath">Nokta Bulutu Yolu</Label>
+                    <Input
+                      id="pointcloudpath"
+                      name="pointcloudpath"
+                      value={project.pointcloudpath || ""}
+                      onChange={(e) => setProject(prev => ({ ...prev, pointcloudpath: e.target.value }))}
+                      placeholder="Nokta bulutu dosya yolu (örn: https://example.com/pointcloud/project.js)"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Potree formatında nokta bulutu dosyasının URL'sini girin (cloud.js uzantılı)
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

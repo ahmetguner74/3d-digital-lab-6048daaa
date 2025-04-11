@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
@@ -24,8 +23,8 @@ interface Project {
   content: string;
   category: string;
   cover_image: string;
-  hasPointCloud?: boolean;
-  pointCloudPath?: string;
+  haspointcloud?: boolean;
+  pointcloudpath?: string;
 }
 
 interface ProjectImage {
@@ -45,7 +44,6 @@ export default function ProjectDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Projeyi ve ilgili görselleri çek
   useEffect(() => {
     const fetchProjectDetails = async () => {
       if (!slug) return;
@@ -53,7 +51,6 @@ export default function ProjectDetail() {
       try {
         setLoading(true);
         
-        // Projeyi çek
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
           .select('*')
@@ -73,7 +70,6 @@ export default function ProjectDetail() {
         
         setProject(projectData);
         
-        // Proje görsellerini çek
         const { data: imagesData, error: imagesError } = await supabase
           .from('project_images')
           .select('*')
@@ -86,7 +82,6 @@ export default function ProjectDetail() {
           setProjectImages(imagesData || []);
         }
         
-        // İlgili projeleri çek (aynı kategoriden)
         const { data: relatedData, error: relatedError } = await supabase
           .from('projects')
           .select('*')
@@ -112,7 +107,6 @@ export default function ProjectDetail() {
     fetchProjectDetails();
   }, [slug]);
 
-  // Bir sonraki ve önceki projeleri bul
   const currentIndex = relatedProjects.findIndex(p => p.slug === slug);
   const prevProject = currentIndex > 0 ? relatedProjects[currentIndex - 1] : null;
   const nextProject = currentIndex < relatedProjects.length - 1 ? relatedProjects[currentIndex + 1] : null;
@@ -143,10 +137,8 @@ export default function ProjectDetail() {
     );
   }
 
-  // Karşılaştırma için kapak görseli ve ilk proje görseli
   const beforeImage = project.cover_image || "/placeholder.svg";
   
-  // Before-After için görselleri bul
   const beforeImageFromSet = projectImages.find(img => img.alt_text === "before");
   const afterImageFromSet = projectImages.find(img => img.alt_text === "after");
   
@@ -161,21 +153,18 @@ export default function ProjectDetail() {
         <meta name="description" content={project.description} />
       </Helmet>
       
-      {/* Section 1: Before-After Slider */}
       <section className="min-h-screen bg-muted/50 dark:bg-muted/20 flex items-center">
         <div className="section-container py-20">
           <h1 className="text-3xl sm:text-4xl font-bold mb-8 reveal">{project.title}</h1>
           
           <div className="relative aspect-video w-full max-w-5xl mx-auto border border-border rounded-lg overflow-hidden reveal">
             <div className="relative w-full h-full">
-              {/* After image (background) */}
               <img 
                 src={afterImage} 
                 alt="After"
                 className="absolute w-full h-full object-cover"
               />
               
-              {/* Before image (foreground with clip) */}
               <div 
                 className="absolute top-0 left-0 h-full overflow-hidden"
                 style={{ width: `${sliderValue}%` }}
@@ -186,7 +175,6 @@ export default function ProjectDetail() {
                   className="w-[100vw] h-full object-cover"
                 />
                 
-                {/* Slider handle */}
                 <div 
                   className="absolute top-0 bottom-0 right-0 w-1 bg-primary cursor-ew-resize"
                 >
@@ -199,7 +187,6 @@ export default function ProjectDetail() {
                 </div>
               </div>
               
-              {/* Labels */}
               <div className="absolute top-4 left-4 px-2 py-1 bg-black/50 text-white text-sm rounded">
                 Öncesi
               </div>
@@ -208,7 +195,6 @@ export default function ProjectDetail() {
               </div>
             </div>
             
-            {/* Slider control */}
             <div className="mt-4 px-4">
               <Slider
                 value={[sliderValue]}
@@ -226,15 +212,14 @@ export default function ProjectDetail() {
         </div>
       </section>
       
-      {/* Section 2: Point Cloud Viewer (if applicable) */}
-      {project.hasPointCloud && (
+      {project.haspointcloud && (
         <section className="min-h-screen bg-background flex items-center">
           <div className="section-container py-20">
             <h2 className="text-2xl sm:text-3xl font-bold mb-8 reveal">Nokta Bulutu Görüntüleyici</h2>
             
             <div className="w-full rounded-lg overflow-hidden reveal">
               <PointCloudViewer 
-                pointCloudPath={project.pointCloudPath || "https://cdn.rawgit.com/potree/potree/develop/pointclouds/lion_takanawa/cloud.js"} 
+                pointCloudPath={project.pointcloudpath || "https://cdn.rawgit.com/potree/potree/develop/pointclouds/lion_takanawa/cloud.js"} 
               />
             </div>
             
@@ -247,7 +232,6 @@ export default function ProjectDetail() {
         </section>
       )}
       
-      {/* Section 3: Project Details */}
       <section className="min-h-screen bg-muted/50 dark:bg-muted/20 flex items-center">
         <div className="section-container py-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -275,7 +259,6 @@ export default function ProjectDetail() {
                 className="w-full h-auto rounded-lg"
               />
               
-              {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/20 blur-xl"></div>
               <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-secondary/20 blur-xl"></div>
             </div>
@@ -283,7 +266,6 @@ export default function ProjectDetail() {
         </div>
       </section>
       
-      {/* Section 4: Project Gallery */}
       {projectImages.length > 0 && (
         <section className="min-h-screen bg-background flex items-center">
           <div className="section-container py-20">
@@ -312,7 +294,6 @@ export default function ProjectDetail() {
         </section>
       )}
       
-      {/* Section 5: More Projects */}
       {relatedProjects.length > 0 && (
         <section className="bg-muted/50 dark:bg-muted/20 py-20">
           <div className="section-container">
