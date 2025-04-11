@@ -86,7 +86,8 @@ export default function AdminProjects() {
           category: item.category,
           status: item.status,
           featured: item.featured || false,
-          lastUpdated: new Date(item.updated_at).toISOString().split('T')[0]
+          lastUpdated: new Date(item.updated_at).toISOString().split('T')[0],
+          slug: item.slug
         }));
         
         setProjects(formattedProjects);

@@ -29,12 +29,13 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export interface Project {
-  id: string; // ID'yi sadece string olarak tanımlayalım (UUID)
+  id: string; // ID'yi sadece string olarak tanımlayalım
   title: string;
   category: string;
   status: string;
   featured: boolean;
   lastUpdated: string;
+  slug?: string;
 }
 
 interface ProjectsTableProps {
@@ -402,7 +403,7 @@ export const ProjectsTable = ({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link to={`/projects/${project.id}`} target="_blank" className="flex items-center">
+                          <Link to={`/projects/${project.slug}`} target="_blank" className="flex items-center">
                             <Eye className="mr-2 h-4 w-4" />
                             <span>Görüntüle</span>
                           </Link>

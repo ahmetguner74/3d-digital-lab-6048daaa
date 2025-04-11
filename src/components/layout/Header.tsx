@@ -12,6 +12,10 @@ const navigation = [
     href: "/"
   }, 
   {
+    name: "Hakkımızda",
+    href: "/about"
+  },
+  {
     name: "Projeler",
     href: "/projects"
   }, 
