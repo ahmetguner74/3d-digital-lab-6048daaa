@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,9 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { X, Save, Loader2, Upload } from "lucide-react";
+import { X, Save, Loader2, Upload, ImagePlus, Check, AlertTriangle } from "lucide-react";
 
-// Sample project data
+// Örnek proje verisi
 const sampleProject = {
   id: 1,
   title: "Sivil Mimari Örneği",
@@ -40,6 +40,7 @@ const sampleProject = {
     { id: 2, url: "/placeholder.svg", alt: "Örnek görsel 2", type: "before" },
     { id: 3, url: "/placeholder.svg", alt: "Örnek görsel 3", type: "after" }
   ],
+  additionalImages: [],
   hasPointCloud: true,
   lastUpdated: "2024-04-05"
 };
@@ -60,17 +61,23 @@ export default function ProjectEdit() {
     content: "",
     tags: [],
     images: [],
+    additionalImages: [],
     hasPointCloud: false,
     lastUpdated: new Date().toISOString().split('T')[0]
   } : sampleProject);
   
   const [loading, setLoading] = useState(false);
   const [tagInput, setTagInput] = useState("");
+  const [previewImages, setPreviewImages] = useState<{[key: string]: string}>({});
+  
+  const mainImageInputRef = useRef<HTMLInputElement>(null);
+  const beforeImageInputRef = useRef<HTMLInputElement>(null);
+  const afterImageInputRef = useRef<HTMLInputElement>(null);
+  const additionalImageInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
     if (!isNew && id) {
-      // In a real implementation, this would fetch the project from Supabase
-      // For now, we just use the sample data
+      // Gerçek uygulamada Supabase'den proje verisini çekecek
       setLoading(true);
       setTimeout(() => {
         setProject(sampleProject);
@@ -82,6 +89,16 @@ export default function ProjectEdit() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setProject(prev => ({ ...prev, [name]: value }));
+    
+    // Slug otomatik oluşturma
+    if (name === "title" && isNew) {
+      const slug = value
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "") // Özel karakterleri kaldır
+        .replace(/\s+/g, "-") // Boşlukları tire ile değiştir
+        .replace(/--+/g, "-"); // Çoklu tireleri tek tire yap
+      setProject(prev => ({ ...prev, slug }));
+    }
   };
 
   const handleTagAdd = () => {
@@ -101,10 +118,126 @@ export default function ProjectEdit() {
     }));
   };
   
+  const handleImageUpload = (type: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      
+      reader.onloadend = () => {
+        // URL oluştur ve önizleme için kaydet
+        const imageUrl = reader.result as string;
+        setPreviewImages(prev => ({...prev, [type]: imageUrl}));
+        
+        // Resim türüne göre projeyi güncelle
+        if (type === "additional") {
+          // Ek görseller dizisine ekle
+          const newImage = {
+            id: Date.now(), // Geçici ID
+            url: imageUrl,
+            alt: "Ek görsel",
+            type: "additional"
+          };
+          
+          setProject(prev => ({
+            ...prev,
+            additionalImages: [...(prev.additionalImages || []), newImage]
+          }));
+        } else {
+          // Ana resimleri güncelle
+          const imageIndex = project.images.findIndex(img => img.type === type);
+          
+          if (imageIndex >= 0) {
+            // Varolan resmi güncelle
+            setProject(prev => {
+              const updatedImages = [...prev.images];
+              updatedImages[imageIndex] = {
+                ...updatedImages[imageIndex],
+                url: imageUrl
+              };
+              return { ...prev, images: updatedImages };
+            });
+          } else {
+            // Yeni resim ekle
+            setProject(prev => ({
+              ...prev,
+              images: [
+                ...prev.images,
+                {
+                  id: Date.now(), // Geçici ID
+                  url: imageUrl,
+                  alt: `${type} görsel`,
+                  type
+                }
+              ]
+            }));
+          }
+        }
+      };
+      
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const removeImage = (type: string, id?: number) => {
+    if (type === "additional" && id) {
+      // Ek görseli sil
+      setProject(prev => ({
+        ...prev,
+        additionalImages: prev.additionalImages.filter(img => img.id !== id)
+      }));
+    } else {
+      // Ana görsellerden birini sil
+      setProject(prev => ({
+        ...prev,
+        images: prev.images.filter(img => img.type !== type)
+      }));
+      
+      // Önizleme resmini temizle
+      setPreviewImages(prev => {
+        const newPreviews = {...prev};
+        delete newPreviews[type];
+        return newPreviews;
+      });
+    }
+  };
+  
+  // Ön izleme URL'si al
+  const getImageUrl = (type: string) => {
+    // Önce yeni yüklenen resmi kontrol et
+    if (previewImages[type]) {
+      return previewImages[type];
+    }
+    
+    // Varolan proje resmini kontrol et
+    const image = project.images.find(img => img.type === type);
+    if (image) {
+      return image.url;
+    }
+    
+    return null;
+  };
+  
+  const triggerImageUpload = (ref: React.RefObject<HTMLInputElement>) => {
+    if (ref.current) {
+      ref.current.click();
+    }
+  };
+  
   const handleSave = () => {
     setLoading(true);
     
-    // In a real implementation, this would save to Supabase
+    // Zorunlu alanların kontrolü
+    if (!project.title || !project.category || !project.description) {
+      toast({
+        title: "Hata",
+        description: "Lütfen gerekli tüm alanları doldurun.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+    
+    // Gerçek uygulamada, bu fonksiyon Supabase'e veri kaydedecek
     setTimeout(() => {
       setLoading(false);
       toast({
@@ -113,6 +246,12 @@ export default function ProjectEdit() {
       });
       navigate("/admin/projects");
     }, 1000);
+  };
+
+  const handlePreview = () => {
+    // Yeni sekmede önizleme için
+    // Gerçek uygulamada, dinamik proje detay sayfasına yönlendirecek
+    window.open(`/projects/${project.slug}`, '_blank');
   };
 
   if (loading && !isNew) {
@@ -145,13 +284,14 @@ export default function ProjectEdit() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Proje Başlığı</Label>
+                <Label htmlFor="title">Proje Başlığı <span className="text-destructive">*</span></Label>
                 <Input
                   id="title"
                   name="title"
                   value={project.title}
                   onChange={handleChange}
                   placeholder="Proje başlığını girin"
+                  required
                 />
               </div>
               
@@ -164,10 +304,13 @@ export default function ProjectEdit() {
                   onChange={handleChange}
                   placeholder="proje-url-adresi"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Boş bırakırsanız, başlıktan otomatik oluşturulacaktır.
+                </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="description">Kısa Açıklama</Label>
+                <Label htmlFor="description">Kısa Açıklama <span className="text-destructive">*</span></Label>
                 <Textarea
                   id="description"
                   name="description"
@@ -175,12 +318,13 @@ export default function ProjectEdit() {
                   onChange={handleChange}
                   placeholder="Proje hakkında kısa bir açıklama yazın"
                   rows={3}
+                  required
                 />
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Kategori</Label>
+                  <Label htmlFor="category">Kategori <span className="text-destructive">*</span></Label>
                   <Select
                     value={project.category}
                     onValueChange={(value) => setProject(prev => ({ ...prev, category: value }))}
@@ -287,14 +431,14 @@ export default function ProjectEdit() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
                   <Label className="block mb-2">Ana Görsel</Label>
                   <div className="border border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center bg-muted/50">
-                    {project.images.find(img => img.type === 'main') ? (
+                    {getImageUrl('main') ? (
                       <div className="relative w-full">
                         <img 
-                          src={project.images.find(img => img.type === 'main')?.url} 
+                          src={getImageUrl('main')} 
                           alt="Ana görsel"
                           className="w-full h-auto max-h-48 object-contain mx-auto"
                         />
@@ -302,9 +446,22 @@ export default function ProjectEdit() {
                           variant="destructive" 
                           size="icon"
                           className="absolute top-0 right-0"
+                          onClick={() => removeImage('main')}
                         >
                           <X className="h-4 w-4" />
                         </Button>
+                        
+                        <div className="absolute bottom-2 right-2">
+                          <Button 
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => triggerImageUpload(mainImageInputRef)}
+                            className="flex items-center"
+                          >
+                            <ImagePlus className="h-4 w-4 mr-1" />
+                            Değiştir
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center">
@@ -312,11 +469,24 @@ export default function ProjectEdit() {
                         <p className="text-sm text-muted-foreground">
                           Ana görseli yüklemek için tıklayın veya sürükleyin
                         </p>
-                        <Button variant="secondary" size="sm" className="mt-4">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="mt-4"
+                          onClick={() => triggerImageUpload(mainImageInputRef)}
+                        >
                           Dosya Seç
                         </Button>
                       </div>
                     )}
+                    
+                    <input
+                      ref={mainImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload('main', e)}
+                    />
                   </div>
                 </div>
                 
@@ -324,10 +494,10 @@ export default function ProjectEdit() {
                   <div>
                     <Label className="block mb-2">Öncesi Görseli</Label>
                     <div className="border border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center bg-muted/50">
-                      {project.images.find(img => img.type === 'before') ? (
+                      {getImageUrl('before') ? (
                         <div className="relative w-full">
                           <img 
-                            src={project.images.find(img => img.type === 'before')?.url} 
+                            src={getImageUrl('before')} 
                             alt="Öncesi görseli"
                             className="w-full h-auto max-h-36 object-contain mx-auto"
                           />
@@ -335,9 +505,22 @@ export default function ProjectEdit() {
                             variant="destructive" 
                             size="icon"
                             className="absolute top-0 right-0"
+                            onClick={() => removeImage('before')}
                           >
                             <X className="h-4 w-4" />
                           </Button>
+                          
+                          <div className="absolute bottom-2 right-2">
+                            <Button 
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => triggerImageUpload(beforeImageInputRef)}
+                              className="flex items-center"
+                            >
+                              <ImagePlus className="h-4 w-4 mr-1" />
+                              Değiştir
+                            </Button>
+                          </div>
                         </div>
                       ) : (
                         <div className="text-center">
@@ -345,21 +528,34 @@ export default function ProjectEdit() {
                           <p className="text-sm text-muted-foreground">
                             "Öncesi" görseli
                           </p>
-                          <Button variant="secondary" size="sm" className="mt-2">
+                          <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => triggerImageUpload(beforeImageInputRef)}
+                          >
                             Yükle
                           </Button>
                         </div>
                       )}
+                      
+                      <input
+                        ref={beforeImageInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleImageUpload('before', e)}
+                      />
                     </div>
                   </div>
                   
                   <div>
                     <Label className="block mb-2">Sonrası Görseli</Label>
                     <div className="border border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center bg-muted/50">
-                      {project.images.find(img => img.type === 'after') ? (
+                      {getImageUrl('after') ? (
                         <div className="relative w-full">
                           <img 
-                            src={project.images.find(img => img.type === 'after')?.url} 
+                            src={getImageUrl('after')} 
                             alt="Sonrası görseli"
                             className="w-full h-auto max-h-36 object-contain mx-auto"
                           />
@@ -367,9 +563,22 @@ export default function ProjectEdit() {
                             variant="destructive" 
                             size="icon"
                             className="absolute top-0 right-0"
+                            onClick={() => removeImage('after')}
                           >
                             <X className="h-4 w-4" />
                           </Button>
+                          
+                          <div className="absolute bottom-2 right-2">
+                            <Button 
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => triggerImageUpload(afterImageInputRef)}
+                              className="flex items-center"
+                            >
+                              <ImagePlus className="h-4 w-4 mr-1" />
+                              Değiştir
+                            </Button>
+                          </div>
                         </div>
                       ) : (
                         <div className="text-center">
@@ -377,11 +586,24 @@ export default function ProjectEdit() {
                           <p className="text-sm text-muted-foreground">
                             "Sonrası" görseli
                           </p>
-                          <Button variant="secondary" size="sm" className="mt-2">
+                          <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => triggerImageUpload(afterImageInputRef)}
+                          >
                             Yükle
                           </Button>
                         </div>
                       )}
+                      
+                      <input
+                        ref={afterImageInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleImageUpload('after', e)}
+                      />
                     </div>
                   </div>
                 </div>
@@ -390,10 +612,41 @@ export default function ProjectEdit() {
                   <Label className="block mb-2">Ek Görseller</Label>
                   <div className="border border-dashed border-border rounded-lg p-6 bg-muted/50">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      <div className="aspect-square flex flex-col items-center justify-center bg-muted rounded-md border border-dashed border-border">
+                      {/* Ek görselleri göster */}
+                      {project.additionalImages && project.additionalImages.map((image) => (
+                        <div key={image.id} className="aspect-square relative bg-background rounded-md border border-border overflow-hidden">
+                          <img 
+                            src={image.url} 
+                            alt={image.alt} 
+                            className="object-cover w-full h-full"
+                          />
+                          <Button 
+                            variant="destructive" 
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6"
+                            onClick={() => removeImage('additional', image.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                      
+                      {/* Yeni görsel ekleme butonu */}
+                      <div 
+                        className="aspect-square flex flex-col items-center justify-center bg-muted rounded-md border border-dashed border-border cursor-pointer hover:bg-muted/80 transition-colors"
+                        onClick={() => triggerImageUpload(additionalImageInputRef)}
+                      >
                         <Upload className="h-6 w-6 text-muted-foreground mb-1" />
                         <p className="text-xs text-center text-muted-foreground">Görsel Ekle</p>
                       </div>
+                      
+                      <input
+                        ref={additionalImageInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleImageUpload('additional', e)}
+                      />
                     </div>
                   </div>
                 </div>
@@ -422,30 +675,93 @@ export default function ProjectEdit() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Bu bölüm daha sonra genişletilecektir.
-              </p>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">SEO Ayarları</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="metaTitle">Meta Başlık</Label>
+                      <Input
+                        id="metaTitle"
+                        name="metaTitle"
+                        placeholder="Meta başlık (boş bırakılırsa proje başlığı kullanılır)"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="metaDescription">Meta Açıklama</Label>
+                      <Textarea
+                        id="metaDescription"
+                        name="metaDescription"
+                        placeholder="Meta açıklama (boş bırakılırsa kısa açıklama kullanılır)"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Görünürlük Ayarları</h3>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="featured" 
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="featured">Öne çıkan proje</Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="hideFromListing" 
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="hideFromListing">Liste sayfasında gizle</Label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/30 rounded-lg">
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mr-3 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-yellow-800 dark:text-yellow-300">Dikkat</h4>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                        Bu bölümdeki ayarlar henüz geliştirilme aşamasındadır. İleride daha fazla özellik eklenecektir.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
         
-        <div className="mt-6 flex items-center justify-end space-x-4">
+        <div className="mt-6 flex items-center justify-between space-x-4">
           <Button variant="outline" onClick={() => navigate("/admin/projects")}>
             İptal
           </Button>
-          <Button onClick={handleSave} disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Kaydediliyor...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Kaydet
-              </>
-            )}
-          </Button>
+          
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" onClick={handlePreview}>
+              Önizle
+            </Button>
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Kaydediliyor...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Kaydet
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </Tabs>
     </AdminLayout>

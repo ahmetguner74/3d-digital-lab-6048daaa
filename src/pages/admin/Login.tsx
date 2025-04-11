@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -23,19 +22,19 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // In a real implementation, this would use supabase.auth.signInWithPassword
-      // For now, use a simple check (for demonstration only)
-      if (email === "admin@example.com" && password === "password") {
-        // Success message
+      // Sabit admin bilgileri ile giriş kontrolü
+      if (email === "ahmetguner74@gmail.com" && password === "selim-16") {
+        // Başarılı giriş mesajı
         toast({
           title: "Giriş başarılı",
           description: "Yönetim paneline yönlendiriliyorsunuz.",
         });
         
-        // Store a flag in localStorage to simulate authentication
+        // localStorage'a kimlik doğrulama işareti ekle
         localStorage.setItem("adminAuthenticated", "true");
+        localStorage.setItem("adminEmail", email);
         
-        // Navigate to admin dashboard
+        // Admin paneline yönlendir
         navigate("/admin/dashboard");
       } else {
         setError("Geçersiz e-posta veya şifre.");
@@ -79,7 +78,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@example.com"
+                placeholder="ahmetguner74@gmail.com"
               />
             </div>
             
@@ -93,6 +92,7 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                placeholder="········"
               />
             </div>
             
