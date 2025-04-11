@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Play, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,8 @@ interface FeaturedProject {
   description: string;
   slug: string;
   cover_image: string;
+  hasPointCloud?: boolean;
+  pointCloudPath?: string;
 }
 
 export default function ProjectsSection() {
@@ -25,7 +26,7 @@ export default function ProjectsSection() {
         // Admin panelinden "featured" olarak işaretlenmiş ve yayında olan projeleri çek
         const { data, error } = await supabase
           .from('projects')
-          .select('id, title, description, slug, cover_image')
+          .select('id, title, description, slug, cover_image, hasPointCloud, pointCloudPath')
           .eq('featured', true)
           .eq('status', 'Yayında')
           .order('updated_at', { ascending: false })

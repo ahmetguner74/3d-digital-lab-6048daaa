@@ -51,6 +51,7 @@ interface Project {
   }[];
   cover_image: string;
   hasPointCloud: boolean;
+  pointCloudPath?: string;
   lastUpdated: string;
 }
 

@@ -73,7 +73,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           featured: boolean | null
+          haspointcloud: boolean | null
           id: string
+          pointcloudpath: string | null
           slug: string
           status: string
           title: string
@@ -86,7 +88,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           featured?: boolean | null
+          haspointcloud?: boolean | null
           id?: string
+          pointcloudpath?: string | null
           slug: string
           status?: string
           title: string
@@ -99,7 +103,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           featured?: boolean | null
+          haspointcloud?: boolean | null
           id?: string
+          pointcloudpath?: string | null
           slug?: string
           status?: string
           title?: string
