@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export interface Project {
-  id: string | number;
+  id: string; // ID'yi sadece string olarak tanımlayalım (UUID)
   title: string;
   category: string;
   status: string;
@@ -68,7 +68,7 @@ export const ProjectsTable = ({
 }: ProjectsTableProps) => {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState<string | number | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [processingAction, setProcessingAction] = useState<string | null>(null);
 
   // Sıralama fonksiyonu
@@ -80,7 +80,7 @@ export const ProjectsTable = ({
     setSortConfig({ key, direction });
   };
 
-  const confirmDelete = (id: string | number) => {
+  const confirmDelete = (id: string) => {
     setProjectToDelete(id);
     setDeleteDialogOpen(true);
   };
@@ -119,7 +119,7 @@ export const ProjectsTable = ({
     }
   };
 
-  const handleDuplicate = async (id: string | number) => {
+  const handleDuplicate = async (id: string) => {
     try {
       setProcessingAction(`duplicate-${id}`);
       
@@ -176,7 +176,7 @@ export const ProjectsTable = ({
     }
   };
 
-  const toggleFeatured = async (id: string | number, currentFeatured: boolean) => {
+  const toggleFeatured = async (id: string, currentFeatured: boolean) => {
     try {
       setProcessingAction(`feature-${id}`);
       
