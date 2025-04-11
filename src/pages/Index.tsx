@@ -2,6 +2,7 @@
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/home/HeroSection";
 import ProjectsSection from "@/components/home/ProjectsSection";
+import AboutSection from "@/components/home/AboutSection";
 import ThirdSection from "@/components/home/ThirdSection";
 import FourthSection from "@/components/home/FourthSection";
 import AllProjectsSection from "@/components/home/AllProjectsSection";
@@ -17,6 +18,7 @@ export default function Index() {
       </Helmet>
       <HeroSection />
       <ProjectsSection />
+      <AboutSection />
       <ThirdSection />
       <FourthSection />
       <AllProjectsSection />

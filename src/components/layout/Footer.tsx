@@ -1,9 +1,13 @@
+
 import { Link } from "react-router-dom";
 import { Github, Linkedin, Mail, Twitter } from "lucide-react";
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-  return <footer className="bg-muted/50 dark:bg-muted/20">
-      <div className="section-container py-[199px]">
+  
+  return (
+    <footer className="bg-muted/50 dark:bg-muted/20">
+      <div className="section-container py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-gradient">Portfolyo</h3>
@@ -76,5 +80,6 @@ export default function Footer() {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 }

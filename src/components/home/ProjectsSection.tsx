@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Play, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ interface FeaturedProject {
   description: string;
   slug: string;
   cover_image: string;
+  category?: string;
   haspointcloud?: boolean;
   pointcloudpath?: string;
 }
@@ -27,7 +28,7 @@ export default function ProjectsSection() {
         // Admin panelinden "featured" olarak işaretlenmiş ve yayında olan projeleri çek
         const { data, error } = await supabase
           .from('projects')
-          .select('id, title, description, slug, cover_image, haspointcloud, pointcloudpath')
+          .select('id, title, description, slug, cover_image, category, haspointcloud, pointcloudpath')
           .eq('featured', true)
           .eq('status', 'Yayında')
           .order('updated_at', { ascending: false })
@@ -54,25 +55,15 @@ export default function ProjectsSection() {
     fetchFeaturedProject();
   }, []);
 
-  if (loading) {
-    return (
-      <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
-        <div className="section-container min-h-screen flex items-center justify-center">
-          <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      </section>
-    );
-  }
-
-  // Öne çıkan proje yoksa varsayılan içerik göster
-  if (!featuredProject) {
+  // Öne çıkan proje yoksa veya yükleme devam ediyorsa bir şey gösterme
+  if (loading || !featuredProject) {
     return null;
   }
 
   return (
     <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
       <div className="section-container min-h-screen flex items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           {/* Left content */}
           <div className="space-y-6 reveal">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
@@ -84,7 +75,7 @@ export default function ProjectsSection() {
 
             <div className="pt-4">
               <Button asChild size="lg" className="group">
-                <Link to={`/projects/${featuredProject.slug}`} className="py-0 my-[10px]">
+                <Link to={`/projects/${featuredProject.slug}`} className="py-0 my-[10px] flex items-center">
                   Projeyi Görüntüle
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
@@ -92,21 +83,20 @@ export default function ProjectsSection() {
             </div>
           </div>
 
-          {/* Right content - Video area with link to project */}
+          {/* Right content - Cover image with link to project */}
           <div className="relative w-full reveal">
             <Link to={`/projects/${featuredProject.slug}`} className="block">
-              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted cursor-pointer">
-                {/* Cover image or video placeholder */}
+              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted border border-muted cursor-pointer">
+                {/* Cover image or placeholder */}
                 {featuredProject.cover_image ? (
                   <img 
                     src={featuredProject.cover_image} 
                     alt={featuredProject.title} 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
                   />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10">
-                    <Play className="h-16 w-16 text-primary opacity-60" />
-                    <p className="mt-4 text-sm text-muted-foreground">Görsel burada gösterilecek</p>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/50">
+                    <p className="mt-4 text-sm text-muted-foreground">Fotoğraf buraya eklenecek</p>
                   </div>
                 )}
 
@@ -118,10 +108,6 @@ export default function ProjectsSection() {
                 </div>
               </div>
             </Link>
-
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/20 blur-xl"></div>
-            <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-secondary/20 blur-xl"></div>
           </div>
         </div>
       </div>

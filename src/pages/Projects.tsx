@@ -6,6 +6,14 @@ import { Helmet } from "react-helmet-async";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 // Proje türü tanımı
 interface Project {
@@ -22,6 +30,9 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const projectsPerPage = 9;
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -29,9 +40,9 @@ export default function Projects() {
         setLoading(true);
         
         // Supabase'den yayında olan projeleri çek
-        const { data, error } = await supabase
+        const { data, error, count } = await supabase
           .from('projects')
-          .select('*')
+          .select('*', { count: 'exact' })
           .eq('status', 'Yayında')
           .order('created_at', { ascending: false });
           
@@ -39,7 +50,13 @@ export default function Projects() {
           throw error;
         }
         
+        console.log("Tüm projeler:", data);
         setProjects(data || []);
+        
+        // Toplam sayfa sayısını hesapla
+        if (count) {
+          setTotalPages(Math.ceil(count / projectsPerPage));
+        }
       } catch (err) {
         console.error('Projeler yüklenirken hata oluştu:', err);
         setError('Projeler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
@@ -50,6 +67,19 @@ export default function Projects() {
     
     fetchProjects();
   }, []);
+
+  // Geçerli sayfadaki projeleri hesapla
+  const getCurrentPageProjects = () => {
+    const startIndex = (currentPage - 1) * projectsPerPage;
+    const endIndex = startIndex + projectsPerPage;
+    return projects.slice(startIndex, endIndex);
+  };
+
+  // Sayfa değiştirme işlevi
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <Layout>
@@ -91,7 +121,7 @@ export default function Projects() {
         
         {!loading && !error && projects.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project) => (
+            {getCurrentPageProjects().map((project) => (
               <Link 
                 key={project.id} 
                 to={`/projects/${project.slug}`}
@@ -117,6 +147,41 @@ export default function Projects() {
                 </div>
               </Link>
             ))}
+          </div>
+        )}
+
+        {/* Sayfalama */}
+        {projects.length > projectsPerPage && (
+          <div className="flex justify-center mt-12">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }).map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      isActive={currentPage === index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`cursor-pointer ${currentPage === index + 1 ? 'bg-primary text-primary-foreground' : 'bg-muted/50'}`}
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         )}
         

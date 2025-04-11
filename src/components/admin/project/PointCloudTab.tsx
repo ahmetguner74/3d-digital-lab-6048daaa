@@ -1,10 +1,10 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Upload, Check, AlertTriangle, X } from "lucide-react";
+import { Loader2, Upload, Check, AlertTriangle, X, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Card,
@@ -13,6 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface PointCloudTabProps {
   project: any;
@@ -22,8 +29,15 @@ interface PointCloudTabProps {
 export default function PointCloudTab({ project, setProject }: PointCloudTabProps) {
   const [uploadingPointCloud, setUploadingPointCloud] = useState(false);
   const [pointCloudError, setPointCloudError] = useState<string | null>(null);
+  const [previewAvailable, setPreviewAvailable] = useState(false);
   const pointCloudFileInputRef = useRef<HTMLInputElement>(null);
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
+  
+  // Nokta bulutu dosyası var olduğunda önizleme durumunu kontrol et
+  useEffect(() => {
+    setPreviewAvailable(Boolean(project?.pointcloudpath && project?.haspointcloud));
+  }, [project?.pointcloudpath, project?.haspointcloud]);
 
   const handlePointCloudUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -44,6 +58,7 @@ export default function PointCloudTab({ project, setProject }: PointCloudTabProp
         title: "Dosya Yüklendi",
         description: "Nokta bulutu dosyası başarıyla yüklendi.",
       });
+      setPreviewAvailable(true);
     } catch (error: any) {
       console.error("Nokta bulutu yüklenirken hata:", error);
       setPointCloudError(error.message || "Nokta bulutu yüklenirken bir hata oluştu");
@@ -70,10 +85,23 @@ export default function PointCloudTab({ project, setProject }: PointCloudTabProp
       haspointcloud: false
     }));
     
+    setPreviewAvailable(false);
+    
     toast({
       title: "Nokta Bulutu Kaldırıldı",
       description: "Nokta bulutu dosyası başarıyla kaldırıldı.",
     });
+  };
+  
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setProject(prev => ({
+      ...prev,
+      pointcloudpath: url
+    }));
+    
+    // URL girildiğinde önizleme durumunu güncelle
+    setPreviewAvailable(Boolean(url && project?.haspointcloud));
   };
 
   return (
@@ -90,7 +118,10 @@ export default function PointCloudTab({ project, setProject }: PointCloudTabProp
             <Switch 
               id="haspointcloud" 
               checked={project.haspointcloud}
-              onCheckedChange={(checked) => setProject(prev => ({ ...prev, haspointcloud: checked }))}
+              onCheckedChange={(checked) => {
+                setProject(prev => ({ ...prev, haspointcloud: checked }));
+                setPreviewAvailable(checked && Boolean(project.pointcloudpath));
+              }}
             />
             <Label htmlFor="haspointcloud">Bu proje nokta bulutu görüntüleyici içerir</Label>
           </div>
@@ -111,13 +142,38 @@ export default function PointCloudTab({ project, setProject }: PointCloudTabProp
                         {project.pointcloudpath}
                       </p>
                     </div>
-                    <Button 
-                      variant="destructive" 
-                      size="sm" 
-                      onClick={removePointCloud}
-                    >
-                      <X className="h-4 w-4 mr-1" /> Kaldır
-                    </Button>
+                    <div className="flex gap-2">
+                      {previewAvailable && (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4 mr-1" /> Önizle
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl h-[80vh]">
+                            <DialogHeader>
+                              <DialogTitle>Nokta Bulutu Önizleme</DialogTitle>
+                            </DialogHeader>
+                            <div className="w-full h-full min-h-[60vh] bg-muted rounded-md border border-border p-2">
+                              <iframe
+                                ref={previewIframeRef}
+                                src={`/projects/preview?pointcloud=${encodeURIComponent(project.pointcloudpath)}`}
+                                className="w-full h-full rounded"
+                                title="Nokta Bulutu Önizleme"
+                              />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                      
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={removePointCloud}
+                      >
+                        <X className="h-4 w-4 mr-1" /> Kaldır
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="bg-primary/5 p-4 rounded-md border border-primary/20">
@@ -164,7 +220,7 @@ export default function PointCloudTab({ project, setProject }: PointCloudTabProp
                     <Input
                       placeholder="Nokta bulutu URL'si"
                       value={project.pointcloudpath || ""}
-                      onChange={(e) => setProject(prev => ({ ...prev, pointcloudpath: e.target.value }))}
+                      onChange={handleUrlChange}
                       className="flex-1"
                     />
                   </div>
@@ -193,7 +249,7 @@ export default function PointCloudTab({ project, setProject }: PointCloudTabProp
                 id="pointcloudpath"
                 placeholder="https://example.com/pointclouds/project/cloud.js"
                 value={project.pointcloudpath || ""}
-                onChange={(e) => setProject(prev => ({ ...prev, pointcloudpath: e.target.value }))}
+                onChange={handleUrlChange}
               />
               <p className="text-xs text-muted-foreground">
                 Potree formatında nokta bulutu dosyasının URL'sini girin. Dosya cloud.js ile bitmelidir.
