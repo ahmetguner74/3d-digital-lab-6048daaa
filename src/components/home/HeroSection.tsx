@@ -23,7 +23,7 @@ export default function HeroSection() {
           </div>
           
           <div className="relative w-full max-w-md lg:max-w-none reveal rounded-full bg-stone-200 px-0 mx-0 my-0 py-0">
-            <div className="aspect-square rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur p-1">
+            <div className="aspect-square rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 backdrop-blur p-1 py-0 px-0">
               <div className="h-full w-full rounded-full overflow-hidden bg-muted/50">
                 {/* Replace with your profile image */}
                 <img alt="Mimari Görsel" src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" className="h-full w-full object-none" />
