@@ -1,12 +1,8 @@
-
 import { Link } from "react-router-dom";
 import { Github, Linkedin, Mail, Twitter } from "lucide-react";
-
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-  
-  return (
-    <footer className="bg-muted/50 dark:bg-muted/20">
+  return <footer className="bg-muted/50 dark:bg-muted/20">
       <div className="section-container py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
@@ -25,9 +21,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Hakkımda
-                </Link>
+                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">Hakkımızda</Link>
               </li>
               <li>
                 <Link to="/projects" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -53,31 +47,13 @@ export default function Footer() {
               </li>
               <li>
                 <div className="flex items-center gap-3 mt-4">
-                  <a
-                    href="https://github.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    aria-label="GitHub"
-                  >
+                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="GitHub">
                     <Github className="h-5 w-5" />
                   </a>
-                  <a
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    aria-label="LinkedIn"
-                  >
+                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="LinkedIn">
                     <Linkedin className="h-5 w-5" />
                   </a>
-                  <a
-                    href="https://twitter.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    aria-label="Twitter"
-                  >
+                  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
                     <Twitter className="h-5 w-5" />
                   </a>
                 </div>
@@ -100,6 +76,5 @@ export default function Footer() {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 }
