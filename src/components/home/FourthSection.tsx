@@ -1,29 +1,28 @@
 
-import { Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-export default function ProjectsSection() {
+export default function FourthSection() {
   return (
-    <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
+    <section className="min-h-screen bg-muted/50 dark:bg-muted/20">
       <div className="section-container min-h-screen flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           {/* Left content */}
           <div className="space-y-6 reveal">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Sivil Mimari Örneği
+              Tarihi Yapılar
             </h2>
             <p className="text-lg text-muted-foreground">
-              Binaları geliştirdiğimiz son teknoloji sistemleri ile modelliyoruz. 
-              Lazer tarama teknolojisi ve yüksek çözünürlüklü fotogrametri ile yapıların 
-              detaylı 3D modellerini oluşturuyor, mimari ve tarihi değerleri dijital 
-              ortama aktarıyoruz.
+              Tarihi yapıların dijitalleştirilmesi ile kültürel mirasın korunmasına 
+              katkıda bulunuyoruz. Detaylı 3D modeller, yapıların belgelenmesi, 
+              restorasyonu ve gelecek nesillere aktarılması için eşsiz bir kaynak oluşturuyor.
             </p>
             
             <div className="pt-4">
               <Button asChild size="lg" className="group">
-                <Link to="/projects/sivil-mimari">
+                <Link to="/projects/tarihi-yapilar">
                   Projeyi Görüntüle
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
@@ -31,14 +30,13 @@ export default function ProjectsSection() {
             </div>
           </div>
           
-          {/* Right content - Video area with link to project */}
+          {/* Right content - Image area */}
           <div className="relative w-full reveal">
-            <Link to="/projects/sivil-mimari" target="_blank" className="block">
-              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted cursor-pointer">
-                {/* Video placeholder - Will be replaced with actual video */}
+            <Link to="/projects/tarihi-yapilar" className="block">
+              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted">
+                {/* Image placeholder - Will be replaced with actual image */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10">
-                  <Play className="h-16 w-16 text-primary opacity-60" />
-                  <p className="mt-4 text-sm text-muted-foreground">Video buraya eklenecek</p>
+                  <p className="text-sm text-muted-foreground">Fotoğraf buraya eklenecek</p>
                 </div>
                 
                 {/* Overlay for hover effect */}
