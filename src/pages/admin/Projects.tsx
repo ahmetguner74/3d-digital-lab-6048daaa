@@ -259,11 +259,11 @@ export default function AdminProjects() {
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <div className="flex items-center">
                     <Filter className="h-4 w-4 mr-2" />
-                    {categoryFilter || "Kategori"}
+                    {categoryFilter === "all" ? "Kategori" : categoryFilter}
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tümü</SelectItem>
+                  <SelectItem value="all">Tümü</SelectItem>
                   {uniqueCategories.map(category => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -276,11 +276,11 @@ export default function AdminProjects() {
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <div className="flex items-center">
                     <Filter className="h-4 w-4 mr-2" />
-                    {statusFilter || "Durum"}
+                    {statusFilter === "all" ? "Durum" : statusFilter}
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tümü</SelectItem>
+                  <SelectItem value="all">Tümü</SelectItem>
                   <SelectItem value="Taslak">Taslak</SelectItem>
                   <SelectItem value="Yayında">Yayında</SelectItem>
                   <SelectItem value="Arşiv">Arşiv</SelectItem>
@@ -422,7 +422,7 @@ export default function AdminProjects() {
             ) : (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-6">
-                  {searchTerm || categoryFilter || statusFilter ? (
+                  {searchTerm || categoryFilter !== "all" || statusFilter !== "all" ? (
                     <div className="flex flex-col items-center">
                       <Search className="h-6 w-6 text-muted-foreground mb-2" />
                       <p>Aramanıza uygun proje bulunamadı.</p>
@@ -430,8 +430,8 @@ export default function AdminProjects() {
                         variant="link" 
                         onClick={() => {
                           setSearchTerm("");
-                          setCategoryFilter("");
-                          setStatusFilter("");
+                          setCategoryFilter("all");
+                          setStatusFilter("all");
                         }}
                       >
                         Filtreleri Temizle
@@ -458,13 +458,13 @@ export default function AdminProjects() {
       {filteredProjects.length > 0 && (
         <div className="mt-4 text-sm text-muted-foreground">
           Toplam {filteredProjects.length} proje gösteriliyor
-          {(searchTerm || categoryFilter || statusFilter) && (
+          {(searchTerm || categoryFilter !== "all" || statusFilter !== "all") && (
             <Button 
               variant="link" 
               onClick={() => {
                 setSearchTerm("");
-                setCategoryFilter("");
-                setStatusFilter("");
+                setCategoryFilter("all");
+                setStatusFilter("all");
               }}
               className="text-sm h-auto p-0 ml-2"
             >
