@@ -1,3 +1,4 @@
+
 import { Play, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -20,7 +21,7 @@ export default function ProjectsSection() {
             
             <div className="pt-4">
               <Button asChild size="lg" className="group">
-                <Link to="/projects/sivil-mimari" className="py-0 my-[10px]">
+                <Link to="/projects/sivil-mimari" target="_blank" className="py-0 my-[10px]">
                   Projeyi Görüntüle
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>

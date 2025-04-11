@@ -256,6 +256,7 @@ export default function ProjectDetail() {
                 <Link 
                   key={p.id} 
                   to={`/projects/${p.slug}`}
+                  target="_blank"
                   className="group rounded-lg overflow-hidden bg-muted/50 dark:bg-muted/20 reveal"
                 >
                   <div className="aspect-video overflow-hidden">
@@ -287,7 +288,7 @@ export default function ProjectDetail() {
             </div>
             
             <Button asChild>
-              <Link to="/projects" className="flex items-center">
+              <Link to="/projects" target="_blank" className="flex items-center">
                 Tüm Projeleri Görüntüle
               </Link>
             </Button>

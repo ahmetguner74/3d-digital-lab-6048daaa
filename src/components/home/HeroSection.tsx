@@ -1,3 +1,4 @@
+
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -22,17 +23,28 @@ export default function HeroSection() {
             </div>
           </div>
           
-          <div className="relative w-full max-w-md lg:max-w-none reveal rounded-full bg-stone-200 px-0 mx-0 my-0 py-0">
-            <div className="aspect-square rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 backdrop-blur p-1 py-0 px-0">
-              <div className="h-full w-full rounded-full overflow-hidden bg-muted/50">
-                {/* Replace with your profile image */}
-                <img alt="Mimari Görsel" src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" className="h-full w-full object-none" />
+          <div className="relative w-full max-w-xl mx-auto lg:max-w-none reveal">
+            {/* Modern dikdörtgen görsel alanı */}
+            <div className="aspect-video rounded-lg overflow-hidden transform rotate-2 hover:rotate-0 transition-all duration-300">
+              {/* Modern görsel konteyner */}
+              <div className="relative w-full h-full">
+                {/* Ana görsel */}
+                <div className="absolute inset-0 z-10">
+                  <img 
+                    alt="Mimari Görsel" 
+                    src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" 
+                    className="h-full w-full object-cover" 
+                  />
+                </div>
+                
+                {/* Dekoratif arka plan eleman */}
+                <div className="absolute -inset-4 bg-gradient-to-br from-primary/30 to-secondary/30 blur-xl z-0"></div>
               </div>
             </div>
             
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/30 blur-2xl"></div>
-            <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-secondary/30 blur-2xl"></div>
+            {/* Dekoratif elementler */}
+            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/30 blur-3xl"></div>
+            <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-secondary/30 blur-3xl"></div>
           </div>
         </div>
         

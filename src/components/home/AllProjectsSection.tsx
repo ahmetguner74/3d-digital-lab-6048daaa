@@ -62,6 +62,7 @@ export default function AllProjectsSection() {
             <Link 
               key={project.id} 
               to={`/projects/${project.slug}`}
+              target="_blank"
               className="group rounded-lg overflow-hidden bg-muted/50 dark:bg-muted/20 reveal"
             >
               <div className="aspect-video overflow-hidden">
@@ -82,7 +83,7 @@ export default function AllProjectsSection() {
         
         <div className="flex justify-center mt-12">
           <Button asChild size="lg">
-            <Link to="/projects" className="flex items-center">
+            <Link to="/projects" target="_blank" className="flex items-center">
               Tüm Projeleri Görüntüle
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
