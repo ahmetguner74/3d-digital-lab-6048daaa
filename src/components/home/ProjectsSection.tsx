@@ -1,11 +1,8 @@
-
 import { Play, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
 export default function ProjectsSection() {
-  return (
-    <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
+  return <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
       <div className="section-container min-h-screen flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
@@ -23,7 +20,7 @@ export default function ProjectsSection() {
             
             <div className="pt-4">
               <Button asChild size="lg" className="group">
-                <Link to="/projects/sivil-mimari">
+                <Link to="/projects/sivil-mimari" className="py-0 my-[10px]">
                   Projeyi Görüntüle
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
@@ -56,6 +53,5 @@ export default function ProjectsSection() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }
