@@ -158,7 +158,7 @@ export default function ProjectDetail() {
         </div>
       </section>
       
-      {project.haspointcloud && <section className="min-h-screen bg-background flex items-center">
+      {project.haspointcloud && <section className="min-h-screen flex items-center bg-zinc-50">
           <div className="section-container py-20">
             <h2 className="text-2xl sm:text-3xl font-bold mb-8 reveal">Nokta Bulutu Görüntüleyici</h2>
             
@@ -174,7 +174,7 @@ export default function ProjectDetail() {
           </div>
         </section>}
       
-      <section className="min-h-screen bg-muted/50 dark:bg-muted/20 flex items-center">
+      <section className="min-h-screen flex items-center bg-zinc-50 rounded-full">
         <div className="section-container py-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 reveal">
