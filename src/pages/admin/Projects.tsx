@@ -105,8 +105,8 @@ const initialProjects = [
 
 export default function AdminProjects() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [projects, setProjects] = useState(initialProjects);
   const [filteredProjects, setFilteredProjects] = useState(initialProjects);
   const { toast } = useToast();
@@ -128,12 +128,12 @@ export default function AdminProjects() {
     }
     
     // Kategori filtresi
-    if (categoryFilter) {
+    if (categoryFilter && categoryFilter !== "all") {
       result = result.filter(project => project.category === categoryFilter);
     }
     
     // Durum filtresi
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== "all") {
       result = result.filter(project => project.status === statusFilter);
     }
     
