@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Phone, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cn } from "@/lib/utils";
@@ -85,6 +85,12 @@ export default function Header() {
               <span>WhatsApp</span>
             </Button>
             
+            <Link to="/admin/dashboard" title="Yönetim Paneli" className="ml-2">
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+              </Button>
+            </Link>
+            
             <ThemeToggle />
           </nav>
 
@@ -98,6 +104,12 @@ export default function Header() {
             >
               <Phone className="h-4 w-4" />
             </Button>
+            
+            <Link to="/admin/dashboard" title="Yönetim Paneli">
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+              </Button>
+            </Link>
             
             <ThemeToggle />
             

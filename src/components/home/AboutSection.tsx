@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
+// Teknolojilerimiz listesi - Supabase'den yüklenerek dinamik olacak
 const technologies = [
   { name: "React", logo: "/tech/react.svg" },
   { name: "TypeScript", logo: "/tech/typescript.svg" },
@@ -20,12 +21,9 @@ export default function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
           <div className="space-y-6 reveal">
             <p className="text-lg text-muted-foreground">
-              Mimari ve arkeolojik yapıları en son teknolojilerle dijitalleştiren uzman ekibimizle, 
-              fiziksel dünyanın en doğru dijital temsillerini oluşturuyoruz.
-            </p>
-            <p className="text-lg text-muted-foreground">
-              Lazer tarama ve fotogrametri teknolojilerini entegre ederek, milimetrik hassasiyette 3D modeller üretiyor,
-              mimari, mühendislik ve koruma alanlarında öncü çözümler sunuyoruz.
+              3D Dijital Lab olarak, mimari ve arkeolojik yapıları en son teknolojilerle dijitalleştiriyoruz. 
+              Lazer tarama ve fotogrametri teknolojilerini kullanarak, yapıların milimetrik hassasiyette 
+              3D modellerini oluşturup, gelecek nesillere aktarılmasını sağlıyoruz.
             </p>
             
             <div>

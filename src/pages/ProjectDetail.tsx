@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
@@ -12,73 +13,125 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
+import { supabase } from "@/integrations/supabase/client";
 
-// Sample project data - This will be fetched from Supabase in a later step
-const sampleProjects = [
-  {
-    id: 1,
-    slug: "sivil-mimari",
-    title: "Sivil Mimari Örneği",
-    description: "Modern ve tarihi yapıların detaylı 3D tarama ve modellemesi",
-    beforeImage: "/placeholder.svg",
-    afterImage: "/placeholder.svg", 
-    hasPointCloud: true,
-    content: "Bu projede sivil mimari yapısının hem dış hem de iç kısımlarının lazer tarama teknolojisi kullanılarak milimetrik hassasiyetle 3D modelleri oluşturulmuştur. Tarama sonuçları, yapının mevcut durumunu detaylı şekilde belgelemekte ve olası restorasyon çalışmalarına temel oluşturmaktadır.",
-    additionalImages: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg"]
-  },
-  {
-    id: 2,
-    slug: "arkeolojik-eserler",
-    title: "Arkeolojik Eserler",
-    description: "Tarihi eserlerin detaylı 3D modellenmesi",
-    beforeImage: "/placeholder.svg",
-    afterImage: "/placeholder.svg",
-    hasPointCloud: false,
-    content: "Arkeolojik eserlerin korunması için yürüttüğümüz bu projede, yüksek hassasiyetli tarama teknolojileri kullanılarak çeşitli arkeolojik buluntuların 3D modelleri oluşturulmuştur. Bu modeller sayesinde eserler hem daha detaylı incelenebilmekte hem de dijital ortamda korunarak gelecek nesillere aktarılabilmektedir.",
-    additionalImages: ["/placeholder.svg", "/placeholder.svg"]
-  }
-];
+interface Project {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  category: string;
+  cover_image: string;
+  hasPointCloud?: boolean;
+}
+
+interface ProjectImage {
+  id: string;
+  project_id: string;
+  image_url: string;
+  alt_text: string;
+  sequence_order: number;
+}
 
 export default function ProjectDetail() {
   const { slug } = useParams();
-  const [project, setProject] = useState(null);
+  const [project, setProject] = useState<Project | null>(null);
+  const [projectImages, setProjectImages] = useState<ProjectImage[]>([]);
+  const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
   const [sliderValue, setSliderValue] = useState(50);
-  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Find the project based on the slug
+  // Projeyi ve ilgili görselleri çek
   useEffect(() => {
-    const currentProject = sampleProjects.find(p => p.slug === slug);
-    
-    if (currentProject) {
-      setProject(currentProject);
+    const fetchProjectDetails = async () => {
+      if (!slug) return;
       
-      // Reset the slider when changing projects
-      setSliderValue(50);
-      setLoaded(true);
-    }
+      try {
+        setLoading(true);
+        
+        // Projeyi çek
+        const { data: projectData, error: projectError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('slug', slug)
+          .eq('status', 'Yayında')
+          .single();
+          
+        if (projectError) {
+          throw projectError;
+        }
+        
+        if (!projectData) {
+          setError('Proje bulunamadı.');
+          setLoading(false);
+          return;
+        }
+        
+        setProject(projectData);
+        
+        // Proje görsellerini çek
+        const { data: imagesData, error: imagesError } = await supabase
+          .from('project_images')
+          .select('*')
+          .eq('project_id', projectData.id)
+          .order('sequence_order', { ascending: true });
+          
+        if (imagesError) {
+          console.error('Proje görselleri yüklenirken hata:', imagesError);
+        } else {
+          setProjectImages(imagesData || []);
+        }
+        
+        // İlgili projeleri çek (aynı kategoriden)
+        const { data: relatedData, error: relatedError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('status', 'Yayında')
+          .eq('category', projectData.category)
+          .neq('id', projectData.id)
+          .limit(3);
+          
+        if (relatedError) {
+          console.error('İlgili projeler yüklenirken hata:', relatedError);
+        } else {
+          setRelatedProjects(relatedData || []);
+        }
+        
+      } catch (err) {
+        console.error('Proje detayları yüklenirken hata:', err);
+        setError('Proje detayları yüklenirken bir hata oluştu.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProjectDetails();
   }, [slug]);
-  
-  // Find previous and next projects for navigation
-  const currentIndex = sampleProjects.findIndex(p => p.slug === slug);
-  const prevProject = currentIndex > 0 ? sampleProjects[currentIndex - 1] : null;
-  const nextProject = currentIndex < sampleProjects.length - 1 ? sampleProjects[currentIndex + 1] : null;
 
-  if (!loaded) {
+  // Bir sonraki ve önceki projeleri bul
+  const currentIndex = relatedProjects.findIndex(p => p.slug === slug);
+  const prevProject = currentIndex > 0 ? relatedProjects[currentIndex - 1] : null;
+  const nextProject = currentIndex < relatedProjects.length - 1 ? relatedProjects[currentIndex + 1] : null;
+
+  if (loading) {
     return (
       <Layout>
         <div className="section-container min-h-screen flex items-center justify-center">
-          <p>Yükleniyor...</p>
+          <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
       </Layout>
     );
   }
 
-  if (!project) {
+  if (error || !project) {
     return (
       <Layout>
         <div className="section-container min-h-screen flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-4">Proje Bulunamadı</h1>
+            <p className="mb-6 text-muted-foreground">{error || 'Bu proje mevcut değil veya yayından kaldırılmış olabilir.'}</p>
             <Button asChild>
               <Link to="/projects">Tüm Projelere Dön</Link>
             </Button>
@@ -87,6 +140,10 @@ export default function ProjectDetail() {
       </Layout>
     );
   }
+
+  // Karşılaştırma için kapak görseli ve ilk proje görseli
+  const beforeImage = project.cover_image || "/placeholder.svg";
+  const afterImage = projectImages.length > 0 ? projectImages[0].image_url : "/placeholder.svg";
 
   return (
     <Layout>
@@ -104,7 +161,7 @@ export default function ProjectDetail() {
             <div className="relative w-full h-full">
               {/* After image (background) */}
               <img 
-                src={project.afterImage} 
+                src={afterImage} 
                 alt="After"
                 className="absolute w-full h-full object-cover"
               />
@@ -115,7 +172,7 @@ export default function ProjectDetail() {
                 style={{ width: `${sliderValue}%` }}
               >
                 <img 
-                  src={project.beforeImage} 
+                  src={beforeImage} 
                   alt="Before"
                   className="w-[100vw] h-full object-cover"
                 />
@@ -167,7 +224,7 @@ export default function ProjectDetail() {
             <h2 className="text-2xl sm:text-3xl font-bold mb-8 reveal">Nokta Bulutu Görüntüleyici</h2>
             
             <div className="aspect-[16/9] w-full bg-muted rounded-lg overflow-hidden reveal">
-              {/* This div will be replaced with potree viewer */}
+              {/* Bu div Potree görüntüleyici ile değiştirilecek */}
               <div className="w-full h-full flex items-center justify-center bg-black/10">
                 <p className="text-lg text-muted-foreground">
                   Potree nokta bulutu görüntüleyici buraya eklenecek
@@ -191,7 +248,11 @@ export default function ProjectDetail() {
             <div className="space-y-6 reveal">
               <h2 className="text-2xl sm:text-3xl font-bold">Proje Detayları</h2>
               <div className="prose prose-lg max-w-none dark:prose-invert">
-                <p>{project.content}</p>
+                {project.content ? (
+                  <div dangerouslySetInnerHTML={{ __html: project.content }} />
+                ) : (
+                  <p>{project.description}</p>
+                )}
                 <p>
                   3D modelleme teknolojilerimiz, mimari yapıların her detayını yakalayarak, 
                   dijital ortamda gerçeğe en yakın görselleştirmeyi sağlamaktadır. Bu teknoloji, 
@@ -203,7 +264,7 @@ export default function ProjectDetail() {
             
             <div className="relative w-full reveal">
               <img 
-                src={project.additionalImages[0] || "/placeholder.svg"} 
+                src={projectImages[0]?.image_url || project.cover_image || "/placeholder.svg"} 
                 alt={project.title}
                 className="w-full h-auto rounded-lg"
               />
@@ -217,51 +278,50 @@ export default function ProjectDetail() {
       </section>
       
       {/* Section 4: Project Gallery */}
-      <section className="min-h-screen bg-background flex items-center">
-        <div className="section-container py-20">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center reveal">Proje Galerisi</h2>
-          
-          <Carousel className="w-full max-w-5xl mx-auto reveal">
-            <CarouselContent>
-              {project.additionalImages.map((image, index) => (
-                <CarouselItem key={index}>
-                  <div className="p-1">
-                    <div className="aspect-video overflow-hidden rounded-lg">
-                      <img 
-                        src={image} 
-                        alt={`${project.title} görsel ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+      {projectImages.length > 0 && (
+        <section className="min-h-screen bg-background flex items-center">
+          <div className="section-container py-20">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center reveal">Proje Galerisi</h2>
+            
+            <Carousel className="w-full max-w-5xl mx-auto reveal">
+              <CarouselContent>
+                {projectImages.map((image) => (
+                  <CarouselItem key={image.id}>
+                    <div className="p-1">
+                      <div className="aspect-video overflow-hidden rounded-lg">
+                        <img 
+                          src={image.image_url} 
+                          alt={image.alt_text || `${project.title} görsel`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-1" />
-            <CarouselNext className="right-1" />
-          </Carousel>
-        </div>
-      </section>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-1" />
+              <CarouselNext className="right-1" />
+            </Carousel>
+          </div>
+        </section>
+      )}
       
       {/* Section 5: More Projects */}
-      <section className="bg-muted/50 dark:bg-muted/20 py-20">
-        <div className="section-container">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center reveal">Diğer Projeler</h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sampleProjects
-              .filter(p => p.slug !== slug)
-              .slice(0, 3)
-              .map(p => (
+      {relatedProjects.length > 0 && (
+        <section className="bg-muted/50 dark:bg-muted/20 py-20">
+          <div className="section-container">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center reveal">Diğer Projeler</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {relatedProjects.map((p) => (
                 <Link 
                   key={p.id} 
                   to={`/projects/${p.slug}`}
-                  target="_blank"
                   className="group rounded-lg overflow-hidden bg-muted/50 dark:bg-muted/20 reveal"
                 >
                   <div className="aspect-video overflow-hidden">
                     <img 
-                      src={p.afterImage} 
+                      src={p.cover_image || "/placeholder.svg"} 
                       alt={p.title}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
@@ -273,39 +333,40 @@ export default function ProjectDetail() {
                   </div>
                 </Link>
               ))}
-          </div>
-          
-          <div className="flex justify-between mt-12">
-            <div>
-              {prevProject && (
-                <Button asChild variant="outline">
-                  <Link to={`/projects/${prevProject.slug}`} className="flex items-center">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Önceki Proje
-                  </Link>
-                </Button>
-              )}
             </div>
             
-            <Button asChild>
-              <Link to="/projects" target="_blank" className="flex items-center">
-                Tüm Projeleri Görüntüle
-              </Link>
-            </Button>
-            
-            <div>
-              {nextProject && (
-                <Button asChild variant="outline">
-                  <Link to={`/projects/${nextProject.slug}`} className="flex items-center">
-                    Sonraki Proje
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              )}
+            <div className="flex justify-between mt-12">
+              <div>
+                {prevProject && (
+                  <Button asChild variant="outline">
+                    <Link to={`/projects/${prevProject.slug}`} className="flex items-center">
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Önceki Proje
+                    </Link>
+                  </Button>
+                )}
+              </div>
+              
+              <Button asChild>
+                <Link to="/projects" className="flex items-center">
+                  Tüm Projeleri Görüntüle
+                </Link>
+              </Button>
+              
+              <div>
+                {nextProject && (
+                  <Button asChild variant="outline">
+                    <Link to={`/projects/${nextProject.slug}`} className="flex items-center">
+                      Sonraki Proje
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </Layout>
   );
 }

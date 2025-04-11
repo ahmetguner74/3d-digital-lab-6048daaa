@@ -1,49 +1,91 @@
 
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
-// Sample project data - This will be fetched from Supabase in a later step
-const sampleProjects = [
-  {
-    id: 1,
-    title: "Sivil Mimari Örneği",
-    image: "/placeholder.svg",
-    slug: "sivil-mimari"
-  },
-  {
-    id: 2,
-    title: "Arkeolojik Eserler",
-    image: "/placeholder.svg",
-    slug: "arkeolojik-eserler"
-  },
-  {
-    id: 3,
-    title: "Tarihi Yapılar",
-    image: "/placeholder.svg",
-    slug: "tarihi-yapilar"
-  },
-  {
-    id: 4,
-    title: "Modern Mimari",
-    image: "/placeholder.svg",
-    slug: "modern-mimari"
-  },
-  {
-    id: 5,
-    title: "Müze Sergileri",
-    image: "/placeholder.svg",
-    slug: "muze-sergileri"
-  },
-  {
-    id: 6,
-    title: "Kültürel Miras",
-    image: "/placeholder.svg",
-    slug: "kulturel-miras"
-  }
-];
+interface Project {
+  id: string;
+  title: string;
+  slug: string;
+  cover_image: string;
+}
 
 export default function AllProjectsSection() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        
+        // Supabase'den yayında olan projeleri çek
+        const { data, error } = await supabase
+          .from('projects')
+          .select('id, title, slug, cover_image')
+          .eq('status', 'Yayında')
+          .order('created_at', { ascending: false })
+          .limit(6);
+          
+        if (error) {
+          throw error;
+        }
+        
+        setProjects(data || []);
+      } catch (err) {
+        console.error('Projeler yüklenirken hata oluştu:', err);
+        setError('Projeler yüklenirken bir hata oluştu.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProjects();
+  }, []);
+  
+  // Veri yoksa varsayılan projeleri göster
+  const displayProjects = projects.length > 0 ? projects : [
+    {
+      id: "1",
+      title: "Sivil Mimari Örneği",
+      cover_image: "/placeholder.svg",
+      slug: "sivil-mimari"
+    },
+    {
+      id: "2",
+      title: "Arkeolojik Eserler",
+      cover_image: "/placeholder.svg",
+      slug: "arkeolojik-eserler"
+    },
+    {
+      id: "3",
+      title: "Tarihi Yapılar",
+      cover_image: "/placeholder.svg",
+      slug: "tarihi-yapilar"
+    },
+    {
+      id: "4",
+      title: "Modern Mimari",
+      cover_image: "/placeholder.svg",
+      slug: "modern-mimari"
+    },
+    {
+      id: "5",
+      title: "Müze Sergileri",
+      cover_image: "/placeholder.svg",
+      slug: "muze-sergileri"
+    },
+    {
+      id: "6",
+      title: "Kültürel Miras",
+      cover_image: "/placeholder.svg",
+      slug: "kulturel-miras"
+    }
+  ];
+
   return (
     <section className="min-h-screen bg-background">
       <div className="section-container py-20">
@@ -57,17 +99,30 @@ export default function AllProjectsSection() {
           </p>
         </div>
         
+        {/* Yükleniyor durumu */}
+        {loading && (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
+          </div>
+        )}
+        
+        {/* Hata durumu */}
+        {error && !loading && (
+          <div className="text-center py-4 mb-8">
+            <p className="text-red-500 text-sm">{error}</p>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sampleProjects.map((project) => (
+          {displayProjects.map((project) => (
             <Link 
               key={project.id} 
               to={`/projects/${project.slug}`}
-              target="_blank"
               className="group rounded-lg overflow-hidden bg-muted/50 dark:bg-muted/20 reveal"
             >
               <div className="aspect-video overflow-hidden">
                 <img 
-                  src={project.image} 
+                  src={project.cover_image || "/placeholder.svg"} 
                   alt={project.title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -83,7 +138,7 @@ export default function AllProjectsSection() {
         
         <div className="flex justify-center mt-12">
           <Button asChild size="lg">
-            <Link to="/projects" target="_blank" className="flex items-center">
+            <Link to="/projects" className="flex items-center">
               Tüm Projeleri Görüntüle
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
