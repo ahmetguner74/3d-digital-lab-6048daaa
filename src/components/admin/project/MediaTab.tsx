@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,10 @@ export default function MediaTab({
       
       reader.onloadend = () => {
         const imageUrl = reader.result as string;
-        setPreviewImages(prev => ({...prev, [type]: imageUrl}));
+        setPreviewImages({
+          ...previewImages,
+          [type]: imageUrl
+        });
         
         if (type === "main") {
           setProject(prev => ({
@@ -100,22 +102,18 @@ export default function MediaTab({
         cover_image: ""
       }));
       
-      setPreviewImages(prev => {
-        const newPreviews = {...prev};
-        delete newPreviews[type];
-        return newPreviews;
-      });
+      const updatedPreviews = { ...previewImages };
+      delete updatedPreviews[type];
+      setPreviewImages(updatedPreviews);
     } else {
       setProject(prev => ({
         ...prev,
         images: prev.images.filter((img: any) => img.type !== type)
       }));
       
-      setPreviewImages(prev => {
-        const newPreviews = {...prev};
-        delete newPreviews[type];
-        return newPreviews;
-      });
+      const updatedPreviews = { ...previewImages };
+      delete updatedPreviews[type];
+      setPreviewImages(updatedPreviews);
     }
   };
   
