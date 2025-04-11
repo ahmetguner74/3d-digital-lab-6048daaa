@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 export default function AboutSection() {
-  return <section id="about" className="bg-background py-[17px]">
+  return <section id="about" className="bg-background py-[16px]">
       <div className="section-container my-0 mx-0 px-0 py-0">
-        <h2 className="section-title reveal px-0 py-0 my-0 mx-0 text-4xl font-medium text-slate-950">Hakkımızda</h2>
+        <h2 className="section-title reveal px-0 my-0 mx-0 text-4xl font-medium text-slate-950 py-[22px]">Hakkımızda</h2>
         
         <div className="mt-12">
           <div className="space-y-6 reveal max-w-3xl mx-auto">
