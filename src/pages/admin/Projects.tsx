@@ -111,10 +111,14 @@ export default function AdminProjects() {
     setFilteredProjects(result);
   }, [searchTerm, categoryFilter, statusFilter, projects, sortConfig]);
 
-  // Supabase'den projeleri çekme (ileride implement edilecek)
+  // Supabase'den projeleri çekme
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        // Note: This is commented out until the database schema is fully implemented
+        // The original code was causing a TypeScript error because the 'projects' table
+        // isn't defined in the Database type
+        /*
         const { data, error } = await supabase
           .from('projects')
           .select('*')
@@ -125,16 +129,19 @@ export default function AdminProjects() {
         }
 
         if (data) {
-          // Verileri uygun biçime dönüştürür
+          // Convert data to the Project format
           // setProjects(data);
         }
+        */
+        
+        // For now, we'll continue using the sample data
+        console.log("Using sample project data until Supabase schema is implemented");
       } catch (error) {
         console.error('Error fetching projects:', error);
       }
     };
 
-    // fetchProjects();
-    // Şu an için örnek veri kullanıyoruz
+    fetchProjects();
   }, []);
 
   // Benzersiz kategori listesini elde et
