@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import ProjectGrid from "./ProjectGrid";
 import ProjectPagination from "./ProjectPagination";
 import { useProjects } from "./useProjects";
+import ProjectFilters from "./ProjectFilters";
 
 interface ProjectsListProps {
   className?: string;
@@ -17,7 +18,11 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
     error, 
     currentPage, 
     totalPages, 
-    handlePageChange 
+    handlePageChange,
+    categories,
+    selectedCategory,
+    handleCategoryChange,
+    resetFilters
   } = useProjects({ projectsPerPage });
 
   if (loading) {
@@ -39,15 +44,24 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
           </Button>
         </div>
       )}
+      
+      <ProjectFilters
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        onResetFilters={resetFilters}
+      />
 
       <ProjectGrid projects={projects} />
       
-      <ProjectPagination 
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        className="mt-12"
-      />
+      {totalPages > 1 && (
+        <ProjectPagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          className="mt-12"
+        />
+      )}
     </div>
   );
 }
