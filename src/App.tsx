@@ -9,8 +9,6 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
-import Projects from "./pages/Projects";
-import ProjectEdit from "./pages/admin/ProjectEdit";
 import AdminProjects from "./pages/admin/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import FAQ from "./pages/FAQ";
@@ -18,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import ThreeDViewer from "./pages/ThreeDViewer"; // Yeni sayfa eklendi
 import Settings from "./pages/admin/Settings";
 import Messages from "./pages/admin/Messages";
+import ProjectEdit from "./pages/admin/ProjectEdit";
 
 function App() {
   return (
@@ -26,10 +25,9 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:slug" element={<ProjectDetail />} />
         <Route path="/faq" element={<FAQ />} />
-        <Route path="/3d-viewer" element={<ThreeDViewer />} /> {/* Yeni rota eklendi */}
+        <Route path="/3d-viewer" element={<ThreeDViewer />} /> 
         
         {/* Admin routes */}
         <Route path="/admin/login" element={<Login />} />
