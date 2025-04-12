@@ -29,7 +29,7 @@ import {
 import { Link } from "react-router-dom";
 import { ContactMessage } from "@/types/supabase-extensions";
 
-interface Message {
+interface Message extends Partial<ContactMessage> {
   id: string;
   name: string;
   email: string;
@@ -56,7 +56,6 @@ export default function AdminMessages() {
       setLoading(true);
       
       try {
-        // İlk önce toplam sayıyı al
         const { count, error: countError } = await supabase
           .from('contact_messages' as any)
           .select('*', { count: 'exact', head: true });
@@ -68,7 +67,6 @@ export default function AdminMessages() {
           setTotalMessages(0);
         }
         
-        // Sonra mesajları al
         const from = (currentPage - 1) * messagesPerPage;
         const to = from + messagesPerPage - 1;
         
@@ -79,7 +77,7 @@ export default function AdminMessages() {
           .range(from, to);
         
         if (!error) {
-          setMessages(data || []);
+          setMessages(data as Message[] || []);
         } else {
           throw error;
         }
@@ -121,7 +119,6 @@ export default function AdminMessages() {
   const handleMessageClick = async (message: Message) => {
     setSelectedMessage(message);
     
-    // Eğer mesaj okunmadıysa, okundu olarak işaretle
     if (!message.read) {
       try {
         await supabase
@@ -129,7 +126,6 @@ export default function AdminMessages() {
           .update({ read: true })
           .eq('id', message.id);
         
-        // Mesajı güncelle
         setMessages(messages.map(m => 
           m.id === message.id ? { ...m, read: true } : m
         ));
@@ -154,7 +150,6 @@ export default function AdminMessages() {
       
       if (error) throw error;
       
-      // Mesajı güncelle
       setMessages(messages.map(m => 
         m.id === messageId ? { ...m, read: !currentReadStatus } : m
       ));
@@ -190,10 +185,8 @@ export default function AdminMessages() {
       
       if (error) throw error;
       
-      // Mesajı listeden kaldır
       setMessages(messages.filter(m => m.id !== messageId));
       
-      // Eğer seçili mesaj silindiyse, seçili mesajı sıfırla
       if (selectedMessage && selectedMessage.id === messageId) {
         setSelectedMessage(null);
       }

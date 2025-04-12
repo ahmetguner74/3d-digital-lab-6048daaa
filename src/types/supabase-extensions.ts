@@ -45,14 +45,19 @@ export function toSiteSettings(json: Json | null): SiteSettings {
     customScript: ""
   };
   
-  if (!json || typeof json !== 'object' || Array.isArray(json)) {
+  if (!json || typeof json !== 'object') {
     return defaultSettings;
   }
   
-  // JSON nesnesinin türünü kontrol et
-  const jsonObj = json as Record<string, unknown>;
+  // JSON nesnesinin türünü kontrol et ve diziyse varsayılan ayarları döndür
+  if (Array.isArray(json)) {
+    return defaultSettings;
+  }
   
   // JSON nesnesini doğru şekilde SiteSettings'e dönüştür
+  // TypeScript tip hatası olmaması için önce Record<string, unknown> olarak ele alıyoruz
+  const jsonObj = json as Record<string, unknown>;
+  
   return {
     title: typeof jsonObj.title === 'string' ? jsonObj.title : defaultSettings.title,
     description: typeof jsonObj.description === 'string' ? jsonObj.description : defaultSettings.description,

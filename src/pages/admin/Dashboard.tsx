@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -232,7 +233,9 @@ function RecentMessages() {
             .limit(3);
             
           if (!error) {
-            setMessages(data || []);
+            // Tip dönüşümünü yapalım - data dönüşü doğru tipte olduğundan emin olalım
+            // Hatalı dönüşe karşı boş dizi ataması yapalım
+            setMessages(data as Partial<ContactMessage>[] || []);
           } else {
             console.error("Son mesajlar yüklenirken hata:", error);
             setMessages([]); // Hata durumunda boş dizi

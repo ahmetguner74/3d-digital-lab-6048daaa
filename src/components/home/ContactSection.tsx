@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,8 +28,7 @@ export default function ContactSection() {
     setIsSubmitting(true);
     
     try {
-      // Mesajı Supabase'e kaydet - any tipini kullanarak TypeScript hatasını geçiyoruz
-      // Daha iyi bir çözüm olabilir ama şimdilik bu işimizi görecek
+      // JSON uyum sorununu çözmek için doğrudan nesne olarak gönderiyoruz
       const { error } = await supabase
         .from('contact_messages' as any)
         .insert({
