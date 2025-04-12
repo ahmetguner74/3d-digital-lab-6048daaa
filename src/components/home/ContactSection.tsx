@@ -29,10 +29,16 @@ export default function ContactSection() {
     setIsSubmitting(true);
     
     try {
-      // Supabase edge function'a istek gönder
-      const { data, error } = await supabase.functions.invoke('send-contact-email', {
-        body: formData
-      });
+      // Mesajı Supabase'e kaydet
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          read: false
+        });
       
       if (error) {
         throw new Error(error.message || 'Bir hata oluştu');
@@ -204,7 +210,7 @@ export default function ContactSection() {
                 />
               </div>
               
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
                 {isSubmitting ? "Gönderiliyor..." : "Gönder"}
               </Button>
             </form>

@@ -14,6 +14,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useToast } from "@/hooks/use-toast";
 
 // Proje türü tanımı
 interface Project {
@@ -32,6 +33,7 @@ export default function Projects() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const { toast } = useToast();
   const projectsPerPage = 9;
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function Projects() {
         setLoading(true);
         console.log("Projeler yükleniyor...");
         
-        // Supabase'den yayında olan projeleri çek
+        // Supabase'den sadece yayında olan projeleri çek
         const { data, error, count } = await supabase
           .from('projects')
           .select('id, title, slug, description, category, cover_image, featured', { count: 'exact' })
@@ -61,50 +63,42 @@ export default function Projects() {
             setTotalPages(Math.ceil(count / projectsPerPage));
           }
         } else {
-          // Veri yoksa test verilerini ekle
-          console.log("Hiç proje bulunamadı, test verileri ekleniyor");
-          const testProjects = [
-            {
-              id: '1',
-              title: 'Test Projesi 1',
-              slug: 'test-projesi-1',
-              description: 'Bu bir test projesidir. Tarihi yapıların dijitalleştirilmesi.',
-              category: 'Tarihi Yapılar',
-              cover_image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131',
-              featured: true
-            },
-            {
-              id: '2',
-              title: 'Test Projesi 2',
-              slug: 'test-projesi-2',
-              description: 'Bu bir başka test projesidir. Modern binaların 3D taraması.',
-              category: 'Modern Yapılar',
-              cover_image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
-              featured: false
-            },
-            {
-              id: '3',
-              title: 'Test Projesi 3',
-              slug: 'test-projesi-3',
-              description: 'Üçüncü test projesi. Arkeolojik alanların belgelenmesi.',
-              category: 'Arkeolojik Eserler',
-              cover_image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
-              featured: false
-            }
-          ];
-          setProjects(testProjects);
+          toast({
+            title: "Bilgi",
+            description: "Henüz yayınlanmış proje bulunmamaktadır.",
+          });
+          setProjects([]);
           setTotalPages(1);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Projeler yüklenirken hata oluştu:', err);
         setError('Projeler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+        toast({
+          title: "Hata",
+          description: "Projeler yüklenirken bir hata oluştu: " + (err.message || err),
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     };
     
     fetchProjects();
-  }, []);
+    
+    // Supabase realtime aboneliği oluştur
+    const channel = supabase
+      .channel('public:projects')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'projects' }, 
+        () => {
+          fetchProjects(); // Herhangi bir değişiklikte projeleri yeniden yükle
+        })
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
 
   // Geçerli sayfadaki projeleri hesapla
   const getCurrentPageProjects = () => {
@@ -170,10 +164,14 @@ export default function Projects() {
                     src={project.cover_image || "/placeholder.svg"} 
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                    }}
                   />
                   {project.featured && (
                     <div className="absolute top-3 right-3">
-                      <span className="bg-primary/90 text-primary-foreground text-xs font-medium px-2 py-1 rounded-full">
+                      <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
                         Öne Çıkan
                       </span>
                     </div>
@@ -201,7 +199,7 @@ export default function Projects() {
         )}
 
         {/* Sayfalama */}
-        {projects.length > projectsPerPage && (
+        {totalPages > 1 && (
           <div className="flex justify-center mt-12">
             <Pagination>
               <PaginationContent>
@@ -217,7 +215,7 @@ export default function Projects() {
                     <PaginationLink
                       isActive={currentPage === index + 1}
                       onClick={() => handlePageChange(index + 1)}
-                      className={`cursor-pointer ${currentPage === index + 1 ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'}`}
+                      className={`cursor-pointer ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'hover:bg-muted/80'}`}
                     >
                       {index + 1}
                     </PaginationLink>

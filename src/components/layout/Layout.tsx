@@ -1,51 +1,39 @@
 
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import SiteNav from "@/components/layout/SiteNav";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import Header from "./Header";
-import Footer from "./Footer";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { pathname } = useLocation();
-
-  // Scroll to top on route change
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    // Sayfa yüklendiğinde 'reveal' sınıfına sahip elementleri bul
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("active");
+        }
+      });
+    });
 
-  // Reveal animations on scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("active");
-          }
-        });
-      },
-      {
-        root: null,
-        rootMargin: "0px",
-        threshold: 0.1,
-      }
-    );
-
-    const revealElements = document.querySelectorAll(".reveal");
-    revealElements.forEach((element) => observer.observe(element));
+    document.querySelectorAll(".reveal").forEach((el) => {
+      observer.observe(el);
+    });
 
     return () => {
-      revealElements.forEach((element) => observer.unobserve(element));
+      observer.disconnect();
     };
-  }, [pathname]);
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-grow pt-16">{children}</main>
+      <main className="flex-1">{children}</main>
       <Footer />
+      <SiteNav />
     </div>
   );
 }
