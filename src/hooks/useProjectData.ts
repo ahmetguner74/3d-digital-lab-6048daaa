@@ -1,18 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  content: string;
-  category: string;
-  cover_image: string;
-  haspointcloud?: boolean;
-  pointcloudpath?: string;
-}
+import { Project } from "@/components/projects/types";
 
 interface ProjectImage {
   id: string;
@@ -104,7 +93,7 @@ export function useProjectData(slug: string) {
 
   const loadTestData = (slug: string) => {
     // Test proje verisi
-    const testProject = {
+    const testProject: Project = {
       id: '1',
       slug: slug,
       title: 'Test Proje: ' + slug,
@@ -112,6 +101,7 @@ export function useProjectData(slug: string) {
       content: `<p>Bu içerik örnek bir proje içeriğidir.</p><p>Projenin detaylı açıklaması burada yer alacaktır.</p><p>3D modelleme teknolojilerimizle, yapıların her detayını dijital ortama aktarıyoruz. Bu teknoloji, mimari ve arkeolojik değerlerin korunması ve restore edilmesinde büyük öneme sahiptir.</p>`,
       category: 'Test Kategori',
       cover_image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131',
+      featured: false,
       haspointcloud: false
     };
     
@@ -145,7 +135,7 @@ export function useProjectData(slug: string) {
     setProjectImages(testImages);
     
     // Test ilgili projeler
-    const testRelated = [
+    const testRelated: Project[] = [
       {
         id: '2',
         slug: 'test-proje-2',
@@ -153,7 +143,8 @@ export function useProjectData(slug: string) {
         description: 'İlgili proje açıklaması',
         content: '',
         category: 'Test Kategori',
-        cover_image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d'
+        cover_image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d',
+        featured: false
       },
       {
         id: '3',
@@ -162,7 +153,8 @@ export function useProjectData(slug: string) {
         description: 'İlgili proje açıklaması',
         content: '',
         category: 'Test Kategori',
-        cover_image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'
+        cover_image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
+        featured: false
       }
     ];
     

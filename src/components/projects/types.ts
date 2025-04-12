@@ -7,6 +7,7 @@ export interface Project {
   category: string;
   cover_image: string;
   featured: boolean;
+  content?: string;
   haspointcloud?: boolean;
   pointcloudpath?: string;
 }

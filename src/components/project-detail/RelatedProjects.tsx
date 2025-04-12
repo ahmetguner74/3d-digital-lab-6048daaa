@@ -2,16 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-
-interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  content: string;
-  category: string;
-  cover_image: string;
-}
+import { Project } from "@/components/projects/types";
 
 interface RelatedProjectsProps {
   relatedProjects: Project[];

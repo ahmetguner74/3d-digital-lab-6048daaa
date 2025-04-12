@@ -1,13 +1,5 @@
 
-interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  content: string;
-  category: string;
-  cover_image: string;
-}
+import { Project } from "@/components/projects/types";
 
 interface ProjectImage {
   id: string;
