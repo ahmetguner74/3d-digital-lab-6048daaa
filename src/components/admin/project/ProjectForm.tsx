@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Save } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 // Bileşenleri içe aktar
 import GeneralInfoTab from "./GeneralInfoTab";
@@ -13,6 +12,7 @@ import ContentTab from "./ContentTab";
 import MediaTab from "./MediaTab";
 import PointCloudTab from "./PointCloudTab";
 import SettingsTab from "./SettingsTab";
+import { saveProject } from "./projectService";
 
 interface Project {
   id: string | null;
@@ -70,120 +70,12 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
     }
 
     try {
-      const projectData = {
-        title: project.title,
-        slug: project.slug,
-        description: project.description,
-        category: project.category,
-        status: project.status,
-        content: project.content,
-        featured: project.featured,
-        cover_image: project.cover_image,
-        haspointcloud: project.haspointcloud,
-        pointcloudpath: project.pointcloudpath,
-        updated_at: new Date().toISOString()
-      };
-      
-      let projectId = project.id;
-      
-      if (isNew) {
-        const { data, error } = await supabase
-          .from('projects')
-          .insert([projectData])
-          .select('id');
-        
-        if (error) {
-          throw error;
-        }
-        
-        if (data && data.length > 0) {
-          projectId = data[0].id;
-        } else {
-          throw new Error("Proje kaydedildi ancak ID alınamadı");
-        }
-      } else {
-        const { error } = await supabase
-          .from('projects')
-          .update(projectData)
-          .eq('id', project.id);
-        
-        if (error) {
-          throw error;
-        }
-      }
-      
-      if (!projectId) {
-        throw new Error("Proje ID'si alınamadı");
-      }
-
-      // Silinmiş görselleri veritabanından kaldır
-      if (deletedImageIds.length > 0) {
-        console.log("Silinecek görseller:", deletedImageIds);
-        const { error: deleteError } = await supabase
-          .from('project_images')
-          .delete()
-          .in('id', deletedImageIds);
-          
-        if (deleteError) {
-          console.error("Görseller silinirken hata:", deleteError);
-        }
-      }
-
-      // Önce-sonra görselleri için
-      for (const imageType of ['before', 'after']) {
-        const imageUrl = getImageUrl(imageType);
-        if (imageUrl) {
-          const { data: existingImages } = await supabase
-            .from('project_images')
-            .select('id')
-            .eq('project_id', projectId)
-            .eq('alt_text', imageType);
-          
-          if (existingImages && existingImages.length > 0) {
-            await supabase
-              .from('project_images')
-              .update({ image_url: imageUrl })
-              .eq('id', existingImages[0].id);
-          } else {
-            await supabase
-              .from('project_images')
-              .insert({
-                project_id: projectId,
-                image_url: imageUrl,
-                alt_text: imageType,
-                sequence_order: imageType === 'before' ? 0 : 1
-              });
-          }
-        }
-      }
-
-      // Ek görseller için
-      if (project.additionalImages && project.additionalImages.length > 0) {
-        const { data: existingImages } = await supabase
-          .from('project_images')
-          .select('*')
-          .eq('project_id', projectId)
-          .neq('alt_text', 'before')
-          .neq('alt_text', 'after');
-        
-        const existingIds = existingImages ? existingImages.map(img => img.id) : [];
-        
-        const newImages = project.additionalImages.filter(img => 
-          typeof img.id === 'number' || !existingIds.includes(img.id as string));
-        
-        if (newImages.length > 0) {
-          const imagesToInsert = newImages.map((img, index) => ({
-            project_id: projectId,
-            image_url: img.url,
-            alt_text: img.alt,
-            sequence_order: existingImages ? existingImages.length + index + 2 : index + 2
-          }));
-          
-          await supabase
-            .from('project_images')
-            .insert(imagesToInsert);
-        }
-      }
+      await saveProject({
+        project,
+        isNew,
+        deletedImageIds,
+        previewImages
+      });
       
       toast({
         title: "Başarılı",
@@ -207,85 +99,124 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
     window.open(`/projects/${project.slug}`, '_blank');
   };
 
-  const getImageUrl = (type: string) => {
-    if (previewImages[type]) {
-      return previewImages[type];
-    }
-    
-    if (type === "main" && project.cover_image) {
-      return project.cover_image;
-    }
-    
-    const image = project.images.find(img => img.type === type);
-    if (image) {
-      return image.url;
-    }
-    
-    return null;
-  };
-
   return (
-    <>
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="general">Genel</TabsTrigger>
-          <TabsTrigger value="content">İçerik</TabsTrigger>
-          <TabsTrigger value="media">Medya</TabsTrigger>
-          <TabsTrigger value="pointcloud">Nokta Bulutu</TabsTrigger>
-          <TabsTrigger value="settings">Ayarlar</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="general">
-          <GeneralInfoTab project={project} setProject={setProject} />
-        </TabsContent>
-        
-        <TabsContent value="content">
-          <ContentTab project={project} setProject={setProject} />
-        </TabsContent>
-        
-        <TabsContent value="media">
-          <MediaTab 
-            project={project} 
-            setProject={setProject} 
-            previewImages={previewImages} 
-            setPreviewImages={setPreviewImages}
-            setDeletedImageIds={setDeletedImageIds}
-          />
-        </TabsContent>
-        
-        <TabsContent value="pointcloud">
-          <PointCloudTab project={project} setProject={setProject} />
-        </TabsContent>
-        
-        <TabsContent value="settings">
-          <SettingsTab project={project} setProject={setProject} />
-        </TabsContent>
-        
-        <div className="mt-6 flex items-center justify-between space-x-4">
-          <Button variant="outline" onClick={() => navigate("/admin/projects")}>
-            İptal
-          </Button>
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" onClick={handlePreview} disabled={!project.slug}>
-              Önizle
-            </Button>
-            <Button onClick={handleSave} disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Kaydediliyor...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Kaydet
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </Tabs>
-    </>
+    <ProjectFormLayout
+      project={project}
+      setProject={setProject}
+      previewImages={previewImages}
+      setPreviewImages={setPreviewImages}
+      setDeletedImageIds={setDeletedImageIds}
+      loading={loading}
+      handleSave={handleSave}
+      handlePreview={handlePreview}
+      navigate={navigate}
+    />
+  );
+}
+
+interface ProjectFormLayoutProps {
+  project: Project;
+  setProject: React.Dispatch<React.SetStateAction<Project>>;
+  previewImages: {[key: string]: string};
+  setPreviewImages: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
+  setDeletedImageIds: React.Dispatch<React.SetStateAction<string[]>>;
+  loading: boolean;
+  handleSave: () => Promise<void>;
+  handlePreview: () => void;
+  navigate: (path: string) => void;
+}
+
+function ProjectFormLayout({
+  project,
+  setProject,
+  previewImages,
+  setPreviewImages,
+  setDeletedImageIds,
+  loading,
+  handleSave,
+  handlePreview,
+  navigate
+}: ProjectFormLayoutProps) {
+  return (
+    <Tabs defaultValue="general" className="w-full">
+      <TabsList className="mb-6">
+        <TabsTrigger value="general">Genel</TabsTrigger>
+        <TabsTrigger value="content">İçerik</TabsTrigger>
+        <TabsTrigger value="media">Medya</TabsTrigger>
+        <TabsTrigger value="pointcloud">Nokta Bulutu</TabsTrigger>
+        <TabsTrigger value="settings">Ayarlar</TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="general">
+        <GeneralInfoTab project={project} setProject={setProject} />
+      </TabsContent>
+      
+      <TabsContent value="content">
+        <ContentTab project={project} setProject={setProject} />
+      </TabsContent>
+      
+      <TabsContent value="media">
+        <MediaTab 
+          project={project} 
+          setProject={setProject} 
+          previewImages={previewImages} 
+          setPreviewImages={setPreviewImages}
+          setDeletedImageIds={setDeletedImageIds}
+        />
+      </TabsContent>
+      
+      <TabsContent value="pointcloud">
+        <PointCloudTab project={project} setProject={setProject} />
+      </TabsContent>
+      
+      <TabsContent value="settings">
+        <SettingsTab project={project} setProject={setProject} />
+      </TabsContent>
+      
+      <FormActions
+        project={project}
+        loading={loading}
+        handleSave={handleSave}
+        handlePreview={handlePreview}
+        navigate={navigate}
+      />
+    </Tabs>
+  );
+}
+
+interface FormActionsProps {
+  project: Project;
+  loading: boolean;
+  handleSave: () => Promise<void>;
+  handlePreview: () => void;
+  navigate: (path: string) => void;
+}
+
+function FormActions({ project, loading, handleSave, handlePreview, navigate }: FormActionsProps) {
+  return (
+    <div className="mt-6 flex items-center justify-between space-x-4">
+      <Button variant="outline" onClick={() => navigate("/admin/projects")}>
+        İptal
+      </Button>
+      
+      <div className="flex items-center space-x-2">
+        <Button variant="outline" onClick={handlePreview} disabled={!project.slug}>
+          Önizle
+        </Button>
+        <Button onClick={handleSave} disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Kaydediliyor...
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" />
+              Kaydet
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }
