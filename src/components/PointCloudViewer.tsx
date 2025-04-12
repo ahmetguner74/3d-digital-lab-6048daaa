@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, RotateCcw, ChevronsExpand } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PointCloudViewerProps {
   pointCloudPath: string;
@@ -11,6 +12,7 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
   const viewerInitialized = useRef<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewerInstance, setViewerInstance] = useState<any>(null);
 
   useEffect(() => {
     // Check if container exists
@@ -97,6 +99,9 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
         viewer.setBackground("gradient"); // skybox, gradient, black, white
         viewer.loadSettingsFromURL();
         
+        // Save viewer instance for controls
+        setViewerInstance(viewer);
+        
         // Load point cloud
         console.log("Nokta bulutu yükleniyor:", pointCloudPath);
         Potree.loadPointCloud(pointCloudPath, "point_cloud", (e: any) => {
@@ -148,6 +153,37 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
     };
   }, [pointCloudPath]);
 
+  // Viewer control functions
+  const handleZoomIn = () => {
+    if (viewerInstance) {
+      const camera = viewerInstance.scene.getActiveCamera();
+      camera.position.z *= 0.8;
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (viewerInstance) {
+      const camera = viewerInstance.scene.getActiveCamera();
+      camera.position.z *= 1.2;
+    }
+  };
+
+  const handleReset = () => {
+    if (viewerInstance) {
+      viewerInstance.fitToScreen();
+    }
+  };
+
+  const handleFullscreen = () => {
+    if (containerRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        containerRef.current.requestFullscreen();
+      }
+    }
+  };
+
   return (
     <div className="potree-container w-full relative" style={{ height: "500px" }}>
       <div ref={containerRef} className="w-full h-full"></div>
@@ -176,6 +212,46 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
       
       {!loading && !error && (
         <>
+          {/* Görüntüleyici kontrolleri */}
+          <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="bg-background/70 backdrop-blur-sm shadow-sm"
+              onClick={handleZoomIn}
+              title="Yakınlaştır"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="bg-background/70 backdrop-blur-sm shadow-sm"
+              onClick={handleZoomOut}
+              title="Uzaklaştır"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="bg-background/70 backdrop-blur-sm shadow-sm"
+              onClick={handleReset}
+              title="Görünümü Sıfırla"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="bg-background/70 backdrop-blur-sm shadow-sm"
+              onClick={handleFullscreen}
+              title="Tam Ekran"
+            >
+              <ChevronsExpand className="h-4 w-4" />
+            </Button>
+          </div>
+          
           <div className="absolute bottom-2 left-2 text-xs text-white bg-black/50 p-1 rounded">
             Potree v1.8 | Nokta bulutu: {pointCloudPath.split('/').pop()}
           </div>
