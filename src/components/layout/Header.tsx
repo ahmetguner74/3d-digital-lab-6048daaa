@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Phone, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import ThreeJsButton from "@/components/header/ThreeJsButton"; 
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -59,9 +60,12 @@ export default function Header() {
     )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center text-xl font-bold transition-colors hover:text-primary">
-            <span className="text-gradient">3D Dijital Lab</span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center text-xl font-bold transition-colors hover:text-primary">
+              <span className="text-gradient">3D Dijital Lab</span>
+            </Link>
+            <ThreeJsButton />
+          </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
@@ -135,6 +139,7 @@ export default function Header() {
         mobileMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <div className="flex flex-col pt-8 pb-6 px-6 space-y-6">
+          <ThreeJsButton />
           {navigation.map(item => (
             <Link 
               key={item.name} 
