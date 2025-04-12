@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils"; 
 import { Menu, X } from "lucide-react";
-import { useMobile } from "@/hooks/use-mobile";
-import ThemeToggle from "./ThemeToggle";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "./ThemeToggle";
 
 type NavItem = {
   title: string;
@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
 
 export default function SiteNav() {
   const [isOpen, setIsOpen] = useState(false);
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!isMobile) {
