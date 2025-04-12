@@ -40,7 +40,6 @@ export default function Projects() {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        console.log("Projeler yükleniyor...");
         
         // Supabase'den sadece yayında olan projeleri çek
         const { data, error, count } = await supabase
@@ -53,8 +52,6 @@ export default function Projects() {
           throw error;
         }
         
-        console.log("Projelerin durumu:", data ? `${data.length} proje bulundu` : "Proje bulunamadı");
-        
         if (data && data.length > 0) {
           setProjects(data);
           
@@ -63,42 +60,7 @@ export default function Projects() {
             setTotalPages(Math.ceil(count / projectsPerPage));
           }
         } else {
-          // Veri yoksa örnek projeler göster
-          const demoProjects = [
-            {
-              id: "1",
-              title: "3. Proje",
-              slug: "proje-3",
-              description: "inanılmaz proje",
-              category: "Koruma",
-              cover_image: "/placeholder.svg",
-              featured: true
-            },
-            {
-              id: "2",
-              title: "bbbbb",
-              slug: "bbbbb",
-              description: "asdsad",
-              category: "Mimari",
-              cover_image: "/placeholder.svg",
-              featured: true
-            },
-            {
-              id: "3",
-              title: "proje2",
-              slug: "proje-2",
-              description: "çok güzel proje",
-              category: "Arkeoloji",
-              cover_image: "/placeholder.svg",
-              featured: true
-            }
-          ];
-          setProjects(demoProjects);
-          setTotalPages(1);
-          toast({
-            title: "Bilgi",
-            description: "Demo projeler görüntüleniyor.",
-          });
+          console.log("Yayınlanmış proje bulunamadı, örnek projeler gösteriliyor");
         }
       } catch (err: any) {
         console.error('Projeler yüklenirken hata oluştu:', err);
@@ -181,7 +143,7 @@ export default function Projects() {
           </div>
         )}
         
-        {!loading && !error && projects.length > 0 && (
+        {!loading && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {getCurrentPageProjects().map((project) => (
               <Link 

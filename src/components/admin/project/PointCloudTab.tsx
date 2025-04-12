@@ -107,7 +107,6 @@ export default function PointCloudTab({ project, setProject, onPreview }: PointC
                     <li>• Nokta bulutu işlemesi için tarayıcı WebGL desteğine sahip olmalıdır.</li>
                     <li>• Büyük nokta bulutu dosyaları yüklenmesi zaman alabilir.</li>
                     <li>• Potree formatı .js uzantılı ana dosyaya ihtiyaç duyar.</li>
-                    <li>• LAS formatındaki dosyanızı <a href="https://potree.org/potree/converter.html" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Potree Converter</a> ile dönüştürün.</li>
                   </ul>
                 </div>
               </div>
