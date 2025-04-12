@@ -17,6 +17,10 @@ const navigation = [
     href: "/about"
   },
   {
+    name: "Hizmetler",
+    href: "/services"
+  }, 
+  {
     name: "Projeler",
     href: "/projects"
   }, 
