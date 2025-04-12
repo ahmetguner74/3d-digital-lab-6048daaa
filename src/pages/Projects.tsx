@@ -63,12 +63,42 @@ export default function Projects() {
             setTotalPages(Math.ceil(count / projectsPerPage));
           }
         } else {
+          // Veri yoksa örnek projeler göster
+          const demoProjects = [
+            {
+              id: "1",
+              title: "3. Proje",
+              slug: "proje-3",
+              description: "inanılmaz proje",
+              category: "Koruma",
+              cover_image: "/placeholder.svg",
+              featured: true
+            },
+            {
+              id: "2",
+              title: "bbbbb",
+              slug: "bbbbb",
+              description: "asdsad",
+              category: "Mimari",
+              cover_image: "/placeholder.svg",
+              featured: true
+            },
+            {
+              id: "3",
+              title: "proje2",
+              slug: "proje-2",
+              description: "çok güzel proje",
+              category: "Arkeoloji",
+              cover_image: "/placeholder.svg",
+              featured: true
+            }
+          ];
+          setProjects(demoProjects);
+          setTotalPages(1);
           toast({
             title: "Bilgi",
-            description: "Henüz yayınlanmış proje bulunmamaktadır.",
+            description: "Demo projeler görüntüleniyor.",
           });
-          setProjects([]);
-          setTotalPages(1);
         }
       } catch (err: any) {
         console.error('Projeler yüklenirken hata oluştu:', err);

@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface FeaturedProject {
   id: string;
@@ -17,11 +18,13 @@ interface FeaturedProject {
 }
 
 export default function ProjectsSection() {
-  const [featuredProject, setFeaturedProject] = useState<FeaturedProject | null>(null);
+  const [featuredProjects, setFeaturedProjects] = useState<FeaturedProject[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchFeaturedProject = async () => {
+    const fetchFeaturedProjects = async () => {
       try {
         setLoading(true);
 
@@ -34,7 +37,7 @@ export default function ProjectsSection() {
           .eq('featured', true)
           .eq('status', 'Yayında')
           .order('updated_at', { ascending: false })
-          .limit(1);
+          .limit(3);
           
         if (error) {
           console.error('Öne çıkan proje yüklenirken hata:', error);
@@ -43,11 +46,38 @@ export default function ProjectsSection() {
         }
         
         if (data && data.length > 0) {
-          console.log("Öne çıkan proje verileri:", data[0]);
-          setFeaturedProject(data[0]);
+          console.log("Öne çıkan projeler verileri:", data);
+          setFeaturedProjects(data);
         } else {
           console.log("Öne çıkan proje bulunamadı");
-          setFeaturedProject(null);
+          // Demo veriler
+          const demoProjects = [
+            {
+              id: "1",
+              title: "3. Proje",
+              slug: "proje-3",
+              description: "inanılmaz proje",
+              cover_image: "/placeholder.svg",
+              category: "Koruma"
+            },
+            {
+              id: "2",
+              title: "bbbbb",
+              slug: "bbbbb",
+              description: "asdsad",
+              cover_image: "/placeholder.svg",
+              category: "Mimari"
+            },
+            {
+              id: "3",
+              title: "proje2",
+              slug: "proje-2",
+              description: "çok güzel proje",
+              cover_image: "/placeholder.svg", 
+              category: "Arkeoloji"
+            }
+          ];
+          setFeaturedProjects(demoProjects);
         }
       } catch (err) {
         console.error('Öne çıkan proje yüklenirken beklenmeyen hata:', err);
@@ -56,7 +86,7 @@ export default function ProjectsSection() {
       }
     };
     
-    fetchFeaturedProject();
+    fetchFeaturedProjects();
     
     // Realtime değişiklikleri dinle
     const channel = supabase
@@ -70,7 +100,7 @@ export default function ProjectsSection() {
         }, 
         () => {
           // Öne çıkan projelerde değişiklik olduğunda yeniden yükle
-          fetchFeaturedProject();
+          fetchFeaturedProjects();
         })
       .subscribe();
     
@@ -78,6 +108,17 @@ export default function ProjectsSection() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Öne çıkan projeleri otomatik olarak değiştir
+  useEffect(() => {
+    if (featuredProjects.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % featuredProjects.length);
+      }, 7000); // Her 7 saniyede bir değiştir
+      
+      return () => clearInterval(interval);
+    }
+  }, [featuredProjects]);
 
   if (loading) {
     return (
@@ -89,7 +130,7 @@ export default function ProjectsSection() {
     );
   }
 
-  if (!featuredProject) {
+  if (featuredProjects.length === 0) {
     return (
       <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
         <div className="section-container min-h-screen flex flex-col items-center justify-center">
@@ -108,14 +149,31 @@ export default function ProjectsSection() {
     );
   }
 
+  // Görüntülenecek güncel projeyi al
+  const featuredProject = featuredProjects[currentIndex];
+
   return (
     <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
       <div className="section-container min-h-screen grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
         <div className="md:col-span-6 space-y-6 order-2 md:order-1">
           <div className="space-y-2">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              {featuredProject.title}
-            </h2>
+            <div className="flex items-center mb-2">
+              <h2 className="text-3xl md:text-4xl font-bold">
+                {featuredProject.title}
+              </h2>
+              {featuredProjects.length > 1 && (
+                <div className="flex ml-4 items-center space-x-1">
+                  {featuredProjects.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentIndex(idx)}
+                      className={`w-2 h-2 rounded-full ${idx === currentIndex ? 'bg-primary' : 'bg-gray-300'}`}
+                      aria-label={`Proje ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
             <p className="text-primary font-medium">
               {featuredProject.category}
             </p>
