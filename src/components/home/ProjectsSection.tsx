@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -83,5 +84,57 @@ export default function ProjectsSection() {
   if (!featuredProject) {
     return null;
   }
-  return;
+  
+  // Burada önemli bir hata var, component return ifadesi içermiyor
+  // Bu yüzden öne çıkan projeler görünmüyor. Aşağıda doğru return ifadesi eklendi:
+  return (
+    <section id="projects" className="min-h-screen bg-muted/50 dark:bg-muted/20">
+      <div className="section-container min-h-screen grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        <div className="md:col-span-6 space-y-6 order-2 md:order-1">
+          <div className="space-y-2">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              {featuredProject.title}
+            </h2>
+            <p className="text-primary font-medium">
+              {featuredProject.category}
+            </p>
+          </div>
+          
+          <p className="text-muted-foreground text-lg">
+            {featuredProject.description}
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button asChild size="lg">
+              <Link to={`/projects/${featuredProject.slug}`} className="flex items-center">
+                İncele
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            
+            <Button variant="outline" asChild size="lg">
+              <Link to="/projects" className="flex items-center">
+                Tüm Projeleri Gör
+              </Link>
+            </Button>
+          </div>
+        </div>
+        
+        <div className="md:col-span-6 aspect-video order-1 md:order-2">
+          <Link to={`/projects/${featuredProject.slug}`}>
+            <div className="relative w-full h-full overflow-hidden rounded-lg">
+              <img 
+                src={featuredProject.cover_image || "/placeholder.svg"} 
+                alt={featuredProject.title} 
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              />
+              <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
+                <p className="text-sm md:text-base">Öne Çıkan Proje</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
 }

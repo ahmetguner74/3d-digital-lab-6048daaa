@@ -54,15 +54,23 @@ export default function SettingsTab({ project, setProject }: SettingsTabProps) {
           <div className="space-y-2">
             <h3 className="text-lg font-medium">Görünürlük Ayarları</h3>
             <div className="flex flex-col gap-3">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="featured" className="font-medium">Öne çıkan proje</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Bu proje anasayfada öne çıkan proje olarak gösterilecek
+                  </p>
+                </div>
                 <Switch 
                   id="featured" 
                   checked={project.featured}
                   onCheckedChange={(checked) => setProject(prev => ({ ...prev, featured: checked }))}
                 />
-                <Label htmlFor="featured">Öne çıkan proje</Label>
               </div>
             </div>
+            <p className="text-xs text-amber-500 mt-2">
+              Not: Bir projeyi öne çıkan olarak işaretlerseniz, daha önce öne çıkan olarak işaretlenmiş projeler otomatik olarak öne çıkarılmayacaktır.
+            </p>
           </div>
           
           {project.haspointcloud && (

@@ -38,6 +38,7 @@ export default function Projects() {
     const fetchProjects = async () => {
       try {
         setLoading(true);
+        console.log("Projeler yükleniyor...");
         
         // Supabase'den yayında olan projeleri çek
         const { data, error, count } = await supabase
@@ -50,16 +51,18 @@ export default function Projects() {
           throw error;
         }
         
-        console.log("Tüm projeler:", data);
-        setProjects(data || []);
+        console.log("Projelerin durumu:", data ? `${data.length} proje bulundu` : "Proje bulunamadı");
         
-        // Toplam sayfa sayısını hesapla
-        if (count) {
-          setTotalPages(Math.ceil(count / projectsPerPage));
-        }
-
-        // Veri yoksa test verilerini ekle
-        if (!data || data.length === 0) {
+        if (data && data.length > 0) {
+          setProjects(data);
+          
+          // Toplam sayfa sayısını hesapla
+          if (count) {
+            setTotalPages(Math.ceil(count / projectsPerPage));
+          }
+        } else {
+          // Veri yoksa test verilerini ekle
+          console.log("Hiç proje bulunamadı, test verileri ekleniyor");
           const testProjects = [
             {
               id: '1',
@@ -168,6 +171,13 @@ export default function Projects() {
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
+                  {project.featured && (
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+                        Öne Çıkan
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
                   <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
