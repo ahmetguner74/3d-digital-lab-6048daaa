@@ -15,6 +15,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { title: "Anasayfa", href: "/" },
   { title: "Hakkımızda", href: "/about" },
+  { title: "Projeler", href: "/projects" },
   { title: "3D Görüntüleyici", href: "/3d-viewer" },
   { title: "İletişim", href: "/contact" },
 ];

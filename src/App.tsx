@@ -10,6 +10,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/Projects";
+import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:slug" element={<ProjectDetail />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/3d-viewer" element={<ThreeDViewer />} /> 
