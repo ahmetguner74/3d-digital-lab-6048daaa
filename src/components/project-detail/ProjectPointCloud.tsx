@@ -11,8 +11,15 @@ export default function ProjectPointCloud({ pointCloudPath }: ProjectPointCloudP
       <div className="section-container py-20">
         <h2 className="text-2xl sm:text-3xl font-bold mb-8 reveal">Nokta Bulutu Görüntüleyici</h2>
         
-        <div className="w-full h-[500px] rounded-lg overflow-hidden reveal border border-border">
-          <PointCloudViewer pointCloudPath={pointCloudPath} />
+        <div className="relative w-full">
+          <div className="w-full h-[500px] rounded-lg overflow-hidden reveal border border-border">
+            <PointCloudViewer pointCloudPath={pointCloudPath} />
+          </div>
+          
+          {/* Minimal sayfa numarası göstergesi */}
+          <div className="absolute bottom-[-30px] right-0 text-xs text-muted-foreground/60 font-light">
+            2 / 2
+          </div>
         </div>
         
         <p className="text-lg text-center mt-8 max-w-3xl mx-auto text-muted-foreground reveal">

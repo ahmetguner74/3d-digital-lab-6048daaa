@@ -2,8 +2,6 @@
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/home/HeroSection";
 import ProjectsSection from "@/components/home/ProjectsSection";
-import ThirdSection from "@/components/home/ThirdSection";
-import FourthSection from "@/components/home/FourthSection";
 import AllProjectsSection from "@/components/home/AllProjectsSection";
 import ContactSection from "@/components/home/ContactSection";
 import { Helmet } from "react-helmet-async";
@@ -17,8 +15,6 @@ export default function Index() {
       </Helmet>
       <HeroSection />
       <ProjectsSection />
-      <ThirdSection />
-      <FourthSection />
       <AllProjectsSection />
       <ContactSection />
     </Layout>
