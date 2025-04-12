@@ -64,6 +64,7 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
             setTotalPages(Math.ceil(count / projectsPerPage));
           }
         } else {
+          console.log("Öne çıkan proje bulunamadı, demo verileri gösteriliyor");
           // Gerçek veri yoksa demo projeleri göster
           const demoProjects: Project[] = [
             {
@@ -90,6 +91,33 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
               slug: "muze-eserleri",
               description: "Müzedeki eserlerin fotogrametri yöntemiyle 3D olarak arşivlenmesi",
               category: "Müzecilik",
+              cover_image: "/placeholder.svg",
+              featured: false
+            },
+            {
+              id: "4",
+              title: "Tarihi Yapı Restorasyonu",
+              slug: "tarihi-yapi-restorasyonu",
+              description: "Tarihi yapının 3D taraması ve restorasyon öncesi-sonrası karşılaştırmalı analizleri",
+              category: "Restorasyon",
+              cover_image: "/placeholder.svg",
+              featured: true
+            },
+            {
+              id: "5",
+              title: "Kentsel Dönüşüm Projesi",
+              slug: "kentsel-donusum",
+              description: "Kentsel dönüşüm alanının dijital ikizinin oluşturulması ve simülasyonu",
+              category: "Şehircilik",
+              cover_image: "/placeholder.svg",
+              featured: false
+            },
+            {
+              id: "6",
+              title: "Endüstriyel Miras Belgelemesi",
+              slug: "endustriyel-miras",
+              description: "Tarihi fabrika yapısının detaylı 3D modellemesi ve sanal tur uygulaması",
+              category: "Endüstriyel Miras",
               cover_image: "/placeholder.svg",
               featured: false
             }
@@ -183,103 +211,103 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
     );
   }
 
-  if (error && !loading && projects.length === 0) {
-    return (
-      <div className={`${className} text-center py-12`}>
-        <p className="text-lg text-muted-foreground mb-4">{error}</p>
-        <Button onClick={() => window.location.reload()}>Yeniden Dene</Button>
-      </div>
-    );
-  }
-
-  if (!loading && !error && projects.length === 0) {
-    return (
-      <div className={`${className} text-center py-12`}>
-        <p className="text-lg text-muted-foreground mb-4">Henüz yayınlanmış proje bulunmamaktadır.</p>
-      </div>
-    );
-  }
-
   return (
     <div className={className}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-        {getCurrentPageProjects().map((project) => (
-          <Link 
-            key={project.id} 
-            to={`/projects/${project.slug}`}
-            className="group overflow-hidden bg-white dark:bg-muted/10 rounded-lg border border-muted shadow-sm hover:shadow-md transition-all duration-300 reveal"
-          >
-            <div className="aspect-video relative overflow-hidden">
-              <img 
-                src={project.cover_image || "/placeholder.svg"} 
-                alt={project.title}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/placeholder.svg";
-                }}
-              />
-              {project.featured && (
-                <div className="absolute top-3 right-3">
-                  <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
-                    Öne Çıkan
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="p-5">
-              <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-                {project.title}
-              </h3>
-              {project.description && (
-                <p className="mt-2 text-muted-foreground line-clamp-2">
-                  {project.description}
-                </p>
-              )}
-              <div className="flex justify-between items-center mt-3">
-                <span className="text-sm font-medium text-primary/80">{project.category}</span>
-                <div className="text-sm text-primary flex items-center">
-                  Detaylar <ArrowRight className="ml-1 h-3 w-3" />
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Sayfalama */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-12">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-              
-              {Array.from({ length: totalPages }).map((_, index) => (
-                <PaginationItem key={index}>
-                  <PaginationLink
-                    isActive={currentPage === index + 1}
-                    onClick={() => handlePageChange(index + 1)}
-                    className={`cursor-pointer ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'hover:bg-muted/80'}`}
-                  >
-                    {index + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+      {error && (
+        <div className="text-center py-4 mb-6">
+          <p className="text-red-500">{error}</p>
+          <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="mt-2">
+            Yeniden Dene
+          </Button>
         </div>
+      )}
+
+      {projects.length === 0 && !error ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-muted-foreground mb-4">Henüz yayınlanmış proje bulunmamaktadır.</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {getCurrentPageProjects().map((project) => (
+              <Link 
+                key={project.id} 
+                to={`/projects/${project.slug}`}
+                className="group overflow-hidden bg-white dark:bg-muted/10 rounded-lg border border-muted shadow-sm hover:shadow-md transition-all duration-300 reveal"
+              >
+                <div className="aspect-video relative overflow-hidden">
+                  <img 
+                    src={project.cover_image || "/placeholder.svg"} 
+                    alt={project.title}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                    }}
+                  />
+                  {project.featured && (
+                    <div className="absolute top-3 right-3">
+                      <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+                        Öne Çıkan
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-5">
+                  <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+                    {project.title}
+                  </h3>
+                  {project.description && (
+                    <p className="mt-2 text-muted-foreground line-clamp-2">
+                      {project.description}
+                    </p>
+                  )}
+                  <div className="flex justify-between items-center mt-3">
+                    <span className="text-sm font-medium text-primary/80">{project.category}</span>
+                    <div className="text-sm text-primary flex items-center">
+                      Detaylar <ArrowRight className="ml-1 h-3 w-3" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Sayfalama */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-12">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }).map((_, index) => (
+                    <PaginationItem key={index}>
+                      <PaginationLink
+                        isActive={currentPage === index + 1}
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`cursor-pointer ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'hover:bg-muted/80'}`}
+                      >
+                        {index + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
