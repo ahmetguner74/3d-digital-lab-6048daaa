@@ -49,27 +49,27 @@ export default function ProjectsSection() {
           const demoProjects = [
             {
               id: "1",
-              title: "3. Proje",
-              slug: "proje-3",
-              description: "inanılmaz proje",
+              title: "Tarihi Kent Dokusunun 3D Dijitalleştirilmesi",
+              slug: "tarihi-kent-dokusu",
+              description: "Tarihi kent dokusunun lazer tarama ve fotogrametri teknikleri ile dijitalleştirilmesi ve sanal ortama aktarılması projesi",
               cover_image: "/placeholder.svg",
               category: "Koruma"
             },
             {
               id: "2",
-              title: "bbbbb",
-              slug: "bbbbb",
-              description: "asdsad",
+              title: "Arkeolojik Alanın 3D Belgelenmesi",
+              slug: "arkeolojik-alan-belgelemesi",
+              description: "Arkeolojik kalıntıların yüksek çözünürlüklü nokta bulutu ve 3D modellenmesi",
               cover_image: "/placeholder.svg",
-              category: "Mimari"
+              category: "Arkeoloji"
             },
             {
               id: "3",
-              title: "proje2",
-              slug: "proje-2",
-              description: "çok güzel proje",
+              title: "Modern Mimari Eser Dijitalleştirme",
+              slug: "modern-mimari-dijitallestirme",
+              description: "Modern mimari yapının iç ve dış mekanlarının Three.js teknolojisi ile web ortamında interaktif sunumu",
               cover_image: "/placeholder.svg", 
-              category: "Arkeoloji"
+              category: "Mimari"
             }
           ];
           setFeaturedProjects(demoProjects);
@@ -162,7 +162,7 @@ export default function ProjectsSection() {
                     <button
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
-                      className={`w-2 h-2 rounded-full ${idx === currentIndex ? 'bg-primary' : 'bg-gray-300'}`}
+                      className={`w-3 h-3 rounded-full ${idx === currentIndex ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
                       aria-label={`Proje ${idx + 1}`}
                     />
                   ))}

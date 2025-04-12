@@ -1,168 +1,106 @@
 
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Search, Folder, Home, Info, MessageSquare, HelpCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { NavLink } from "react-router-dom";
+import { cn } from "@/lib/utils"; 
+import { Menu, X } from "lucide-react";
+import { useMobile } from "@/hooks/use-mobile";
+import ThemeToggle from "./ThemeToggle";
 
-interface Project {
-  id: string;
+type NavItem = {
   title: string;
-  slug: string;
-  category: string;
-}
+  href: string;
+  external?: boolean;
+};
+
+const navItems: NavItem[] = [
+  { title: "Anasayfa", href: "/" },
+  { title: "Hakkımızda", href: "/about" },
+  { title: "Projeler", href: "/projects" },
+  { title: "3D Görüntüleyici", href: "/3d-viewer" }, // Yeni menü eklendi 
+  { title: "İletişim", href: "/contact" },
+];
 
 export default function SiteNav() {
-  const [open, setOpen] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMobile();
 
   useEffect(() => {
-    // Dialog açıldığında projeleri yükle
-    if (open) {
-      const fetchProjects = async () => {
-        const { data } = await supabase
-          .from('projects')
-          .select('id, title, slug, category')
-          .eq('status', 'Yayında')
-          .order('title', { ascending: true });
-          
-        if (data) {
-          setProjects(data);
-        }
-      };
-      
-      fetchProjects();
+    if (!isMobile) {
+      setIsOpen(false);
     }
-  }, [open]);
-  
-  const mainPages = [
-    { icon: Home, name: "Ana Sayfa", href: "/" },
-    { icon: Info, name: "Hakkımızda", href: "/about" },
-    { icon: Folder, name: "Projeler", href: "/projects" },
-    { icon: HelpCircle, name: "SSS", href: "/faq" },
-    { icon: MessageSquare, name: "İletişim", href: "/contact" }
-  ];
-  
-  const adminPages = [
-    { icon: Home, name: "Admin Dashboard", href: "/admin/dashboard" },
-    { icon: Folder, name: "Projeler Yönetimi", href: "/admin/projects" },
-    { icon: MessageSquare, name: "Mesaj Yönetimi", href: "/admin/messages" },
-    { icon: Search, name: "Site Ayarları", href: "/admin/settings" },
-  ];
+  }, [isMobile]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button 
-          className="fixed bottom-4 right-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          title="Site navigasyonu"
-        >
-          <Search className="h-5 w-5" />
-        </button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Site Navigasyonu</DialogTitle>
-        </DialogHeader>
-        <Command>
-          <CommandInput placeholder="Sayfa veya proje ara..." />
-          <CommandList>
-            <CommandEmpty>Sonuç bulunamadı.</CommandEmpty>
-            
-            <CommandGroup heading="Ana Sayfalar">
-              {mainPages.map((page) => {
-                const Icon = page.icon;
-                const isActive = location.pathname === page.href;
-                
-                return (
-                  <CommandItem
-                    key={page.href}
-                    onSelect={() => {
-                      window.location.href = page.href;
-                      setOpen(false);
-                    }}
-                    className={isActive ? "bg-muted" : ""}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    <span>{page.name}</span>
-                    {isActive && (
-                      <span className="ml-auto text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                        Aktif
-                      </span>
-                    )}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-            
-            <CommandGroup heading="Yönetim">
-              {adminPages.map((page) => {
-                const Icon = page.icon;
-                const isActive = location.pathname === page.href;
-                
-                return (
-                  <CommandItem
-                    key={page.href}
-                    onSelect={() => {
-                      window.location.href = page.href;
-                      setOpen(false);
-                    }}
-                    className={isActive ? "bg-muted" : ""}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    <span>{page.name}</span>
-                    {isActive && (
-                      <span className="ml-auto text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                        Aktif
-                      </span>
-                    )}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-            
-            {projects.length > 0 && (
-              <CommandGroup heading="Projeler">
-                {projects.map((project) => {
-                  const isActive = location.pathname === `/projects/${project.slug}`;
-                  
-                  return (
-                    <CommandItem
-                      key={project.id}
-                      onSelect={() => {
-                        window.location.href = `/projects/${project.slug}`;
-                        setOpen(false);
-                      }}
-                      className={isActive ? "bg-muted" : ""}
-                    >
-                      <Folder className="mr-2 h-4 w-4" />
-                      <span>{project.title}</span>
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        {project.category}
-                      </span>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
-      </DialogContent>
-    </Dialog>
+    <>
+      <div className="block text-sm items-center max-w-[600px]">
+        <div className="hidden md:flex items-center space-x-6">
+          {navItems.map((item, i) => (
+            <NavLink
+              key={i}
+              to={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noreferrer" : undefined}
+              className={({ isActive }) =>
+                cn(
+                  "transition-colors hover:text-primary hover:underline hover:underline-offset-4",
+                  isActive
+                    ? "font-medium text-primary underline underline-offset-4"
+                    : "text-foreground/80"
+                )
+              }
+            >
+              {item.title}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+      <button
+        className="flex md:hidden"
+        onClick={() => setIsOpen(true)}
+        aria-label="Open menu"
+      >
+        <Menu className="h-6 w-6" />
+      </button>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-background border-l border-border flex flex-col overflow-y-auto">
+          <div className="flex items-center justify-between h-16 px-6 border-b shrink-0">
+            <NavLink to="/" onClick={() => setIsOpen(false)}>
+              <span className="font-bold">3D Dijital Lab</span>
+            </NavLink>
+            <button
+              className="flex"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close menu"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          <div className="flex flex-col px-4 py-8 space-y-4">
+            {navItems.map((item, i) => (
+              <NavLink
+                key={i}
+                to={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noreferrer" : undefined}
+                className={({ isActive }) =>
+                  cn(
+                    "px-2 py-2 text-lg transition-colors hover:text-primary",
+                    isActive
+                      ? "font-medium text-primary underline underline-offset-4"
+                      : "text-foreground/80"
+                  )
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                {item.title}
+              </NavLink>
+            ))}
+            <div className="px-2 py-4 border-t">
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

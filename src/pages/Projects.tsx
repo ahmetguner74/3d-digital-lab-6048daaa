@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -51,6 +51,8 @@ export default function Projects() {
         if (error) {
           throw error;
         }
+        
+        console.log("Çekilen projeler:", data);
         
         if (data && data.length > 0) {
           setProjects(data);
@@ -107,6 +109,25 @@ export default function Projects() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Three.js teknolojileriyle ilgili bölüm verileri
+  const technologies = [
+    {
+      name: "Three.js",
+      icon: "/tech/threejs.svg",
+      description: "3D modelleri web ortamında görüntülemek için kullanılan JavaScript kütüphanesi"
+    },
+    {
+      name: "Potree",
+      icon: "/tech/potree.png",
+      description: "Büyük nokta bulutu verilerini web tarayıcıda görselleştirmek için kullanılan WebGL tabanlı görüntüleyici"
+    },
+    {
+      name: "React",
+      icon: "/tech/react.svg",
+      description: "Kullanıcı arayüzü oluşturmak için kullanılan JavaScript kütüphanesi"
+    }
+  ];
+
   return (
     <Layout>
       <Helmet>
@@ -125,8 +146,9 @@ export default function Projects() {
         
         {/* Yükleniyor durumu */}
         {loading && (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+            <p className="text-muted-foreground">Projeler yükleniyor...</p>
           </div>
         )}
         
@@ -138,15 +160,16 @@ export default function Projects() {
           </div>
         )}
         
-        {/* Proje listesi */}
+        {/* Proje bulunamadı durumu */}
         {!loading && !error && projects.length === 0 && (
           <div className="text-center py-12">
             <p className="text-lg text-muted-foreground mb-4">Henüz yayınlanmış proje bulunmamaktadır.</p>
           </div>
         )}
         
+        {/* Proje listesi */}
         {!loading && projects.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {getCurrentPageProjects().map((project) => (
               <Link 
                 key={project.id} 
@@ -226,6 +249,29 @@ export default function Projects() {
             </Pagination>
           </div>
         )}
+        
+        {/* 3D Teknolojilerimiz Bölümü */}
+        <div className="mt-24 mb-16 reveal">
+          <h2 className="text-3xl font-bold mb-10 text-center">3D Görselleştirme Teknolojilerimiz</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {technologies.map((tech, index) => (
+              <div key={index} className="bg-white dark:bg-muted/10 p-6 rounded-lg border border-muted shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="flex flex-col items-center mb-4">
+                  <img src={tech.icon} alt={tech.name} className="h-16 mb-3" />
+                  <h3 className="text-xl font-semibold">{tech.name}</h3>
+                </div>
+                <p className="text-center text-muted-foreground">{tech.description}</p>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="mb-6 text-lg text-muted-foreground">
+              Özel 3D görselleştirme çözümleri ve nokta bulutu entegrasyonu için bize ulaşın.
+            </p>
+          </div>
+        </div>
         
         <div className="flex justify-center mt-12">
           <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
