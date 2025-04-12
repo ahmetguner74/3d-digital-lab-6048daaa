@@ -45,24 +45,27 @@ export function toSiteSettings(json: Json | null): SiteSettings {
     customScript: ""
   };
   
-  if (!json || typeof json !== 'object') {
+  if (!json || typeof json !== 'object' || Array.isArray(json)) {
     return defaultSettings;
   }
   
+  // JSON nesnesinin türünü kontrol et
+  const jsonObj = json as Record<string, unknown>;
+  
   // JSON nesnesini doğru şekilde SiteSettings'e dönüştür
   return {
-    title: typeof json.title === 'string' ? json.title : defaultSettings.title,
-    description: typeof json.description === 'string' ? json.description : defaultSettings.description,
-    keywords: typeof json.keywords === 'string' ? json.keywords : defaultSettings.keywords,
-    email: typeof json.email === 'string' ? json.email : defaultSettings.email,
-    phone: typeof json.phone === 'string' ? json.phone : defaultSettings.phone,
-    address: typeof json.address === 'string' ? json.address : defaultSettings.address,
-    facebook: typeof json.facebook === 'string' ? json.facebook : defaultSettings.facebook,
-    twitter: typeof json.twitter === 'string' ? json.twitter : defaultSettings.twitter,
-    instagram: typeof json.instagram === 'string' ? json.instagram : defaultSettings.instagram,
-    linkedin: typeof json.linkedin === 'string' ? json.linkedin : defaultSettings.linkedin,
-    googleAnalyticsId: typeof json.googleAnalyticsId === 'string' ? json.googleAnalyticsId : defaultSettings.googleAnalyticsId,
-    customScript: typeof json.customScript === 'string' ? json.customScript : defaultSettings.customScript
+    title: typeof jsonObj.title === 'string' ? jsonObj.title : defaultSettings.title,
+    description: typeof jsonObj.description === 'string' ? jsonObj.description : defaultSettings.description,
+    keywords: typeof jsonObj.keywords === 'string' ? jsonObj.keywords : defaultSettings.keywords,
+    email: typeof jsonObj.email === 'string' ? jsonObj.email : defaultSettings.email,
+    phone: typeof jsonObj.phone === 'string' ? jsonObj.phone : defaultSettings.phone,
+    address: typeof jsonObj.address === 'string' ? jsonObj.address : defaultSettings.address,
+    facebook: typeof jsonObj.facebook === 'string' ? jsonObj.facebook : defaultSettings.facebook,
+    twitter: typeof jsonObj.twitter === 'string' ? jsonObj.twitter : defaultSettings.twitter,
+    instagram: typeof jsonObj.instagram === 'string' ? jsonObj.instagram : defaultSettings.instagram,
+    linkedin: typeof jsonObj.linkedin === 'string' ? jsonObj.linkedin : defaultSettings.linkedin,
+    googleAnalyticsId: typeof jsonObj.googleAnalyticsId === 'string' ? jsonObj.googleAnalyticsId : defaultSettings.googleAnalyticsId,
+    customScript: typeof jsonObj.customScript === 'string' ? jsonObj.customScript : defaultSettings.customScript
   };
 }
 

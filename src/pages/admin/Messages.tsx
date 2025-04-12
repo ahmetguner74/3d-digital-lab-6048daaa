@@ -58,8 +58,8 @@ export default function AdminMessages() {
       try {
         // İlk önce toplam sayıyı al
         const { count, error: countError } = await supabase
-          .from('contact_messages')
-          .select('*', { count: 'exact', head: true }) as any;
+          .from('contact_messages' as any)
+          .select('*', { count: 'exact', head: true });
         
         if (!countError) {
           setTotalMessages(count || 0);
@@ -73,10 +73,10 @@ export default function AdminMessages() {
         const to = from + messagesPerPage - 1;
         
         const { data, error } = await supabase
-          .from('contact_messages')
+          .from('contact_messages' as any)
           .select('*')
           .order('created_at', { ascending: false })
-          .range(from, to) as any;
+          .range(from, to);
         
         if (!error) {
           setMessages(data || []);
@@ -125,8 +125,8 @@ export default function AdminMessages() {
     if (!message.read) {
       try {
         await supabase
-          .from('contact_messages')
-          .update({ read: true } as any)
+          .from('contact_messages' as any)
+          .update({ read: true })
           .eq('id', message.id);
         
         // Mesajı güncelle
@@ -148,8 +148,8 @@ export default function AdminMessages() {
       setProcessingAction(`read-${messageId}`);
       
       const { error } = await supabase
-        .from('contact_messages')
-        .update({ read: !currentReadStatus } as any)
+        .from('contact_messages' as any)
+        .update({ read: !currentReadStatus })
         .eq('id', messageId);
       
       if (error) throw error;
@@ -184,9 +184,9 @@ export default function AdminMessages() {
       setProcessingAction(`delete-${messageId}`);
       
       const { error } = await supabase
-        .from('contact_messages')
+        .from('contact_messages' as any)
         .delete()
-        .eq('id', messageId) as any;
+        .eq('id', messageId);
       
       if (error) throw error;
       

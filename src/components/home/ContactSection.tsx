@@ -29,16 +29,17 @@ export default function ContactSection() {
     setIsSubmitting(true);
     
     try {
-      // Mesajı Supabase'e kaydet
+      // Mesajı Supabase'e kaydet - any tipini kullanarak TypeScript hatasını geçiyoruz
+      // Daha iyi bir çözüm olabilir ama şimdilik bu işimizi görecek
       const { error } = await supabase
-        .from('contact_messages')
+        .from('contact_messages' as any)
         .insert({
           name: formData.name,
           email: formData.email,
           subject: formData.subject,
           message: formData.message,
           read: false
-        } as any); // `any` tip belirteci ile TS hatasını önleme
+        });
       
       if (error) {
         throw new Error(error.message || 'Bir hata oluştu');

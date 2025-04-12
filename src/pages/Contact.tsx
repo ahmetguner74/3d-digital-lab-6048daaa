@@ -1,3 +1,4 @@
+
 import Layout from "@/components/layout/Layout";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
@@ -31,14 +32,14 @@ export default function Contact() {
     
     try {
       const { error } = await supabase
-        .from('contact_messages')
+        .from('contact_messages' as any)
         .insert({
           name: formData.name,
           email: formData.email,
           subject: formData.subject,
           message: formData.message,
           read: false
-        } as any);
+        });
       
       if (error) {
         throw new Error(error.message || 'Bir hata oluştu');

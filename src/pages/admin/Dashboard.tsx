@@ -31,9 +31,9 @@ export default function AdminDashboard() {
         let messageCount = 0;
         try {
           const { count, error } = await supabase
-            .from('contact_messages')
+            .from('contact_messages' as any)
             .select('*', { count: 'exact', head: true })
-            .eq('read', false) as any;
+            .eq('read', false);
           
           if (!error) {
             messageCount = count || 0;
@@ -226,10 +226,10 @@ function RecentMessages() {
       try {
         try {
           const { data, error } = await supabase
-            .from('contact_messages')
+            .from('contact_messages' as any)
             .select('id, name, subject, message, created_at')
             .order('created_at', { ascending: false })
-            .limit(3) as any;
+            .limit(3);
             
           if (!error) {
             setMessages(data || []);
