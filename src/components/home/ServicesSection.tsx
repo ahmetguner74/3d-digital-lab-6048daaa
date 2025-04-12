@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Building2, Scan3d, Camera, Box, History, Archive } from "lucide-react";
+import { Building2, Scan, Camera, Box, History, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ const services: Service[] = [
     id: "3d-laser-scanning",
     title: "3D Lazer Tarama",
     description: "Milimetrik hassasiyetle binaların ve mimari yapıların 3D taraması yapıyoruz.",
-    icon: <Scan3d className="h-10 w-10" />,
+    icon: <Scan className="h-10 w-10" />,
     bgClass: "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400"
   },
   {

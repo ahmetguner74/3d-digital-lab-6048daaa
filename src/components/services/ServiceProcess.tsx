@@ -1,5 +1,5 @@
 
-import { PhoneCall, FileSearch, Scan, Box, RefreshCw, PresentationChart, ThumbsUp } from "lucide-react";
+import { PhoneCall, FileSearch, Scan, Box, RefreshCw, Presentation, ThumbsUp } from "lucide-react";
 
 interface Step {
   id: string;
@@ -43,7 +43,7 @@ const steps: Step[] = [
     id: "presentation",
     title: "Sunum ve Teslim",
     description: "İşlenmiş verileri istenilen formatta sunuyor ve detaylı dokümantasyon sağlıyoruz.",
-    icon: <PresentationChart className="h-6 w-6" />
+    icon: <Presentation className="h-6 w-6" />
   },
   {
     id: "support",

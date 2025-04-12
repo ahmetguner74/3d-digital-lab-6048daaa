@@ -1,5 +1,5 @@
 
-import { Building2, Scan3d, Camera, Box, History, Archive, FileDigit, Building, Boxes, PanelTopOpen } from "lucide-react";
+import { Building2, Scan, Camera, Box, History, Archive, FileDigit, Building, Boxes, PanelTopOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +16,7 @@ const serviceItems: ServiceProps[] = [
   {
     title: "3D Lazer Tarama",
     description: "Yapıların iç ve dış mekanlarının milimetrik hassasiyette 3 boyutlu taranması, nokta bulutu oluşturulması ve CAD modellerine dönüştürülmesi.",
-    icon: <Scan3d className="h-10 w-10" />,
+    icon: <Scan className="h-10 w-10" />,
     features: [
       "Milimetrik hassasiyetle ölçüm",
       "Yüksek çözünürlüklü nokta bulutu",
