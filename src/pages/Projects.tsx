@@ -60,7 +60,9 @@ export default function Projects() {
             setTotalPages(Math.ceil(count / projectsPerPage));
           }
         } else {
-          console.log("Yayınlanmış proje bulunamadı, örnek projeler gösteriliyor");
+          // Proje yoksa boş dizi olarak ayarla
+          setProjects([]);
+          setError('Henüz yayınlanmış proje bulunmamaktadır.');
         }
       } catch (err: any) {
         console.error('Projeler yüklenirken hata oluştu:', err);
@@ -129,9 +131,9 @@ export default function Projects() {
         )}
         
         {/* Hata durumu */}
-        {error && (
+        {error && !loading && projects.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-red-500 mb-4">{error}</p>
+            <p className="text-lg text-muted-foreground mb-4">{error}</p>
             <Button onClick={() => window.location.reload()}>Yeniden Dene</Button>
           </div>
         )}
@@ -143,7 +145,7 @@ export default function Projects() {
           </div>
         )}
         
-        {!loading && !error && (
+        {!loading && projects.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {getCurrentPageProjects().map((project) => (
               <Link 

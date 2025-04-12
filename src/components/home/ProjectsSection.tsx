@@ -4,7 +4,6 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface FeaturedProject {
   id: string;
@@ -21,7 +20,6 @@ export default function ProjectsSection() {
   const [featuredProjects, setFeaturedProjects] = useState<FeaturedProject[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchFeaturedProjects = async () => {
@@ -29,10 +27,7 @@ export default function ProjectsSection() {
         setLoading(true);
 
         // Admin panelinden "featured" olarak işaretlenmiş ve yayında olan projeleri çek
-        const {
-          data,
-          error
-        } = await supabase.from('projects')
+        const { data, error } = await supabase.from('projects')
           .select('id, title, description, slug, cover_image, category, haspointcloud, pointcloudpath')
           .eq('featured', true)
           .eq('status', 'Yayında')
