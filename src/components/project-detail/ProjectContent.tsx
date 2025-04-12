@@ -1,5 +1,8 @@
 
 import { Project } from "@/components/projects/types";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Eye } from "lucide-react";
 
 interface ProjectImage {
   id: string;
@@ -34,6 +37,21 @@ export default function ProjectContent({ project, projectImages }: ProjectConten
                 geniş imkanlar sunmaktadır.
               </p>
             </div>
+            
+            {/* Nokta bulutu görüntüleyici linki */}
+            {project.haspointcloud && project.pointcloudpath && (
+              <div className="pt-4">
+                <Button asChild variant="outline" className="flex items-center">
+                  <Link 
+                    to={`/3d-viewer?path=${encodeURIComponent(project.pointcloudpath)}&title=${encodeURIComponent(project.title)}`}
+                    className="flex items-center"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    3D Nokta Bulutu Görüntüle
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
           
           <div className="relative w-full reveal">

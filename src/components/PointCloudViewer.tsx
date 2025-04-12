@@ -1,5 +1,6 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface PointCloudViewerProps {
   pointCloudPath: string;
@@ -8,12 +9,15 @@ interface PointCloudViewerProps {
 export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerInitialized = useRef<boolean>(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if container exists
     if (!containerRef.current) return;
     
     console.log("PointCloudViewer yükleniyor, path:", pointCloudPath);
+    setLoading(true);
     
     // Load Potree scripts dynamically
     const loadPotreeScripts = async () => {
@@ -48,9 +52,13 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
         }
         
         // Initialize Potree viewer once scripts are loaded
-        initPotreeViewer();
+        setTimeout(() => {
+          initPotreeViewer();
+        }, 500); // İlk scriptler yüklendikten sonra kısa bir bekleme ekledim
       } catch (error) {
         console.error('Potree yüklenirken hata:', error);
+        setError('Potree scriptleri yüklenirken bir hata oluştu.');
+        setLoading(false);
       }
     };
     
@@ -68,7 +76,12 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
 
     // Initialize Potree viewer
     const initPotreeViewer = () => {
-      if (!containerRef.current || viewerInitialized.current || typeof (window as any).Potree === 'undefined') return;
+      if (!containerRef.current || viewerInitialized.current || typeof (window as any).Potree === 'undefined') {
+        if (!containerRef.current) console.error("Container bulunamadı");
+        if (viewerInitialized.current) console.warn("Viewer zaten başlatılmış");
+        if (typeof (window as any).Potree === 'undefined') console.error("Potree objesi bulunamadı");
+        return;
+      }
 
       try {
         console.log("Potree görüntüleyici başlatılıyor");
@@ -111,14 +124,17 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
           
           // Fit view to point cloud
           viewer.fitToScreen();
+          
+          // Mark as initialized and loading complete
+          viewerInitialized.current = true;
+          setLoading(false);
+          console.log("Potree görüntüleyici başlatıldı");
         });
 
-        // Mark as initialized
-        viewerInitialized.current = true;
-        console.log("Potree görüntüleyici başlatıldı");
-        
       } catch (error) {
         console.error('Potree görüntüleyici başlatılırken hata:', error);
+        setError('Potree görüntüleyici başlatılamadı. Lütfen daha sonra tekrar deneyin.');
+        setLoading(false);
       }
     };
 
@@ -133,23 +149,50 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
   }, [pointCloudPath]);
 
   return (
-    <div className="potree-container w-full" style={{ height: "500px" }}>
+    <div className="potree-container w-full relative" style={{ height: "500px" }}>
       <div ref={containerRef} className="w-full h-full"></div>
-      <div className="absolute bottom-2 left-2 text-xs text-white bg-black/50 p-1 rounded">
-        Potree v1.8 | Nokta bulutu: {pointCloudPath.split('/').pop()}
-      </div>
       
-      {/* LAS formatı bilgisi */}
-      <div className="absolute top-2 right-2 text-xs text-white bg-black/50 p-1 rounded">
-        <a 
-          href="https://potree.org/potree/converter.html" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-blue-300 hover:underline"
-        >
-          LAS dosyanızı Potree formatına dönüştürmek için tıklayın
-        </a>
-      </div>
+      {/* Yükleniyor durumu */}
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+            <p className="text-sm">Nokta bulutu yükleniyor...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Hata durumu */}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/90 z-10">
+          <div className="text-center max-w-sm p-4">
+            <p className="text-red-500 mb-2">{error}</p>
+            <p className="text-xs text-muted-foreground">
+              Tarayıcınız WebGL'i desteklemiyor olabilir veya nokta bulutu dosyası erişilemiyor olabilir.
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {!loading && !error && (
+        <>
+          <div className="absolute bottom-2 left-2 text-xs text-white bg-black/50 p-1 rounded">
+            Potree v1.8 | Nokta bulutu: {pointCloudPath.split('/').pop()}
+          </div>
+          
+          {/* LAS formatı bilgisi */}
+          <div className="absolute top-2 right-2 text-xs text-white bg-black/50 p-1 rounded">
+            <a 
+              href="https://potree.org/potree/converter.html" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-300 hover:underline"
+            >
+              LAS dosyanızı Potree formatına dönüştürmek için tıklayın
+            </a>
+          </div>
+        </>
+      )}
     </div>
   );
 }
