@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +27,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Link } from "react-router-dom";
+import { ContactMessage } from "@/types/supabase-extensions";
 
 interface Message {
   id: string;
@@ -55,33 +55,43 @@ export default function AdminMessages() {
     try {
       setLoading(true);
       
-      // İlk önce toplam sayıyı al
-      const { count } = await supabase
-        .from('contact_messages')
-        .select('*', { count: 'exact', head: true });
-      
-      setTotalMessages(count || 0);
-      
-      // Sonra mesajları al
-      const from = (currentPage - 1) * messagesPerPage;
-      const to = from + messagesPerPage - 1;
-      
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .range(from, to);
-      
-      if (error) throw error;
-      
-      setMessages(data || []);
-    } catch (error) {
-      console.error("Mesajlar yüklenirken hata:", error);
-      toast({
-        title: "Hata",
-        description: "Mesajlar yüklenirken bir hata oluştu.",
-        variant: "destructive"
-      });
+      try {
+        // İlk önce toplam sayıyı al
+        const { count, error: countError } = await supabase
+          .from('contact_messages')
+          .select('*', { count: 'exact', head: true }) as any;
+        
+        if (!countError) {
+          setTotalMessages(count || 0);
+        } else {
+          console.error("Mesaj sayısı alınırken hata:", countError);
+          setTotalMessages(0);
+        }
+        
+        // Sonra mesajları al
+        const from = (currentPage - 1) * messagesPerPage;
+        const to = from + messagesPerPage - 1;
+        
+        const { data, error } = await supabase
+          .from('contact_messages')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(from, to) as any;
+        
+        if (!error) {
+          setMessages(data || []);
+        } else {
+          throw error;
+        }
+      } catch (error) {
+        console.error("Mesajlar yüklenirken hata:", error);
+        toast({
+          title: "Hata",
+          description: "Mesajlar yüklenirken bir hata oluştu.",
+          variant: "destructive"
+        });
+        setMessages([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -90,14 +100,18 @@ export default function AdminMessages() {
   useEffect(() => {
     fetchMessages();
     
-    const channel = supabase
-      .channel('messages-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_messages' }, fetchMessages)
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    try {
+      const channel = supabase
+        .channel('messages-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_messages' }, fetchMessages)
+        .subscribe();
+      
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      console.error("Realtime mesaj değişiklikleri dinlenirken hata:", error);
+    }
   }, [currentPage]);
   
   const handlePageChange = (page: number) => {
@@ -112,7 +126,7 @@ export default function AdminMessages() {
       try {
         await supabase
           .from('contact_messages')
-          .update({ read: true })
+          .update({ read: true } as any)
           .eq('id', message.id);
         
         // Mesajı güncelle
@@ -135,7 +149,7 @@ export default function AdminMessages() {
       
       const { error } = await supabase
         .from('contact_messages')
-        .update({ read: !currentReadStatus })
+        .update({ read: !currentReadStatus } as any)
         .eq('id', messageId);
       
       if (error) throw error;
@@ -172,7 +186,7 @@ export default function AdminMessages() {
       const { error } = await supabase
         .from('contact_messages')
         .delete()
-        .eq('id', messageId);
+        .eq('id', messageId) as any;
       
       if (error) throw error;
       
@@ -454,7 +468,6 @@ export default function AdminMessages() {
   );
 }
 
-// Mail ikonu için komponent
 function Mail(props: any) {
   return (
     <svg 

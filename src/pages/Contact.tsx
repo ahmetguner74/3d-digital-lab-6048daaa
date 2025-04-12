@@ -1,4 +1,3 @@
-
 import Layout from "@/components/layout/Layout";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Github, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -25,24 +25,46 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          read: false
+        } as any);
+      
+      if (error) {
+        throw new Error(error.message || 'Bir hata oluştu');
+      }
+      
       toast({
         title: "Mesajınız gönderildi",
         description: "En kısa sürede size dönüş yapacağız.",
       });
+      
       setFormData({
         name: "",
         email: "",
         subject: "",
         message: "",
       });
-    }, 1500);
+    } catch (error: any) {
+      console.error('Form gönderim hatası:', error);
+      toast({
+        title: "Hata",
+        description: error.message || "Mesajınız gönderilemedi. Lütfen daha sonra tekrar deneyin.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

@@ -38,7 +38,7 @@ export default function ContactSection() {
           subject: formData.subject,
           message: formData.message,
           read: false
-        });
+        } as any); // `any` tip belirteci ile TS hatasını önleme
       
       if (error) {
         throw new Error(error.message || 'Bir hata oluştu');

@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Image, MessageSquare, Users, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ContactMessage } from "@/types/supabase-extensions";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -27,13 +27,22 @@ export default function AdminDashboard() {
         if (projectError) throw projectError;
 
         // Okunmamış mesaj sayısını al
-        const { count: messageCount, error: messageError } = await supabase
-          .from('contact_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('read', false);
+        // contact_messages tablosunun varlığını kontrol et
+        let messageCount = 0;
+        try {
+          const { count, error } = await supabase
+            .from('contact_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('read', false) as any;
           
-        if (messageError) throw messageError;
-
+          if (!error) {
+            messageCount = count || 0;
+          }
+        } catch (error) {
+          console.error("Mesaj sayısı alınırken hata:", error);
+          // Hata durumunda mesaj sayısını 0 olarak bırak
+        }
+        
         // İçerik sayısını al (projeler + görseller)
         const { count: imagesCount, error: imagesError } = await supabase
           .from('project_images')
@@ -47,7 +56,7 @@ export default function AdminDashboard() {
 
         setStats({
           projectCount: projectCount || 0,
-          messageCount: messageCount || 0,
+          messageCount: messageCount,
           visitorCount: visitorCount,
           contentCount: (projectCount || 0) + (imagesCount || 0)
         });
@@ -209,23 +218,29 @@ function RecentProjects() {
 }
 
 function RecentMessages() {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Partial<ContactMessage>[]>([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const fetchRecentMessages = async () => {
       try {
-        const { data, error } = await supabase
-          .from('contact_messages')
-          .select('id, name, subject, message, created_at')
-          .order('created_at', { ascending: false })
-          .limit(3);
-          
-        if (error) throw error;
-        
-        setMessages(data || []);
-      } catch (error) {
-        console.error("Son mesajlar yüklenirken hata:", error);
+        try {
+          const { data, error } = await supabase
+            .from('contact_messages')
+            .select('id, name, subject, message, created_at')
+            .order('created_at', { ascending: false })
+            .limit(3) as any;
+            
+          if (!error) {
+            setMessages(data || []);
+          } else {
+            console.error("Son mesajlar yüklenirken hata:", error);
+            setMessages([]); // Hata durumunda boş dizi
+          }
+        } catch (error) {
+          console.error("Son mesajlar yüklenirken hata:", error);
+          setMessages([]); // Hata durumunda boş dizi
+        }
       } finally {
         setLoading(false);
       }
@@ -273,7 +288,7 @@ function RecentMessages() {
               <div key={message.id}>
                 <div className="flex items-center justify-between">
                   <p className="font-medium">{message.name}</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(message.created_at)}</p>
+                  <p className="text-xs text-muted-foreground">{message.created_at ? formatDate(message.created_at) : "-"}</p>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-1">
                   {message.message}
