@@ -115,4 +115,17 @@
   .skill-tag {
     @apply px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary dark:bg-primary/20;
   }
+
+  /* Proje kartları için yeni stiller */
+  .project-card {
+    @apply bg-white dark:bg-muted/10 border border-muted rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .project-title {
+    @apply text-xl font-semibold text-foreground group-hover:text-primary transition-colors;
+  }
+
+  .featured-badge {
+    @apply bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium;
+  }
 }

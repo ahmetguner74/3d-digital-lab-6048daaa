@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+
 interface Project {
   id: string;
   title: string;
@@ -12,6 +14,7 @@ interface Project {
   cover_image: string;
   category: string;
 }
+
 export default function AllProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +22,7 @@ export default function AllProjectsSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const projectsPerPage = 6;
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -114,7 +118,8 @@ export default function AllProjectsSection() {
     slug: "kulturel-miras",
     category: "Koruma"
   }];
-  return <section className="min-h-screen bg-background">
+
+  return <section className="min-h-screen bg-muted/30 dark:bg-background">
       <div className="section-container py-20">
         <div className="text-center mb-16 reveal">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">Projelerimiz</h2>
@@ -142,7 +147,7 @@ export default function AllProjectsSection() {
                 <p className="text-lg text-muted-foreground">
                   {project.description || 'Projemizin detayları için tıklayınız.'}
                 </p>
-                <Button asChild variant="default" className="mt-4">
+                <Button asChild variant="default" className="mt-4 bg-blue-600 hover:bg-blue-700">
                   <Link to={`/projects/${project.slug}`} className="flex items-center">
                     Projeyi Görüntüle
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -150,8 +155,8 @@ export default function AllProjectsSection() {
                 </Button>
               </div>
               
-              <Link to={`/projects/${project.slug}`} className="block relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-muted">
-                <img src={project.cover_image || "/placeholder.svg"} alt={project.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+              <Link to={`/projects/${project.slug}`} className="block relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-muted shadow-sm">
+                <img src={project.cover_image || "/placeholder.svg"} alt={project.title} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
                 {!project.cover_image && <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                     <p className="text-sm text-muted-foreground">Fotoğraf buraya eklenecek</p>
                   </div>}
@@ -167,9 +172,7 @@ export default function AllProjectsSection() {
                   <PaginationPrevious onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
                 </PaginationItem>
                 
-                {Array.from({
-              length: totalPages
-            }).map((_, index) => <PaginationItem key={index}>
+                {Array.from({length: totalPages}).map((_, index) => <PaginationItem key={index}>
                     <PaginationLink isActive={currentPage === index + 1} onClick={() => handlePageChange(index + 1)} className={`cursor-pointer ${currentPage === index + 1 ? 'bg-primary text-primary-foreground' : 'bg-muted/50'}`}>
                       {index + 1}
                     </PaginationLink>
@@ -183,7 +186,7 @@ export default function AllProjectsSection() {
           </div>}
         
         <div className="flex justify-center mt-12">
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
             <Link to="/projects" className="flex items-center">
               Tüm Projeleri Görüntüle
               <ArrowRight className="ml-2 h-4 w-4" />

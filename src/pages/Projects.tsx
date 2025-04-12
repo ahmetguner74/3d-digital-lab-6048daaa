@@ -163,24 +163,24 @@ export default function Projects() {
               <Link 
                 key={project.id} 
                 to={`/projects/${project.slug}`}
-                className="group rounded-lg overflow-hidden bg-muted/50 dark:bg-muted/20 reveal"
+                className="group overflow-hidden bg-white dark:bg-muted/10 rounded-lg border border-muted shadow-sm hover:shadow-md transition-all duration-300 reveal"
               >
-                <div className="aspect-video overflow-hidden">
+                <div className="aspect-video relative overflow-hidden">
                   <img 
                     src={project.cover_image || "/placeholder.svg"} 
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   {project.featured && (
-                    <div className="absolute top-2 right-2">
-                      <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+                    <div className="absolute top-3 right-3">
+                      <span className="bg-primary/90 text-primary-foreground text-xs font-medium px-2 py-1 rounded-full">
                         Öne Çıkan
                       </span>
                     </div>
                   )}
                 </div>
-                <div className="p-4">
-                  <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
+                <div className="p-5">
+                  <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
                     {project.title}
                   </h3>
                   {project.description && (
@@ -188,7 +188,12 @@ export default function Projects() {
                       {project.description}
                     </p>
                   )}
-                  <p className="text-sm text-primary mt-2">{project.category}</p>
+                  <div className="flex justify-between items-center mt-3">
+                    <span className="text-sm font-medium text-primary/80">{project.category}</span>
+                    <div className="text-sm text-primary flex items-center">
+                      Detaylar <ArrowRight className="ml-1 h-3 w-3" />
+                    </div>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -212,7 +217,7 @@ export default function Projects() {
                     <PaginationLink
                       isActive={currentPage === index + 1}
                       onClick={() => handlePageChange(index + 1)}
-                      className={`cursor-pointer ${currentPage === index + 1 ? 'bg-primary text-primary-foreground' : 'bg-muted/50'}`}
+                      className={`cursor-pointer ${currentPage === index + 1 ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'}`}
                     >
                       {index + 1}
                     </PaginationLink>
@@ -231,7 +236,7 @@ export default function Projects() {
         )}
         
         <div className="flex justify-center mt-12">
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
             <a href="mailto:info@3ddigitallab.com" className="flex items-center">
               Projeniz İçin Teklif Alın
               <ArrowRight className="ml-2 h-4 w-4" />
