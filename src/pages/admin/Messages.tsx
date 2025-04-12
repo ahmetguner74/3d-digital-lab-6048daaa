@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,7 +78,9 @@ export default function AdminMessages() {
           .range(from, to);
         
         if (!error) {
-          setMessages(data as Message[] || []);
+          // Daha güvenli tip dönüşümü - önce unknown olarak değerlendirip sonra Message[] olarak dönüştürelim
+          const safeData = (data as unknown) as Message[];
+          setMessages(safeData || []);
         } else {
           throw error;
         }
