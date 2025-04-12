@@ -64,9 +64,38 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
             setTotalPages(Math.ceil(count / projectsPerPage));
           }
         } else {
-          // Proje yoksa boş dizi olarak ayarla
-          setProjects([]);
-          setError('Henüz yayınlanmış proje bulunmamaktadır.');
+          // Gerçek veri yoksa demo projeleri göster
+          const demoProjects: Project[] = [
+            {
+              id: "1",
+              title: "Tarihi Kent Merkezi Dijitalleştirme",
+              slug: "tarihi-kent-merkezi",
+              description: "Tarihi kent merkezinin 3D lazer tarama teknolojileri ile belgelenmesi ve dijitalleştirilmesi",
+              category: "Mimari",
+              cover_image: "/placeholder.svg",
+              featured: true
+            },
+            {
+              id: "2",
+              title: "Arkeolojik Alan Belgeleme",
+              slug: "arkeolojik-alan",
+              description: "Kazı alanının yüksek çözünürlüklü 3D modellenmesi ve web ortamında sergilenmesi",
+              category: "Arkeoloji",
+              cover_image: "/placeholder.svg",
+              featured: false
+            },
+            {
+              id: "3",
+              title: "Müze Eserleri Dijital Arşivi",
+              slug: "muze-eserleri",
+              description: "Müzedeki eserlerin fotogrametri yöntemiyle 3D olarak arşivlenmesi",
+              category: "Müzecilik",
+              cover_image: "/placeholder.svg",
+              featured: false
+            }
+          ];
+          setProjects(demoProjects);
+          setTotalPages(Math.ceil(demoProjects.length / projectsPerPage));
         }
       } catch (err: any) {
         console.error('Projeler yüklenirken hata oluştu:', err);
@@ -76,6 +105,40 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
           description: "Projeler yüklenirken bir hata oluştu: " + (err.message || err),
           variant: "destructive"
         });
+        
+        // Hata durumunda demo projeleri göster
+        const demoProjects: Project[] = [
+          {
+            id: "1",
+            title: "Tarihi Kent Merkezi Dijitalleştirme",
+            slug: "tarihi-kent-merkezi",
+            description: "Tarihi kent merkezinin 3D lazer tarama teknolojileri ile belgelenmesi ve dijitalleştirilmesi",
+            category: "Mimari",
+            cover_image: "/placeholder.svg",
+            featured: true
+          },
+          {
+            id: "2",
+            title: "Arkeolojik Alan Belgeleme",
+            slug: "arkeolojik-alan",
+            description: "Kazı alanının yüksek çözünürlüklü 3D modellenmesi ve web ortamında sergilenmesi",
+            category: "Arkeoloji",
+            cover_image: "/placeholder.svg",
+            featured: false
+          },
+          {
+            id: "3",
+            title: "Müze Eserleri Dijital Arşivi",
+            slug: "muze-eserleri",
+            description: "Müzedeki eserlerin fotogrametri yöntemiyle 3D olarak arşivlenmesi",
+            category: "Müzecilik",
+            cover_image: "/placeholder.svg",
+            featured: false
+          }
+        ];
+        setProjects(demoProjects);
+        setTotalPages(Math.ceil(demoProjects.length / projectsPerPage));
+        
       } finally {
         setLoading(false);
       }

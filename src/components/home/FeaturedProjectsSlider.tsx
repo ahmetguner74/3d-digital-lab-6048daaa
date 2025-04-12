@@ -137,5 +137,5 @@ export default function FeaturedProjectsSlider({ className = "" }: FeaturedProje
     );
   };
 
-  return { loading, featuredProjects, currentIndex, renderDotIndicators };
+  return { loading, featuredProjects, currentIndex, setCurrentIndex, renderDotIndicators };
 }
