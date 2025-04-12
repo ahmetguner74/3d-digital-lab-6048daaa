@@ -3,7 +3,7 @@ import { useRef } from "react";
 import Layout from "@/components/layout/Layout";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Cube3D } from "lucide-react";
+import { ArrowRight, Cube } from "lucide-react";
 import { Link } from "react-router-dom";
 import ThreeScene from "@/components/three/ThreeScene";
 import ThreeViewerControls from "@/components/three/ThreeViewerControls";

@@ -7,7 +7,8 @@ import FeaturedProjectContent from "./FeaturedProjectContent";
 import FeaturedProjectImage from "./FeaturedProjectImage";
 
 export default function ProjectsSection() {
-  const { loading, featuredProjects, currentIndex, renderDotIndicators } = FeaturedProjectsSlider();
+  // FeaturedProjectsSlider hook'unu doğru şekilde çağıralım - boş bir className parametresi geçelim
+  const { loading, featuredProjects, currentIndex, renderDotIndicators } = FeaturedProjectsSlider({ className: "" });
 
   if (loading) {
     return (
