@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Cube } from "lucide-react";
+import { Box } from "lucide-react";
 
 export default function ThreeJsButton() {
   return (
@@ -12,7 +12,7 @@ export default function ThreeJsButton() {
                 transform hover:scale-105 duration-300"
       title="3D Görüntüleyici"
     >
-      <Cube className="h-5 w-5 transition-transform group-hover:rotate-12" />
+      <Box className="h-5 w-5 transition-transform group-hover:rotate-12" />
       <span>3D Görüntüle</span>
     </Link>
   );
