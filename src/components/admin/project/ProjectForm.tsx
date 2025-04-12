@@ -54,7 +54,7 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
   const [project, setProject] = useState<Project>(initialProject);
   const [loading, setLoading] = useState(false);
   const [previewImages, setPreviewImages] = useState<{[key: string]: string}>({});
-  const [deletedImageIds, setDeletedImageIds] = useState<(string|number)[]>([]);
+  const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
 
   const handleSave = async () => {
     setLoading(true);

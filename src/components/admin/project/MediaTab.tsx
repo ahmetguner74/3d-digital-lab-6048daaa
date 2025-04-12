@@ -16,7 +16,7 @@ interface MediaTabProps {
   setProject: (project: any) => void;
   previewImages: {[key: string]: string};
   setPreviewImages: (images: {[key: string]: string}) => void;
-  setDeletedImageIds: (ids: (string|number)[]) => void;
+  setDeletedImageIds: (ids: string[] | ((prev: string[]) => string[])) => void;
 }
 
 export default function MediaTab({ 
@@ -94,8 +94,8 @@ export default function MediaTab({
   
   const removeImage = (type: string, id?: number | string) => {
     if (type === "additional" && id) {
-      // Silinecek ID'yi kaydet
-      setDeletedImageIds(prev => [...prev, id]);
+      // Silinecek ID'yi kaydet - string olarak dönüştürüyoruz
+      setDeletedImageIds(prev => [...prev, String(id)]);
       
       // UI'dan kaldır
       setProject(prev => ({
