@@ -2,9 +2,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Eye } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Bileşenleri içe aktar
 import GeneralInfoTab from "./GeneralInfoTab";
@@ -13,6 +19,7 @@ import MediaTab from "./MediaTab";
 import PointCloudTab from "./PointCloudTab";
 import SettingsTab from "./SettingsTab";
 import { saveProject } from "./projectService";
+import PointCloudViewer from "@/components/PointCloudViewer";
 
 interface Project {
   id: string | null;
@@ -55,6 +62,7 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
   const [loading, setLoading] = useState(false);
   const [previewImages, setPreviewImages] = useState<{[key: string]: string}>({});
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
+  const [pointCloudPreviewOpen, setPointCloudPreviewOpen] = useState(false);
 
   const handleSave = async () => {
     setLoading(true);
@@ -99,6 +107,18 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
     window.open(`/projects/${project.slug}`, '_blank');
   };
 
+  const handlePointCloudPreview = () => {
+    if (project.haspointcloud && project.pointcloudpath) {
+      setPointCloudPreviewOpen(true);
+    } else {
+      toast({
+        title: "Bilgi",
+        description: "Nokta bulutu dosyası mevcut değil.",
+        variant: "default"
+      });
+    }
+  };
+
   return (
     <ProjectFormLayout
       project={project}
@@ -109,6 +129,9 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
       loading={loading}
       handleSave={handleSave}
       handlePreview={handlePreview}
+      handlePointCloudPreview={handlePointCloudPreview}
+      pointCloudPreviewOpen={pointCloudPreviewOpen}
+      setPointCloudPreviewOpen={setPointCloudPreviewOpen}
       navigate={navigate}
     />
   );
@@ -123,6 +146,9 @@ interface ProjectFormLayoutProps {
   loading: boolean;
   handleSave: () => Promise<void>;
   handlePreview: () => void;
+  handlePointCloudPreview: () => void;
+  pointCloudPreviewOpen: boolean;
+  setPointCloudPreviewOpen: React.Dispatch<React.SetStateAction<boolean>>;
   navigate: (path: string) => void;
 }
 
@@ -135,52 +161,75 @@ function ProjectFormLayout({
   loading,
   handleSave,
   handlePreview,
+  handlePointCloudPreview,
+  pointCloudPreviewOpen,
+  setPointCloudPreviewOpen,
   navigate
 }: ProjectFormLayoutProps) {
   return (
-    <Tabs defaultValue="general" className="w-full">
-      <TabsList className="mb-6">
-        <TabsTrigger value="general">Genel</TabsTrigger>
-        <TabsTrigger value="content">İçerik</TabsTrigger>
-        <TabsTrigger value="media">Medya</TabsTrigger>
-        <TabsTrigger value="pointcloud">Nokta Bulutu</TabsTrigger>
-        <TabsTrigger value="settings">Ayarlar</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="general">
-        <GeneralInfoTab project={project} setProject={setProject} />
-      </TabsContent>
-      
-      <TabsContent value="content">
-        <ContentTab project={project} setProject={setProject} />
-      </TabsContent>
-      
-      <TabsContent value="media">
-        <MediaTab 
-          project={project} 
-          setProject={setProject} 
-          previewImages={previewImages} 
-          setPreviewImages={setPreviewImages}
-          setDeletedImageIds={setDeletedImageIds}
+    <>
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="general">Genel</TabsTrigger>
+          <TabsTrigger value="content">İçerik</TabsTrigger>
+          <TabsTrigger value="media">Medya</TabsTrigger>
+          <TabsTrigger value="pointcloud">Nokta Bulutu</TabsTrigger>
+          <TabsTrigger value="settings">Ayarlar</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="general">
+          <GeneralInfoTab project={project} setProject={setProject} />
+        </TabsContent>
+        
+        <TabsContent value="content">
+          <ContentTab project={project} setProject={setProject} />
+        </TabsContent>
+        
+        <TabsContent value="media">
+          <MediaTab 
+            project={project} 
+            setProject={setProject} 
+            previewImages={previewImages} 
+            setPreviewImages={setPreviewImages}
+            setDeletedImageIds={setDeletedImageIds}
+          />
+        </TabsContent>
+        
+        <TabsContent value="pointcloud">
+          <PointCloudTab 
+            project={project} 
+            setProject={setProject}
+            onPreview={handlePointCloudPreview} 
+          />
+        </TabsContent>
+        
+        <TabsContent value="settings">
+          <SettingsTab project={project} setProject={setProject} />
+        </TabsContent>
+        
+        <FormActions
+          project={project}
+          loading={loading}
+          handleSave={handleSave}
+          handlePreview={handlePreview}
+          navigate={navigate}
         />
-      </TabsContent>
+      </Tabs>
       
-      <TabsContent value="pointcloud">
-        <PointCloudTab project={project} setProject={setProject} />
-      </TabsContent>
-      
-      <TabsContent value="settings">
-        <SettingsTab project={project} setProject={setProject} />
-      </TabsContent>
-      
-      <FormActions
-        project={project}
-        loading={loading}
-        handleSave={handleSave}
-        handlePreview={handlePreview}
-        navigate={navigate}
-      />
-    </Tabs>
+      {/* Nokta bulutu önizleme dialog'u */}
+      <Dialog open={pointCloudPreviewOpen} onOpenChange={setPointCloudPreviewOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nokta Bulutu Önizlemesi: {project.title}</DialogTitle>
+          </DialogHeader>
+          {project.pointcloudpath && (
+            <div className="h-[70vh] w-full">
+              <PointCloudViewer pointCloudPath={project.pointcloudpath} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -201,6 +250,7 @@ function FormActions({ project, loading, handleSave, handlePreview, navigate }: 
       
       <div className="flex items-center space-x-2">
         <Button variant="outline" onClick={handlePreview} disabled={!project.slug}>
+          <Eye className="mr-2 h-4 w-4" />
           Önizle
         </Button>
         <Button onClick={handleSave} disabled={loading}>

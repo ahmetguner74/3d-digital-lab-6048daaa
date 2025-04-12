@@ -139,29 +139,28 @@ export default function AllProjectsSection() {
             <p className="text-red-500 text-sm">{error}</p>
           </div>}
         
-        {/* Projeler listesi - Fotoğraftaki tasarımla uyumlu */}
-        <div className="space-y-20">
-          {displayProjects.map((project, index) => <div key={project.id} className={`grid grid-cols-1 md:grid-cols-2 gap-8 items-center ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
-              <div className="space-y-4">
-                <h3 className="text-3xl font-bold">{project.title}</h3>
-                <p className="text-lg text-muted-foreground">
-                  {project.description || 'Projemizin detayları için tıklayınız.'}
-                </p>
-                <Button asChild variant="default" className="mt-4 bg-blue-600 hover:bg-blue-700">
-                  <Link to={`/projects/${project.slug}`} className="flex items-center">
-                    Projeyi Görüntüle
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+        {/* Projeler grid görünümü - Sadece kapak fotoğrafı */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {displayProjects.map((project) => (
+            <Link 
+              key={project.id} 
+              to={`/projects/${project.slug}`}
+              className="group overflow-hidden rounded-lg border border-muted shadow-sm hover:shadow-md transition-all duration-300"
+            >
+              <div className="aspect-[4/3] relative overflow-hidden">
+                <img 
+                  src={project.cover_image || "/placeholder.svg"} 
+                  alt={project.title}
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+                
+                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
+                  <h3 className="text-xl font-semibold text-white">{project.title}</h3>
+                  <p className="text-sm text-white/80">{project.category}</p>
+                </div>
               </div>
-              
-              <Link to={`/projects/${project.slug}`} className="block relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-muted shadow-sm">
-                <img src={project.cover_image || "/placeholder.svg"} alt={project.title} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
-                {!project.cover_image && <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
-                    <p className="text-sm text-muted-foreground">Fotoğraf buraya eklenecek</p>
-                  </div>}
-              </Link>
-            </div>)}
+            </Link>
+          ))}
         </div>
         
         {/* Sayfalama */}
