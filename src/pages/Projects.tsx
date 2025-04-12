@@ -42,9 +42,9 @@ export default function Projects() {
         // Supabase'den yayında olan projeleri çek
         const { data, error, count } = await supabase
           .from('projects')
-          .select('*', { count: 'exact' })
+          .select('id, title, slug, description, category, cover_image, featured', { count: 'exact' })
           .eq('status', 'Yayında')
-          .order('created_at', { ascending: false });
+          .order('updated_at', { ascending: false });
           
         if (error) {
           throw error;
@@ -56,6 +56,41 @@ export default function Projects() {
         // Toplam sayfa sayısını hesapla
         if (count) {
           setTotalPages(Math.ceil(count / projectsPerPage));
+        }
+
+        // Veri yoksa test verilerini ekle
+        if (!data || data.length === 0) {
+          const testProjects = [
+            {
+              id: '1',
+              title: 'Test Projesi 1',
+              slug: 'test-projesi-1',
+              description: 'Bu bir test projesidir. Tarihi yapıların dijitalleştirilmesi.',
+              category: 'Tarihi Yapılar',
+              cover_image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131',
+              featured: true
+            },
+            {
+              id: '2',
+              title: 'Test Projesi 2',
+              slug: 'test-projesi-2',
+              description: 'Bu bir başka test projesidir. Modern binaların 3D taraması.',
+              category: 'Modern Yapılar',
+              cover_image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
+              featured: false
+            },
+            {
+              id: '3',
+              title: 'Test Projesi 3',
+              slug: 'test-projesi-3',
+              description: 'Üçüncü test projesi. Arkeolojik alanların belgelenmesi.',
+              category: 'Arkeolojik Eserler',
+              cover_image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
+              featured: false
+            }
+          ];
+          setProjects(testProjects);
+          setTotalPages(1);
         }
       } catch (err) {
         console.error('Projeler yüklenirken hata oluştu:', err);

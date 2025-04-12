@@ -31,7 +31,7 @@ interface Project {
     type: string;
   }[];
   additionalImages: {
-    id: number;
+    id: number | string;
     url: string;
     alt: string;
     type: string;

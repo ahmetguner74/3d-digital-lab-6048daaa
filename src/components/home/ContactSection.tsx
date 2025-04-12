@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Github, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ContactSection() {
   const { toast } = useToast();
@@ -23,24 +24,42 @@ export default function ContactSection() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Supabase edge function'a istek gönder
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: formData
+      });
+      
+      if (error) {
+        throw new Error(error.message || 'Bir hata oluştu');
+      }
+      
       toast({
         title: "Mesajınız gönderildi",
         description: "En kısa sürede size dönüş yapacağız.",
       });
+      
+      // Formu sıfırla
       setFormData({
         name: "",
         email: "",
         subject: "",
         message: "",
       });
-    }, 1500);
+    } catch (error: any) {
+      console.error('Form gönderim hatası:', error);
+      toast({
+        title: "Hata",
+        description: error.message || "Mesajınız gönderilemedi. Lütfen daha sonra tekrar deneyin.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,10 +79,10 @@ export default function ContactSection() {
                 <div>
                   <h3 className="font-medium">Email</h3>
                   <a
-                    href="mailto:email@example.com"
+                    href="mailto:ahmetguner74@gmail.com"
                     className="text-muted-foreground hover:text-primary transition-colors"
                   >
-                    email@example.com
+                    ahmetguner74@gmail.com
                   </a>
                 </div>
               </div>
