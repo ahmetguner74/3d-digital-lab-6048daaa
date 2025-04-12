@@ -1,7 +1,6 @@
 
 import { useState, useCallback, useEffect } from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { useEmblaCarousel } from "embla-carousel-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { cn } from "@/lib/utils";
 
 interface ProjectImage {
