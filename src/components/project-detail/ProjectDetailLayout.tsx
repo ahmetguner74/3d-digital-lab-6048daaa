@@ -59,7 +59,7 @@ export default function ProjectDetailLayout({
       </section>
       
       {project.haspointcloud && project.pointcloudpath && (
-        <ProjectPointCloud pointCloudPath={project.pointcloudpath} />
+        <ProjectPointCloud project={project} />
       )}
       
       <ProjectContent project={project} projectImages={projectImages} />

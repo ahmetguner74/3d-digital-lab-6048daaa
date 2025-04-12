@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Cube, ExternalLink } from "lucide-react";
+import { Box, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { Project } from "@/components/projects/types";
 
@@ -23,7 +23,7 @@ export default function ProjectPointCloud({ project }: ProjectPointCloudProps) {
       <div className="bg-muted/30 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold flex items-center">
-            <Cube className="mr-2 h-5 w-5 text-primary" />
+            <Box className="mr-2 h-5 w-5 text-primary" />
             3D Nokta Bulutu Görüntüleyici
           </h3>
           <div className="flex gap-2">
