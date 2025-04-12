@@ -7,18 +7,7 @@ import ProjectPointCloud from "./ProjectPointCloud";
 import ProjectContent from "./ProjectContent";
 import ProjectGallery from "./ProjectGallery";
 import RelatedProjects from "./RelatedProjects";
-
-interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  content: string;
-  category: string;
-  cover_image: string;
-  haspointcloud?: boolean;
-  pointcloudpath?: string;
-}
+import { Project } from "@/components/projects/types"; // Project tipi için doğrudan import kullanıyoruz
 
 interface ProjectImage {
   id: string;
