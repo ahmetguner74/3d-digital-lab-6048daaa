@@ -1,3 +1,4 @@
+
 import { useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -15,13 +16,15 @@ interface MediaTabProps {
   setProject: (project: any) => void;
   previewImages: {[key: string]: string};
   setPreviewImages: (images: {[key: string]: string}) => void;
+  setDeletedImageIds: (ids: (string|number)[]) => void;
 }
 
 export default function MediaTab({ 
   project, 
   setProject, 
   previewImages, 
-  setPreviewImages 
+  setPreviewImages,
+  setDeletedImageIds
 }: MediaTabProps) {
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const beforeImageInputRef = useRef<HTMLInputElement>(null);
@@ -35,10 +38,9 @@ export default function MediaTab({
       
       reader.onloadend = () => {
         const imageUrl = reader.result as string;
-        setPreviewImages({
-          ...previewImages,
-          [type]: imageUrl
-        });
+        // Doğrudan state değişkenini güncelle, callback kullanma
+        const newPreviewImages = { ...previewImages, [type]: imageUrl };
+        setPreviewImages(newPreviewImages);
         
         if (type === "main") {
           setProject(prev => ({
@@ -90,8 +92,12 @@ export default function MediaTab({
     }
   };
   
-  const removeImage = (type: string, id?: number) => {
+  const removeImage = (type: string, id?: number | string) => {
     if (type === "additional" && id) {
+      // Silinecek ID'yi kaydet
+      setDeletedImageIds(prev => [...prev, id]);
+      
+      // UI'dan kaldır
       setProject(prev => ({
         ...prev,
         additionalImages: prev.additionalImages.filter((img: any) => img.id !== id)
@@ -102,6 +108,7 @@ export default function MediaTab({
         cover_image: ""
       }));
       
+      // Önizleme görselini kaldır
       const updatedPreviews = { ...previewImages };
       delete updatedPreviews[type];
       setPreviewImages(updatedPreviews);
@@ -111,6 +118,7 @@ export default function MediaTab({
         images: prev.images.filter((img: any) => img.type !== type)
       }));
       
+      // Önizleme görselini kaldır
       const updatedPreviews = { ...previewImages };
       delete updatedPreviews[type];
       setPreviewImages(updatedPreviews);

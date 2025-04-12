@@ -54,6 +54,7 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
   const [project, setProject] = useState<Project>(initialProject);
   const [loading, setLoading] = useState(false);
   const [previewImages, setPreviewImages] = useState<{[key: string]: string}>({});
+  const [deletedImageIds, setDeletedImageIds] = useState<(string|number)[]>([]);
 
   const handleSave = async () => {
     setLoading(true);
@@ -115,6 +116,20 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
         throw new Error("Proje ID'si alınamadı");
       }
 
+      // Silinmiş görselleri veritabanından kaldır
+      if (deletedImageIds.length > 0) {
+        console.log("Silinecek görseller:", deletedImageIds);
+        const { error: deleteError } = await supabase
+          .from('project_images')
+          .delete()
+          .in('id', deletedImageIds);
+          
+        if (deleteError) {
+          console.error("Görseller silinirken hata:", deleteError);
+        }
+      }
+
+      // Önce-sonra görselleri için
       for (const imageType of ['before', 'after']) {
         const imageUrl = getImageUrl(imageType);
         if (imageUrl) {
@@ -142,6 +157,7 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
         }
       }
 
+      // Ek görseller için
       if (project.additionalImages && project.additionalImages.length > 0) {
         const { data: existingImages } = await supabase
           .from('project_images')
@@ -232,7 +248,8 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
             project={project} 
             setProject={setProject} 
             previewImages={previewImages} 
-            setPreviewImages={setPreviewImages} 
+            setPreviewImages={setPreviewImages}
+            setDeletedImageIds={setDeletedImageIds}
           />
         </TabsContent>
         
