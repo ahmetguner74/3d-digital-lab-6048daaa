@@ -1,7 +1,7 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { useCarouselContext } from "embla-carousel-react";
+import { useEmblaCarousel } from "embla-carousel-react";
 import { cn } from "@/lib/utils";
 
 interface ProjectImage {
@@ -36,74 +36,28 @@ const CarouselDots = ({ selectedIndex, slideCount }: { selectedIndex: number; sl
   );
 };
 
-// Carouselden geçerli slayt bilgisini alan bir bileşen
-const CarouselProgress = ({ className }: { className?: string }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [slideCount, setSlideCount] = useState(0);
-  
-  const onSelect = useCallback((emblaApi: any) => {
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-    setSlideCount(emblaApi.scrollSnapList().length);
-  }, []);
-  
-  return (
-    <CarouselContext onSelect={onSelect}>
-      <CarouselDots selectedIndex={selectedIndex} slideCount={slideCount} />
-    </CarouselContext>
-  );
-};
-
-// Carousel API'sine erişmek için yardımcı bileşen
-const CarouselContext = ({ 
-  children, 
-  onSelect 
-}: { 
-  children: React.ReactNode; 
-  onSelect: (emblaApi: any) => void;
-}) => {
-  const carouselContext = useCarouselContext();
-  const [emblaApi, setEmblaApi] = useState(carouselContext?.emblaApi);
-
-  const onSelectCallback = useCallback(() => {
-    if (!emblaApi) return;
-    onSelect(emblaApi);
-  }, [emblaApi, onSelect]);
-
-  // API değiştiğinde
-  useState(() => {
-    if (carouselContext?.emblaApi) {
-      setEmblaApi(carouselContext.emblaApi);
-    }
-  });
-
-  // API hazır olduğunda
-  useState(() => {
-    if (emblaApi) {
-      onSelect(emblaApi);
-      emblaApi.on('select', onSelectCallback);
-      return () => {
-        emblaApi.off('select', onSelectCallback);
-      };
-    }
-  });
-
-  return <>{children}</>;
-};
-
 export default function ProjectGallery({ projectImages, projectTitle }: ProjectGalleryProps) {
-  const [api, setApi] = useState<any>();
-  const [current, setCurrent] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel();
+  const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(projectImages.length);
   
-  const onCreated = useCallback((api: any) => {
-    setApi(api);
-  }, []);
-  
-  const handleSelect = useCallback(() => {
-    if (!api) return;
-    setCurrent(api.selectedScrollSnap() + 1);
-    setTotal(api.scrollSnapList().length);
-  }, [api]);
+  // emblaApi hazır olduğunda ve her slayt değiştiğinde
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCurrent(emblaApi.selectedScrollSnap() + 1);
+    setTotal(emblaApi.scrollSnapList().length);
+  }, [emblaApi]);
+
+  // emblaApi hazır olduğunda
+  useEffect(() => {
+    if (emblaApi) {
+      onSelect();
+      emblaApi.on('select', onSelect);
+      return () => {
+        emblaApi.off('select', onSelect);
+      };
+    }
+  }, [emblaApi, onSelect]);
   
   return (
     <section className="min-h-screen bg-background flex items-center">
@@ -111,10 +65,13 @@ export default function ProjectGallery({ projectImages, projectTitle }: ProjectG
         <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center reveal">Proje Galerisi</h2>
         
         <div className="relative w-full max-w-5xl mx-auto reveal">
-          <Carousel className="w-full" onCreated={onCreated} onSelect={handleSelect}>
-            <CarouselContent>
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex">
               {projectImages.map(image => (
-                <CarouselItem key={image.id}>
+                <div 
+                  key={image.id} 
+                  className="min-w-0 flex-[0_0_100%] pl-4"
+                >
                   <div className="p-1">
                     <div className="aspect-video overflow-hidden rounded-lg">
                       <img 
@@ -124,29 +81,38 @@ export default function ProjectGallery({ projectImages, projectTitle }: ProjectG
                       />
                     </div>
                   </div>
-                </CarouselItem>
+                </div>
               ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-1" />
-            <CarouselNext className="right-1" />
-          </Carousel>
-          
-          {/* Sayfa göstergeleri */}
-          <div className="flex justify-center gap-1.5 mt-4">
-            {projectImages.map((_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  current === index + 1 
-                    ? "w-4 bg-primary/70" 
-                    : "w-1.5 bg-muted-foreground/30"
-                )}
-              />
-            ))}
+            </div>
           </div>
           
-          {/* Alternatif olarak, şeffaf ve minimal sayfa numarası */}
+          {/* Gezinme düğmeleri */}
+          <button 
+            className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 border border-border flex items-center justify-center"
+            onClick={() => emblaApi?.scrollPrev()}
+            disabled={!emblaApi?.canScrollPrev()}
+          >
+            <span className="sr-only">Önceki görsel</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+          </button>
+          
+          <button 
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 border border-border flex items-center justify-center"
+            onClick={() => emblaApi?.scrollNext()}
+            disabled={!emblaApi?.canScrollNext()}
+          >
+            <span className="sr-only">Sonraki görsel</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+          
+          {/* Sayfa göstergeleri */}
+          <CarouselDots selectedIndex={current - 1} slideCount={total} />
+          
+          {/* Minimal sayfa numarası göstergesi */}
           <div className="absolute bottom-[-30px] right-0 text-xs text-muted-foreground/60 font-light">
             {current} / {total}
           </div>
