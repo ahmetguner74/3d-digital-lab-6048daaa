@@ -11,20 +11,50 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Project } from "./types";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectDeleteDialogProps {
+  project: Project;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onDelete: () => Promise<void>;
+  onRefresh: () => void;
 }
 
-export const ProjectDeleteDialog = ({ open, onOpenChange, onDelete }: ProjectDeleteDialogProps) => {
+export const ProjectDeleteDialog = ({ project, open, onOpenChange, onRefresh }: ProjectDeleteDialogProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    await onDelete();
-    setIsDeleting(false);
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', project.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Proje silindi",
+        description: `${project.title} projesi başarıyla silindi.`
+      });
+      
+      onRefresh();
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Proje silinirken hata:', error);
+      toast({
+        title: "Hata",
+        description: `Proje silinirken bir sorun oluştu: ${error.message || error}`,
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (

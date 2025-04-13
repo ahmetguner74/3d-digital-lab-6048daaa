@@ -9,6 +9,11 @@ export interface Project {
   slug: string;
 }
 
+export interface SortConfig {
+  key: string;
+  direction: string;
+}
+
 export interface ProjectTableProps {
   projects: Project[];
   filteredProjects: Project[];
