@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { FeaturedProject } from "./ProjectsSection";
+import { FeaturedProject } from "./types/FeaturedProject";
 
 interface FeaturedProjectImageProps {
   project: FeaturedProject;

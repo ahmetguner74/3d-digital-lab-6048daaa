@@ -1,5 +1,4 @@
 
-import { FeaturedProject } from "./FeaturedProjectsSlider";
 import FeaturedProjectContent from "./FeaturedProjectContent";
 import FeaturedProjectImage from "./FeaturedProjectImage";
 import DotIndicators from "./projects/DotIndicators";
@@ -7,6 +6,7 @@ import EmptyState from "./projects/EmptyState";
 import FeaturedProjectControls from "./projects/FeaturedProjectControls";
 import LoadingState from "./projects/LoadingState";
 import { useFeaturedProjects } from "./projects/useFeaturedProjects";
+import { FeaturedProject } from "./types/FeaturedProject";
 
 export default function ProjectsSection() {
   const {

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FeaturedProject } from "../types/FeaturedProject";
 
-export function useFeaturedProjects() {
+export function useFeaturedProjectsSlider() {
   const [featuredProjects, setFeaturedProjects] = useState<FeaturedProject[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,7 @@ export function useFeaturedProjects() {
           ];
           setFeaturedProjects(demoProjects);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Öne çıkan proje yüklenirken beklenmeyen hata:', err);
       } finally {
         setLoading(false);
@@ -78,6 +78,7 @@ export function useFeaturedProjects() {
         }, 
         payload => {
           console.log('Öne çıkan projelerde değişiklik algılandı:', payload);
+          // Öne çıkan projelerde değişiklik olduğunda yeniden yükle
           fetchFeaturedProjects();
         })
       .subscribe();
@@ -98,18 +99,8 @@ export function useFeaturedProjects() {
     }
   }, [featuredProjects]);
 
-  // Manuel olarak önceki projeye geçiş
-  const goToPrevious = () => {
-    if (featuredProjects.length <= 1) return;
-    const newIndex = currentIndex === 0 ? featuredProjects.length - 1 : currentIndex - 1;
-    setCurrentIndex(newIndex);
-  };
-
-  // Manuel olarak sonraki projeye geçiş
-  const goToNext = () => {
-    if (featuredProjects.length <= 1) return;
-    const newIndex = (currentIndex + 1) % featuredProjects.length;
-    setCurrentIndex(newIndex);
+  const getCurrentProject = () => {
+    return featuredProjects[currentIndex];
   };
 
   return {
@@ -117,7 +108,6 @@ export function useFeaturedProjects() {
     currentIndex,
     setCurrentIndex,
     loading,
-    goToPrevious,
-    goToNext
+    getCurrentProject
   };
 }
