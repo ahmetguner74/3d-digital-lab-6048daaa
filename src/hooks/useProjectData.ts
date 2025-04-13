@@ -1,16 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Project } from "@/components/projects/types";
+import { Project, ProjectImage } from "@/components/projects/types";
 import { useToast } from "@/hooks/use-toast";
-
-interface ProjectImage {
-  id: string;
-  project_id: string;
-  image_url: string;
-  alt_text: string;
-  sequence_order: number;
-}
 
 export function useProjectData(slug: string) {
   const { toast } = useToast();
@@ -21,6 +13,8 @@ export function useProjectData(slug: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchProjectDetails = async () => {
       if (!slug) return;
       try {
@@ -40,57 +34,97 @@ export function useProjectData(slug: string) {
           // Eğer gerçek veri yoksa, test verisi olarak göster
           if (projectError.code === "PGRST116") {
             console.log("Proje bulunamadı, test verisi yükleniyor");
-            loadTestData(slug);
+            if (isMounted) {
+              loadTestData(slug);
+            }
           } else {
             throw projectError;
           }
         } else {
           console.log("Proje verileri:", projectData);
-          setProject(projectData);
-          
-          const { data: imagesData, error: imagesError } = await supabase
-            .from('project_images')
-            .select('*')
-            .eq('project_id', projectData.id)
-            .order('sequence_order', { ascending: true });
-          
-          if (imagesError) {
-            console.error('Proje görselleri yüklenirken hata:', imagesError);
-            toast({
-              title: "Uyarı",
-              description: "Proje görselleri yüklenirken bir sorun oluştu.",
-              variant: "destructive"
-            });
-          } else {
-            console.log("Proje görselleri:", imagesData);
-            setProjectImages(imagesData || []);
-          }
-          
-          const { data: relatedData, error: relatedError } = await supabase
-            .from('projects')
-            .select('*')
-            .eq('status', 'Yayında')
-            .eq('category', projectData.category)
-            .neq('id', projectData.id)
-            .limit(3);
-          
-          if (relatedError) {
-            console.error('İlgili projeler yüklenirken hata:', relatedError);
-          } else {
-            console.log("İlgili projeler:", relatedData);
-            setRelatedProjects(relatedData || []);
+          if (isMounted) {
+            setProject(projectData);
+            
+            const { data: imagesData, error: imagesError } = await supabase
+              .from('project_images')
+              .select('*')
+              .eq('project_id', projectData.id)
+              .order('sequence_order', { ascending: true });
+            
+            if (imagesError) {
+              console.error('Proje görselleri yüklenirken hata:', imagesError);
+              toast({
+                title: "Uyarı",
+                description: "Proje görselleri yüklenirken bir sorun oluştu.",
+                variant: "destructive"
+              });
+            } else {
+              console.log("Proje görselleri:", imagesData);
+              setProjectImages(imagesData || []);
+            }
+            
+            const { data: relatedData, error: relatedError } = await supabase
+              .from('projects')
+              .select('*')
+              .eq('status', 'Yayında')
+              .eq('category', projectData.category)
+              .neq('id', projectData.id)
+              .limit(3);
+            
+            if (relatedError) {
+              console.error('İlgili projeler yüklenirken hata:', relatedError);
+            } else {
+              console.log("İlgili projeler:", relatedData);
+              if (isMounted) {
+                setRelatedProjects(relatedData || []);
+              }
+            }
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Proje detayları yüklenirken hata:', err);
-        setError('Proje detayları yüklenirken bir hata oluştu.');
+        if (isMounted) {
+          setError('Proje detayları yüklenirken bir hata oluştu.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     
     fetchProjectDetails();
+    
+    // Cleanup
+    return () => {
+      isMounted = false;
+    };
   }, [slug, toast]);
+
+  // Realtime değişiklikler için abone ol
+  useEffect(() => {
+    if (!project) return;
+    
+    const channel = supabase
+      .channel('project-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'projects',
+          filter: `id=eq.${project.id}` 
+        }, 
+        payload => {
+          console.log('Projede değişiklik algılandı:', payload);
+          // Değişiklik durumunda yeniden yükle
+          window.location.reload();
+        })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [project]);
 
   const loadTestData = (slug: string) => {
     // Test proje verisi
@@ -103,7 +137,8 @@ export function useProjectData(slug: string) {
       category: 'Test Kategori',
       cover_image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131',
       featured: false,
-      haspointcloud: false
+      haspointcloud: false,
+      status: 'Yayında'
     };
     
     setProject(testProject);
@@ -145,7 +180,8 @@ export function useProjectData(slug: string) {
         content: '',
         category: 'Test Kategori',
         cover_image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d',
-        featured: false
+        featured: false,
+        status: 'Yayında'
       },
       {
         id: '3',
@@ -155,7 +191,8 @@ export function useProjectData(slug: string) {
         content: '',
         category: 'Test Kategori',
         cover_image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
-        featured: false
+        featured: false,
+        status: 'Yayında'
       }
     ];
     

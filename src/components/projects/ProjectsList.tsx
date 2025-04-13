@@ -32,14 +32,16 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    // Sayfayı yenilemek için bir süre bekletin
-    setTimeout(() => {
+    try {
       window.location.reload();
-      setRefreshing(false);
-    }, 500);
-    toast({
-      description: "Projeler yenileniyor...",
-    });
+      toast({
+        description: "Projeler yenileniyor...",
+      });
+    } finally {
+      // Tarayıcı yeniden yükleneceği için bu kod çalışmayacak,
+      // ancak herhangi bir sorun olursa diye burada
+      setTimeout(() => setRefreshing(false), 1000);
+    }
   };
 
   if (loading) {
@@ -73,7 +75,12 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
         onResetFilters={resetFilters}
       />
 
-      <ProjectGrid projects={projects} className="my-8" />
+      <ProjectGrid 
+        projects={projects} 
+        className="my-8" 
+        isLoading={loading}
+        error={error}
+      />
       
       {totalPages > 1 && (
         <ProjectPagination 

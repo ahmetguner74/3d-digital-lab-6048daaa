@@ -2,43 +2,17 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ProjectForm from "@/components/admin/project/ProjectForm";
-
-interface Project {
-  id: string | null;
-  title: string;
-  slug: string;
-  description: string;
-  category: string;
-  status: string;
-  content: string;
-  featured: boolean;
-  tags: string[];
-  images: {
-    id: number;
-    url: string;
-    alt: string;
-    type: string;
-  }[];
-  additionalImages: {
-    id: number;
-    url: string;
-    alt: string;
-    type: string;
-  }[];
-  cover_image: string;
-  haspointcloud: boolean;
-  pointcloudpath?: string;
-  lastUpdated: string;
-}
+import { ProjectFormData } from "@/components/projects/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ProjectEdit() {
   const { id } = useParams();
   const isNew = id === "new";
   
-  const [project, setProject] = useState<Project>({
+  const [project, setProject] = useState<ProjectFormData>({
     id: null,
     title: "",
     slug: "",
@@ -56,6 +30,7 @@ export default function ProjectEdit() {
   });
   
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [previewImages, setPreviewImages] = useState<{[key: string]: string}>({});
   
   useEffect(() => {
@@ -110,7 +85,7 @@ export default function ProjectEdit() {
           })) : [],
           haspointcloud: data.haspointcloud || false,
           pointcloudpath: data.pointcloudpath || "",
-          lastUpdated: new Date(data.updated_at).toISOString().split('T')[0]
+          lastUpdated: new Date(data.updated_at || Date.now()).toISOString().split('T')[0]
         });
         
         if (data.cover_image) {
@@ -132,6 +107,7 @@ export default function ProjectEdit() {
       }
     } catch (error: any) {
       console.error("Proje yüklenirken hata:", error);
+      setError(error.message || "Proje yüklenirken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -143,6 +119,17 @@ export default function ProjectEdit() {
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
+      </AdminLayout>
+    );
+  }
+  
+  if (error) {
+    return (
+      <AdminLayout title={isNew ? "Yeni Proje" : "Proje Düzenle"}>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </AdminLayout>
     );
   }

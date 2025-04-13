@@ -45,9 +45,10 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
 
   // Projeler ve kategorileri yükle
   useEffect(() => {
+    let isMounted = true;
     const fetchProjects = async () => {
       try {
-        setLoading(true);
+        if (isMounted) setLoading(true);
         console.log("Projeler yükleniyor...", { currentPage, selectedCategory, featuredOnly, projectsPerPage });
         
         // Sorgu parametrelerini hazırla
@@ -66,8 +67,8 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
           query = query.eq('featured', true);
         }
         
-        // Sıralama ekle
-        query = query.order('created_at', { ascending: false });
+        // Sıralama ekle - önce öne çıkanlar, sonra en son eklenenler
+        query = query.order('featured', { ascending: false }).order('created_at', { ascending: false });
         
         // Sayfalama ekle
         const from = (currentPage - 1) * projectsPerPage;
@@ -79,13 +80,17 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
         
         if (error) {
           console.error("Projeler yüklenirken hata:", error);
-          throw error;
+          if (isMounted) setError(`Veri yüklenirken bir hata oluştu: ${error.message || error}`);
+          return;
         }
         
         console.log("Projeler yüklendi:", { data, count });
         
-        setProjects(data || []);
-        setTotalCount(count || 0);
+        if (isMounted) {
+          setProjects(data || []);
+          setTotalCount(count || 0);
+          setError(null);
+        }
         
         // Kategorileri getir (eğer daha önce yüklenmediyse)
         if (categories.length === 0) {
@@ -97,31 +102,32 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
             
           if (categoryError) {
             console.error("Kategoriler yüklenirken hata:", categoryError);
-            throw categoryError;
+          } else if (isMounted) {
+            // Benzersiz kategorileri al
+            const uniqueCategories = Array.from(
+              new Set((categoryData || []).map(item => item.category))
+            ).map(category => ({
+              value: category,
+              label: category
+            }));
+            
+            console.log("Benzersiz kategoriler:", uniqueCategories);
+            setCategories(uniqueCategories);
           }
-          
-          // Benzersiz kategorileri al
-          const uniqueCategories = Array.from(
-            new Set((categoryData || []).map(item => item.category))
-          ).map(category => ({
-            value: category,
-            label: category
-          }));
-          
-          console.log("Benzersiz kategoriler:", uniqueCategories);
-          setCategories(uniqueCategories);
         }
-      } catch (err) {
-        console.error('Projeler yüklenirken hata:', err);
-        setError('Projeler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+      } catch (err: any) {
+        console.error('Projeler yüklenirken beklenmeyen hata:', err);
+        if (isMounted) {
+          setError('Projeler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchProjects();
     
-    // Realtime değişiklikleri dinle
+    // Realtime güncellemeleri dinle
     const channel = supabase
       .channel('projects-list-changes')
       .on('postgres_changes', 
@@ -138,7 +144,9 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
         })
       .subscribe();
     
+    // Cleanup
     return () => {
+      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, [currentPage, selectedCategory, featuredOnly, projectsPerPage]);

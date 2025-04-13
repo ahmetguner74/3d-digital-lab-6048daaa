@@ -1,36 +1,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
-
-interface Project {
-  id: string | null;
-  title: string;
-  slug: string;
-  description: string;
-  category: string;
-  status: string;
-  content: string;
-  featured: boolean;
-  tags: string[];
-  images: {
-    id: number;
-    url: string;
-    alt: string;
-    type: string;
-  }[];
-  additionalImages: {
-    id: number | string;
-    url: string;
-    alt: string;
-    type: string;
-  }[];
-  cover_image: string;
-  haspointcloud: boolean;
-  pointcloudpath?: string;
-  lastUpdated: string;
-}
+import { ProjectFormData } from "@/components/projects/types";
 
 interface SaveProjectParams {
-  project: Project;
+  project: ProjectFormData;
   isNew: boolean;
   deletedImageIds: string[];
   previewImages: {[key: string]: string};
@@ -110,6 +83,7 @@ export async function saveProject({
       
     if (deleteError) {
       console.error("Görseller silinirken hata:", deleteError);
+      throw deleteError;
     }
   }
 
@@ -178,13 +152,18 @@ async function saveAdditionalImages(projectId: string, additionalImages: any[]) 
       sequence_order: existingImages ? existingImages.length + index + 2 : index + 2
     }));
     
-    await supabase
+    const { error } = await supabase
       .from('project_images')
       .insert(imagesToInsert);
+      
+    if (error) {
+      console.error("Ek görseller kaydedilirken hata:", error);
+      throw error;
+    }
   }
 }
 
-function getImageUrlFromPreview(type: string, previewImages: {[key: string]: string}) {
+function getImageUrlFromPreview(type: string, previewImages: {[key: string]: string}): string | null {
   if (previewImages[type]) {
     return previewImages[type];
   }

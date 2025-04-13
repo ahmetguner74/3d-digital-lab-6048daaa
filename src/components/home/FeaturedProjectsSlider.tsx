@@ -1,9 +1,10 @@
 
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { ProjectCard } from "./ProjectCard";
 
 export interface FeaturedProject {
   id: string;
@@ -35,8 +36,7 @@ export default function FeaturedProjectsSlider({ className = "" }: FeaturedProje
           .select('id, title, description, slug, cover_image, category, haspointcloud, pointcloudpath')
           .eq('featured', true)
           .eq('status', 'Yayında')
-          .order('updated_at', { ascending: false })
-          .limit(3);
+          .order('updated_at', { ascending: false });
           
         if (error) {
           console.error('Öne çıkan proje yüklenirken hata:', error);
@@ -137,5 +137,105 @@ export default function FeaturedProjectsSlider({ className = "" }: FeaturedProje
     );
   };
 
-  return { loading, featuredProjects, currentIndex, setCurrentIndex, renderDotIndicators };
+  const getCurrentProject = () => {
+    return featuredProjects[currentIndex];
+  };
+
+  if (loading) {
+    return (
+      <div className={`${className} flex justify-center items-center h-64`}>
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!featuredProjects.length) {
+    return null;
+  }
+
+  const currentProject = getCurrentProject();
+
+  return (
+    <div className={`${className} rounded-xl overflow-hidden bg-card border shadow-sm`}>
+      <div className="flex flex-col md:flex-row">
+        {/* Proje Görseli - Sol Taraf */}
+        <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden">
+          <Link to={`/projects/${currentProject.slug}`}>
+            <img 
+              src={currentProject.cover_image || "/placeholder.svg"} 
+              alt={currentProject.title}
+              className="w-full h-full object-cover transition-transform hover:scale-105"
+            />
+          </Link>
+        </div>
+
+        {/* Proje Bilgisi - Sağ Taraf */}
+        <div className="w-full md:w-1/2 p-6">
+          <div className="h-full flex flex-col justify-between">
+            <div>
+              {currentProject.category && (
+                <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
+                  {currentProject.category}
+                </span>
+              )}
+              <h3 className="text-xl font-bold mb-3">
+                <Link to={`/projects/${currentProject.slug}`} className="hover:text-primary transition-colors">
+                  {currentProject.title}
+                </Link>
+              </h3>
+              <p className="text-muted-foreground line-clamp-4 mb-4">
+                {currentProject.description}
+              </p>
+            </div>
+            
+            <div className="flex items-center justify-between mt-4">
+              <Button asChild variant="default">
+                <Link to={`/projects/${currentProject.slug}`}>
+                  Devamını Gör
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+
+              {renderDotIndicators()}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ProjectCard bileşeni - öne çıkan projeler için basitleştirilmiş kart
+export function ProjectCard({ project }: { project: FeaturedProject }) {
+  return (
+    <div className="rounded-xl overflow-hidden bg-card border shadow-sm h-full flex flex-col">
+      <div className="relative h-48 overflow-hidden">
+        <Link to={`/projects/${project.slug}`}>
+          <img 
+            src={project.cover_image || "/placeholder.svg"} 
+            alt={project.title} 
+            className="w-full h-full object-cover transition-transform hover:scale-105"
+          />
+        </Link>
+      </div>
+      <div className="p-4 flex-1 flex flex-col">
+        {project.category && (
+          <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1 rounded-full mb-2">
+            {project.category}
+          </span>
+        )}
+        <h3 className="text-lg font-semibold mb-2">
+          <Link to={`/projects/${project.slug}`} className="hover:text-primary transition-colors">
+            {project.title}
+          </Link>
+        </h3>
+        <p className="text-muted-foreground text-sm line-clamp-3 flex-1">{project.description}</p>
+        <div className="mt-4">
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link to={`/projects/${project.slug}`}>Detaylar</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }

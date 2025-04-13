@@ -1,15 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { ProjectsFilter } from "@/components/admin/ProjectsFilter";
 import { ProjectsTable, Project } from "@/components/admin/ProjectsTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 
 export default function AdminProjects() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,12 +17,14 @@ export default function AdminProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [sortConfig, setSortConfig] = useState({
     key: "lastUpdated",
     direction: "desc"
   });
   const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Filtreleme ve sıralama mantığı
   useEffect(() => {
@@ -69,13 +70,18 @@ export default function AdminProjects() {
   const fetchProjects = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .order('featured', { ascending: false })
         .order('updated_at', { ascending: false });
 
       if (error) {
-        throw error;
+        console.error('Error fetching projects:', error);
+        setError(`Projeler yüklenirken bir hata oluştu: ${error.message}`);
+        return;
       }
 
       if (data) {
@@ -86,26 +92,32 @@ export default function AdminProjects() {
           category: item.category,
           status: item.status,
           featured: item.featured || false,
-          lastUpdated: new Date(item.updated_at).toISOString().split('T')[0],
+          lastUpdated: new Date(item.updated_at || Date.now()).toISOString().split('T')[0],
           slug: item.slug
         }));
         
         setProjects(formattedProjects);
+        console.log("Admin paneli - projeler yüklendi:", formattedProjects.length);
         
         // Benzersiz kategorileri ayarla
         const categories = Array.from(new Set(formattedProjects.map(project => project.category)));
         setUniqueCategories(categories);
       }
-    } catch (error: any) {
-      console.error('Error fetching projects:', error);
-      toast({
-        title: "Hata",
-        description: "Projeler yüklenirken bir hata oluştu: " + (error.message || error),
-        variant: "destructive",
-      });
+    } catch (err: any) {
+      console.error('Projeler yüklenirken beklenmeyen hata:', err);
+      setError(`Projeler yüklenirken bir hata oluştu: ${err.message || err}`);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchProjects();
+    toast({
+      description: "Projeler yenileniyor...",
+    });
   };
 
   useEffect(() => {
@@ -120,7 +132,8 @@ export default function AdminProjects() {
           schema: 'public', 
           table: 'projects' 
         }, 
-        () => {
+        (payload) => {
+          console.log('Projelerde değişiklik algılandı:', payload);
           // Herhangi bir değişiklikte projeleri tekrar çek
           fetchProjects();
         })
@@ -134,19 +147,45 @@ export default function AdminProjects() {
 
   return (
     <AdminLayout title="Projeler">
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <ProjectsFilter 
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            uniqueCategories={uniqueCategories}
-          />
-        </CardContent>
-      </Card>
+      {error ? (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            className="ml-auto"
+            disabled={refreshing}
+          >
+            {refreshing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Yenileniyor...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Yeniden Dene
+              </>
+            )}
+          </Button>
+        </Alert>
+      ) : (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <ProjectsFilter 
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              uniqueCategories={uniqueCategories}
+            />
+          </CardContent>
+        </Card>
+      )}
       
       <ProjectsTable 
         projects={projects}
