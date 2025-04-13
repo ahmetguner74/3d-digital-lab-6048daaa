@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Download, Share2, ZoomIn, ZoomOut, Maximize, Minimize } from "lucide-react";
+import PointCloudViewer from "@/components/PointCloudViewer";
 import ThreeViewerControls from "@/components/three/ThreeViewerControls";
 import ThreeViewerInfo from "@/components/three/ThreeViewerInfo";
 import ThreeViewerAdvantages from "@/components/three/ThreeViewerAdvantages";
@@ -20,16 +21,15 @@ export default function ThreeDViewer() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!pointcloudPath) return;
-    
-    // Nokta bulutu yüklendiğinde bu durum güncellenir
-    const loadTimeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000); // Örnek olarak 3 saniye sonra yüklenmiş varsayalım
-    
-    return () => clearTimeout(loadTimeout);
-  }, [pointcloudPath]);
+  // Potree görüntüleyicisi yüklendikten sonra yükleme durumunu güncelleyelim
+  const handleViewerLoad = () => {
+    setIsLoading(false);
+  };
+
+  const handleViewerError = (error: string) => {
+    setViewerError(error);
+    setIsLoading(false);
+  };
   
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -111,7 +111,11 @@ export default function ThreeDViewer() {
           
           {/* Nokta bulutu görüntüleyici bileşeni */}
           <div className="h-full w-full">
-            <div id="potree_container" className="h-full w-full bg-muted/20"></div>
+            {pointcloudPath && (
+              <PointCloudViewer 
+                pointCloudPath={pointcloudPath} 
+              />
+            )}
           </div>
         </div>
       </>
@@ -175,18 +179,13 @@ export default function ThreeDViewer() {
             </div>
           )}
           
-          <div className="absolute top-4 right-4 flex gap-2 z-20">
-            <Button size="sm" variant="secondary" className="bg-background/80">
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="secondary" className="bg-background/80">
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-          </div>
-          
           {/* Nokta bulutu görüntüleyici bileşeni */}
           <div className="h-full w-full">
-            <div id="potree_container" className="h-full w-full bg-muted/20"></div>
+            {pointcloudPath && (
+              <PointCloudViewer 
+                pointCloudPath={pointcloudPath}
+              />
+            )}
           </div>
         </div>
         

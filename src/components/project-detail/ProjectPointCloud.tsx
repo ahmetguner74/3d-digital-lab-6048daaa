@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Box, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { Project } from "@/components/projects/types";
+import PointCloudViewer from "@/components/PointCloudViewer";
 
 interface ProjectPointCloudProps {
   project: Project;
@@ -40,11 +41,7 @@ export default function ProjectPointCloud({ project }: ProjectPointCloudProps) {
         </div>
         
         <div className={`relative overflow-hidden rounded-md border border-muted ${isExpanded ? 'h-[70vh]' : 'aspect-video'} transition-all duration-300`}>
-          <iframe 
-            src={`/3d-viewer?path=${encodeURIComponent(project.pointcloudpath)}&embed=true`} 
-            className="w-full h-full"
-            title={`${project.title} 3D Nokta Bulutu`}
-          />
+          <PointCloudViewer pointCloudPath={project.pointcloudpath} />
         </div>
         
         <p className="mt-4 text-sm text-muted-foreground">
