@@ -85,5 +85,6 @@ export default function FeaturedProjectsSlider({ className = "" }: FeaturedProje
   );
 }
 
-// FeaturedProject arayüzünü dışa aktaralım (geriye dönük uyumluluk için)
-export { FeaturedProject };
+// FeaturedProject arayüzünü geriye dönük uyumluluk için dışa aktarıyoruz
+// isolatedModules etkin olduğunda tür dışa aktarımları için "export type" kullanılmalı
+export type { FeaturedProject };
