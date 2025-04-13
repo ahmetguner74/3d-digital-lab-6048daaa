@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -19,7 +18,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import PointCloudViewer from "@/components/PointCloudViewer";
+import PointCloudViewer from "@/components/point-cloud/PointCloudViewer";
 
 interface PointCloudTabProps {
   project: any;
@@ -35,7 +34,6 @@ export default function PointCloudTab({ project, setProject, onPreview }: PointC
     setProject((prev: any) => ({
       ...prev,
       haspointcloud: checked,
-      // Eğer aktif değilse, yolu temizle
       ...(checked ? {} : { pointcloudpath: "" })
     }));
   };

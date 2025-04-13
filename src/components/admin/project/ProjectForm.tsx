@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ import MediaTab from "./MediaTab";
 import PointCloudTab from "./PointCloudTab";
 import SettingsTab from "./SettingsTab";
 import { saveProject } from "./projectService";
-import PointCloudViewer from "@/components/PointCloudViewer";
+import PointCloudViewer from "@/components/point-cloud/PointCloudViewer";
 
 interface Project {
   id: string | null;
