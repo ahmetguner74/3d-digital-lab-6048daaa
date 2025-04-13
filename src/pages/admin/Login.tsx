@@ -23,6 +23,7 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      // Supabase ile giriş yap
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -54,6 +55,9 @@ export default function AdminLogin() {
             description: "Bu kullanıcı için yönetici izni bulunmuyor.",
             variant: "destructive"
           });
+          
+          // Yetkisiz kullanıcıyı oturumdan çıkar
+          await supabase.auth.signOut();
           return;
         }
 
