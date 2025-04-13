@@ -6,12 +6,7 @@ export interface Project {
   status: string;
   featured: boolean;
   lastUpdated: string;
-  slug?: string;
-}
-
-export interface SortConfig {
-  key: string;
-  direction: string;
+  slug: string;
 }
 
 export interface ProjectTableProps {
@@ -23,8 +18,11 @@ export interface ProjectTableProps {
   setSearchTerm: (value: string) => void;
   setCategoryFilter: (value: string) => void;
   setStatusFilter: (value: string) => void;
-  sortConfig: SortConfig;
-  setSortConfig: (config: SortConfig) => void;
+  sortConfig: {
+    key: string;
+    direction: string;
+  };
+  setSortConfig: (value: { key: string; direction: string }) => void;
   loading: boolean;
   onRefresh: () => void;
 }
