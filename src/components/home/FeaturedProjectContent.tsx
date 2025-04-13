@@ -2,7 +2,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FeaturedProject } from "./FeaturedProjectsSlider";
+import { FeaturedProject } from "./ProjectsSection";
 
 interface FeaturedProjectContentProps {
   project: FeaturedProject;
