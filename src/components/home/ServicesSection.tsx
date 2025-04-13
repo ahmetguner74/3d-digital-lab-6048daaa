@@ -1,6 +1,12 @@
-
 import { useState } from "react";
-import { ArrowRight, Scan, Box, Cube, LayoutPanelLeft, Pencil, Building } from "lucide-react";
+import { 
+  ArrowRight, 
+  Scan, 
+  Box,  // Replace Cube with Box or another suitable icon
+  LayoutPanelLeft, 
+  Pencil, 
+  Building 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -17,14 +23,14 @@ const services = [
     id: "fotogrametri",
     title: "Fotogrametri",
     description: "Fotoğraflar kullanarak yapıların ve nesnelerin üç boyutlu modellerini oluşturuyoruz.",
-    icon: Box,
+    icon: Box,  // Changed from Cube to Box
     color: "from-purple-500 to-pink-500",
   },
   {
     id: "nokta-bulutu",
     title: "Nokta Bulutu İşleme",
     description: "Tarama sonucu elde edilen nokta bulutlarını işleyerek anlamlı ve kullanılabilir verilere dönüştürüyoruz.",
-    icon: Cube,
+    icon: Box,
     color: "from-emerald-500 to-teal-400",
   },
   {
