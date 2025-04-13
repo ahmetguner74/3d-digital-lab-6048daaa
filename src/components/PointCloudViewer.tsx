@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, ZoomIn, ZoomOut, RotateCcw, ChevronsExpand } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, RotateCcw, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PointCloudViewerProps {
@@ -13,6 +13,7 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewerInstance, setViewerInstance] = useState<any>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     // Check if container exists
@@ -153,6 +154,19 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
     };
   }, [pointCloudPath]);
 
+  // Tam ekran durumunu izleyelim
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
   // Viewer control functions
   const handleZoomIn = () => {
     if (viewerInstance) {
@@ -248,7 +262,7 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
               onClick={handleFullscreen}
               title="Tam Ekran"
             >
-              <ChevronsExpand className="h-4 w-4" />
+              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </div>
           
