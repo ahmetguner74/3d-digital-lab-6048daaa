@@ -2,12 +2,22 @@
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import FeaturedProjectsSlider from "./FeaturedProjectsSlider";
-import FeaturedProjectContent from "./FeaturedProjectContent";
-import FeaturedProjectImage from "./FeaturedProjectImage";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FeaturedProject } from "./FeaturedProjectsSlider";
+import FeaturedProjectContent from "./FeaturedProjectContent";
+import FeaturedProjectImage from "./FeaturedProjectImage";
+
+// FeaturedProject tipini burada tanımlayalım
+export interface FeaturedProject {
+  id: string;
+  title: string;
+  description: string;
+  slug: string;
+  cover_image: string;
+  category?: string;
+  haspointcloud?: boolean;
+  pointcloudpath?: string;
+}
 
 export default function ProjectsSection() {
   const [featuredProjects, setFeaturedProjects] = useState<FeaturedProject[]>([]);
@@ -110,7 +120,7 @@ export default function ProjectsSection() {
     if (featuredProjects.length <= 1) return null;
     
     return (
-      <div className="flex ml-4 items-center space-x-1">
+      <div className="flex items-center space-x-1">
         {featuredProjects.map((_, idx) => (
           <button
             key={idx}

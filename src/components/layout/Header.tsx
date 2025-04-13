@@ -66,7 +66,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center text-xl font-bold transition-colors hover:text-primary">
-              <span className="text-gradient">3D Dijital Lab</span>
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">3D Dijital Lab</span>
             </Link>
             <ThreeJsButton />
           </div>
@@ -78,8 +78,10 @@ export default function Header() {
                 key={item.name} 
                 to={item.href} 
                 className={cn(
-                  "text-sm font-medium transition-all hover:text-primary relative",
-                  location.pathname === item.href ? "text-primary" : "text-foreground/80",
+                  "text-sm font-medium transition-all relative",
+                  location.pathname === item.href 
+                    ? "text-primary" 
+                    : "text-foreground/80 hover:text-primary",
                   "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
                 )}
               >

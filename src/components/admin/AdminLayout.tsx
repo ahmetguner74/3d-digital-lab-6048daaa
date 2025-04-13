@@ -1,19 +1,14 @@
 
-import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { 
-  LayoutDashboard,
-  Image,
-  MessageSquare,
-  Settings,
-  LogOut,
-  ChevronRight,
-  Menu,
-  X
+  LayoutDashboard, 
+  FileText, 
+  Settings as SettingsIcon, 
+  MessageSquare, 
+  LogOut, 
+  ChevronLeft 
 } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
@@ -21,193 +16,109 @@ interface AdminLayoutProps {
   title: string;
 }
 
-const menuItems = [
-  { icon: <LayoutDashboard className="h-5 w-5" />, label: "Dashboard", href: "/admin/dashboard" },
-  { icon: <Image className="h-5 w-5" />, label: "Projeler", href: "/admin/projects" },
-  { icon: <MessageSquare className="h-5 w-5" />, label: "Mesajlar", href: "/admin/messages" },
-  { icon: <Settings className="h-5 w-5" />, label: "Ayarlar", href: "/admin/settings" }
-];
-
 export default function AdminLayout({ children, title }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-
-  // Check if user is authenticated
-  useEffect(() => {
-    const isAdmin = localStorage.getItem("adminAuthenticated");
-    if (!isAdmin) {
-      navigate("/admin");
-    }
-  }, [navigate]);
-
+  const location = useLocation();
+  
+  const menuItems = [
+    {
+      title: "Gösterge Paneli",
+      icon: LayoutDashboard,
+      href: "/admin/dashboard",
+    },
+    {
+      title: "Projeler",
+      icon: FileText,
+      href: "/admin/projects",
+    },
+    {
+      title: "Mesajlar",
+      icon: MessageSquare,
+      href: "/admin/messages",
+    },
+    {
+      title: "Ayarlar",
+      icon: SettingsIcon,
+      href: "/admin/settings",
+    },
+  ];
+  
   const handleLogout = () => {
-    localStorage.removeItem("adminAuthenticated");
-    navigate("/admin");
+    // Burada çıkış işlemi yapılabilir, şimdilik sadece ana sayfaya yönlendiriyoruz
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-muted/30 flex flex-col">
       <Helmet>
-        <title>{title} | Yönetim Paneli</title>
+        <title>{title} | Admin Panel</title>
       </Helmet>
       
-      {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-card border-b border-border">
-        <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X /> : <Menu />}
-          </Button>
-          <Link to="/admin/dashboard" className="ml-4 font-bold text-lg">
-            Yönetim Paneli
-          </Link>
-        </div>
-      </div>
-      
-      {/* Mobile Sidebar */}
-      <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:hidden",
-        mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-border">
-            <Link to="/" className="flex items-center">
-              <span className="font-bold text-lg ml-2">3D Dijital Lab</span>
+      <header className="bg-background border-b sticky top-0 z-30">
+        <div className="px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="h-4 w-4" />
+              <span>Siteye Dön</span>
             </Link>
+            <div className="hidden md:block h-6 w-px bg-border"></div>
+            <h1 className="text-lg font-semibold">{title}</h1>
           </div>
           
-          <div className="flex-1 overflow-y-auto py-4">
-            <nav className="space-y-1 px-2">
-              {menuItems.map((item, index) => (
-                <Link
-                  key={index}
-                  to={item.href}
-                  className="flex items-center px-3 py-3 text-sm font-medium rounded-md hover:bg-accent"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          
-          <div className="p-4 border-t border-border">
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="w-full flex items-center justify-between"
-            >
-              <div className="flex items-center">
-                <LogOut className="h-4 w-4 mr-2" />
-                Çıkış Yap
-              </div>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Desktop Sidebar */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 bg-card border-r border-border z-30 transition-all hidden lg:block",
-          sidebarOpen ? "w-64" : "w-16"
-        )}
-      >
-        <div className={cn(
-          "flex items-center justify-between p-4 border-b border-border",
-          sidebarOpen ? "px-4" : "px-2"
-        )}>
-          {sidebarOpen ? (
-            <Link to="/" className="flex items-center">
-              <span className="font-bold text-lg ml-2">3D Dijital Lab</span>
-            </Link>
-          ) : (
-            <div className="w-full flex justify-center">
-              <Link to="/">
-                <span className="font-bold text-xl">3D</span>
-              </Link>
-            </div>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="ml-2"
+          <button
+            onClick={handleLogout}
+            className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm transition-colors"
           >
-            <ChevronRight
-              className={cn(
-                "h-4 w-4 transition-transform",
-                !sidebarOpen && "rotate-180"
-              )}
-            />
-          </Button>
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Çıkış Yap</span>
+          </button>
         </div>
-        
-        <div className="p-4">
-          <nav className="space-y-2">
-            {menuItems.map((item, index) => (
+      </header>
+      
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-[220px_1fr]">
+        {/* Sidebar */}
+        <aside className="bg-background border-r hidden md:block p-4 space-y-4">
+          <nav className="space-y-1">
+            {menuItems.map((item) => (
               <Link
-                key={index}
+                key={item.href}
                 to={item.href}
                 className={cn(
-                  "flex items-center py-3 rounded-md hover:bg-accent transition-all",
-                  sidebarOpen ? "px-3" : "px-2 justify-center"
+                  "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors",
+                  location.pathname === item.href
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <span>{item.icon}</span>
-                {sidebarOpen && <span className="ml-3">{item.label}</span>}
+                <item.icon className="h-4 w-4" />
+                {item.title}
               </Link>
             ))}
           </nav>
+        </aside>
+        
+        {/* Mobile menu */}
+        <div className="md:hidden flex overflow-x-auto border-b bg-background sticky top-16 z-20">
+          {menuItems.map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                "flex-shrink-0 flex flex-col items-center px-4 py-2 text-xs transition-colors border-b-2",
+                location.pathname === item.href
+                  ? "border-primary text-primary font-medium"
+                  : "border-transparent text-muted-foreground"
+              )}
+            >
+              <item.icon className="h-5 w-5 mb-1" />
+              {item.title}
+            </Link>
+          ))}
         </div>
         
-        <div className={cn(
-          "absolute bottom-0 left-0 right-0 p-4 border-t border-border",
-          sidebarOpen ? "px-4" : "px-2"
-        )}>
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className={cn(
-              sidebarOpen ? "w-full flex items-center justify-between" : "w-full p-2 h-auto"
-            )}
-          >
-            {sidebarOpen ? (
-              <>
-                <div className="flex items-center">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Çıkış Yap
-                </div>
-                <ChevronRight className="h-4 w-4" />
-              </>
-            ) : (
-              <LogOut className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main
-        className={cn(
-          "min-h-screen pt-16 lg:pt-0",
-          sidebarOpen ? "lg:ml-64" : "lg:ml-16"
-        )}
-      >
-        <div className="p-6">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">{title}</h1>
-          </div>
-          
-          {children}
-        </div>
-      </main>
+        {/* Main content */}
+        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+      </div>
     </div>
   );
 }

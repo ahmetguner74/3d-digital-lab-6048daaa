@@ -1,105 +1,119 @@
 
-import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowDown, ArrowRight, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+const HERO_TEXTS = [
+  "Mimariye Dijital Dokunuş",
+  "3D Lazer Tarama Teknolojisi",
+  "Kültürel Mirasın Korunması",
+  "Dijital İkizler"
+];
 
 export default function HeroSection() {
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Metin değiştirme efekti
+  useEffect(() => {
+    const textInterval = setInterval(() => {
+      setIsVisible(false);
+      
+      setTimeout(() => {
+        setCurrentTextIndex((prevIndex) => (prevIndex + 1) % HERO_TEXTS.length);
+        setIsVisible(true);
+      }, 500); // Metin değişme gecikmesi
+      
+    }, 4000); // Metin değişim süresi
+    
+    return () => clearInterval(textInterval);
+  }, []);
+
+  // Aşağı kaydırma işlevi
+  const scrollToSection = () => {
+    const servicesSection = document.getElementById("services");
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-muted/20">
-      <div className="section-container min-h-[90vh] flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 reveal">
-            <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm">
-              Yenilikçi 3D Teknolojileri
-            </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-              <span className="text-gradient">3D Mimari</span> Dijitalleştirme <br />
-              <span className="relative">
-                Atölyesi
-                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 358 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 10C59.9737 4.8 203.647 -1.1 356 5.9" stroke="url(#paint0_linear)" strokeWidth="3" strokeLinecap="round"/>
-                  <defs>
-                    <linearGradient id="paint0_linear" x1="2" y1="10" x2="356" y2="5.9" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#2563EB"/>
-                      <stop offset="1" stopColor="#7C3AED"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
+    <section className="min-h-screen relative flex items-center justify-center overflow-hidden">
+      {/* Arka plan gradient ve desen */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background to-muted/20 z-0"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 z-0"></div>
+      
+      {/* Ana içerik */}
+      <div className="section-container relative z-10 py-16 md:py-24 lg:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Sol içerik */}
+          <div className="lg:col-span-6 space-y-6 reveal">
+            <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
+              Mimari Dijitalleştirme Teknolojileri
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
+              <span className="block">Mekanların Dijital</span>
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Dönüşümü</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-lg">
-              En yenilikçi gelişmiş teknolojileri kullanarak mimari ve arkeolojik 
-              yapıları milimetrik hassasiyetle dijitalleştiriyoruz.
-            </p>
-            <div className="flex flex-wrap gap-4 pt-4">
-              <Button asChild size="lg" className="group bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white">
-                <Link to="/contact">
-                  İletişime Geç
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            
+            <div className="h-16 flex items-center">
+              <p 
+                className={cn(
+                  "text-xl md:text-2xl text-muted-foreground transition-all duration-500",
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                )}
+              >
+                {HERO_TEXTS[currentTextIndex]}
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button asChild size="lg" className="group">
+                <Link to="/projects" className="flex items-center gap-2">
+                  Projelerimizi Keşfet
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               
-              <Button asChild variant="outline" size="lg">
-                <Link to="/projects">
-                  Projelerimiz
-                </Link>
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/contact">Bizimle İletişime Geçin</Link>
               </Button>
             </div>
           </div>
           
-          <div className="relative w-full max-w-xl mx-auto lg:max-w-none reveal">
-            {/* Modern dikdörtgen görsel alanı */}
-            <div className="aspect-video rounded-lg overflow-hidden transform rotate-2 hover:rotate-0 transition-all duration-300">
-              {/* Modern görsel konteyner */}
-              <div className="relative w-full h-full">
-                {/* Ana görsel */}
-                <div className="absolute inset-0 z-10">
-                  <img 
-                    alt="Mimari Görsel" 
-                    src="/lovable-uploads/2c24c907-a746-42ed-84b3-91972d11f7b7.jpg" 
-                    className="h-full w-full object-cover" 
-                  />
-                </div>
-                
-                {/* Dekoratif arka plan eleman */}
-                <div className="absolute -inset-4 bg-gradient-to-br from-primary/30 to-secondary/30 blur-xl z-0"></div>
-              </div>
-            </div>
-            
-            {/* Dekoratif elementler */}
-            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/30 blur-3xl"></div>
-            <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-secondary/30 blur-3xl"></div>
-            
-            {/* Bilgilendirme rozetleri */}
-            <div className="absolute -right-8 top-1/4 bg-white dark:bg-background p-3 rounded-lg shadow-lg border border-border transform rotate-3 hover:rotate-0 transition-all duration-300">
-              <div className="flex items-center gap-2">
-                <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full text-green-600 dark:text-green-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium">Milimetrik Hassasiyet</span>
-              </div>
-            </div>
-            
-            <div className="absolute -left-8 bottom-1/4 bg-white dark:bg-background p-3 rounded-lg shadow-lg border border-border transform -rotate-3 hover:rotate-0 transition-all duration-300">
-              <div className="flex items-center gap-2">
-                <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full text-blue-600 dark:text-blue-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium">Hızlı Teslimat</span>
-              </div>
+          {/* Sağ animasyon/görsel */}
+          <div className="lg:col-span-6 relative reveal">
+            <div className="aspect-square max-w-lg mx-auto relative">
+              {/* 3D model görseli veya animasyon buraya eklenebilir */}
+              <img 
+                src="/assets/hero-3d-model.png" 
+                alt="3D Dijitalleştirme" 
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/placeholder.svg";
+                }}
+              />
+              
+              {/* Arka plan efektleri */}
+              <div className="absolute -z-10 -inset-10 bg-gradient-radial from-primary/20 to-transparent opacity-60 blur-2xl"></div>
+              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/3 h-2/3 bg-gradient-to-br from-secondary/20 to-transparent opacity-70 blur-3xl animate-pulse"></div>
             </div>
           </div>
         </div>
         
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
-          <span className="text-sm text-muted-foreground mb-2">Aşağı Kaydır</span>
-          <div className="h-10 w-6 rounded-full border-2 border-muted-foreground/30 flex justify-center">
-            <div className="h-2 w-2 rounded-full bg-muted-foreground mt-2"></div>
-          </div>
+        {/* Aşağı kaydırma düğmesi */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          <button 
+            onClick={scrollToSection}
+            aria-label="Aşağı kaydır"
+            className="flex items-center justify-center w-12 h-12 rounded-full border border-border/50 bg-background/60 backdrop-blur-sm shadow-sm hover:bg-background transition-colors animate-bounce hover:animate-none"
+          >
+            <ArrowDown className="h-5 w-5 text-muted-foreground" />
+          </button>
         </div>
       </div>
     </section>
