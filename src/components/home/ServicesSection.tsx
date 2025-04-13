@@ -1,15 +1,18 @@
+
 import { useState } from "react";
 import { 
   ArrowRight, 
   Scan, 
-  Box,  // Replace Cube with Box or another suitable icon
-  LayoutPanelLeft, 
-  Pencil, 
-  Building 
+  Building2, 
+  Camera,
+  FileDigit, 
+  PenTool, 
+  Layers 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 const services = [
   {
@@ -18,41 +21,47 @@ const services = [
     description: "Yüksek hassasiyetli 3D lazer tarama teknolojisi ile yapıların milimetrik ölçümlerini gerçekleştiriyoruz.",
     icon: Scan,
     color: "from-blue-500 to-cyan-400",
+    badge: "Popüler",
   },
   {
     id: "fotogrametri",
     title: "Fotogrametri",
     description: "Fotoğraflar kullanarak yapıların ve nesnelerin üç boyutlu modellerini oluşturuyoruz.",
-    icon: Box,  // Changed from Cube to Box
+    icon: Camera,
     color: "from-purple-500 to-pink-500",
+    badge: "",
   },
   {
     id: "nokta-bulutu",
     title: "Nokta Bulutu İşleme",
     description: "Tarama sonucu elde edilen nokta bulutlarını işleyerek anlamlı ve kullanılabilir verilere dönüştürüyoruz.",
-    icon: Box,
+    icon: Layers,
     color: "from-emerald-500 to-teal-400",
+    badge: "",
   },
   {
     id: "bim-modelleme",
     title: "BIM Modelleme",
     description: "Nokta bulutu verilerini kullanarak yapıların BIM (Yapı Bilgi Modellemesi) modellerini oluşturuyoruz.",
-    icon: Building,
+    icon: Building2,
     color: "from-orange-500 to-amber-400",
+    badge: "Yeni",
   },
   {
     id: "cad-cizim",
     title: "CAD Çizimleri",
     description: "3D verilerden hassas 2D CAD çizimleri ve kesitler üretiyoruz.",
-    icon: Pencil,
+    icon: PenTool,
     color: "from-red-500 to-rose-400",
+    badge: "",
   },
   {
     id: "web-3d",
     title: "Web 3D Uygulamaları",
     description: "Taramalardan elde edilen 3D modelleri interaktif web uygulamalarına dönüştürüyoruz.",
-    icon: LayoutPanelLeft,
+    icon: FileDigit,
     color: "from-indigo-500 to-violet-400",
+    badge: "Öne Çıkan",
   }
 ];
 
@@ -92,9 +101,14 @@ export default function ServicesSection() {
                     "w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-all",
                     `bg-gradient-to-br ${service.color} text-white`
                   )}>
-                    <service.icon className="h-6 w-6" />
+                    <service.icon className="h-6 w-6" strokeWidth={1.5} />
                   </div>
                   <h3 className="font-bold text-lg mb-1">{service.title}</h3>
+                  {service.badge && (
+                    <Badge variant="outline" className="absolute top-2 right-2 bg-white/50 dark:bg-black/50 backdrop-blur-sm">
+                      {service.badge}
+                    </Badge>
+                  )}
                 </div>
                 
                 {/* Arka plan efekti */}
@@ -108,13 +122,13 @@ export default function ServicesSection() {
           </div>
 
           {/* Sağ taraf - Detaylı bilgi */}
-          <div className="bg-muted/50 rounded-2xl p-8 border relative overflow-hidden reveal">
+          <div className="bg-muted/50 backdrop-blur-sm rounded-2xl p-8 border relative overflow-hidden reveal">
             <div className="relative z-10">
               <div className={cn(
                 "w-16 h-16 rounded-xl flex items-center justify-center mb-6 transition-all",
                 `bg-gradient-to-br ${activeService.color} text-white`
               )}>
-                <activeService.icon className="h-8 w-8" />
+                <activeService.icon className="h-8 w-8" strokeWidth={1.5} />
               </div>
               
               <h3 className="text-2xl font-bold mb-4">{activeService.title}</h3>
