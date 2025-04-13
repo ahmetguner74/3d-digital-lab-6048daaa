@@ -5,11 +5,9 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { ProjectsFilter } from "@/components/admin/ProjectsFilter";
 import { ProjectsTable } from "@/components/admin/ProjectsTable";
 import { useAdminProjects } from "@/hooks/useAdminProjects";
-import { useToast } from "@/hooks/use-toast";
 import ProjectsErrorView from "@/components/admin/ProjectsErrorView";
 
 export default function AdminProjects() {
-  const { toast } = useToast();
   const {
     searchTerm,
     setSearchTerm,
