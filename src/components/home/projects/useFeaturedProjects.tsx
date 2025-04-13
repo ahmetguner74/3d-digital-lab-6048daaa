@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FeaturedProject } from "../ProjectsSection";
+import { FeaturedProject } from "../FeaturedProjectsSlider";
 
 export function useFeaturedProjects() {
   const [featuredProjects, setFeaturedProjects] = useState<FeaturedProject[]>([]);

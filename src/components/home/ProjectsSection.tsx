@@ -8,18 +8,6 @@ import FeaturedProjectControls from "./projects/FeaturedProjectControls";
 import LoadingState from "./projects/LoadingState";
 import { useFeaturedProjects } from "./projects/useFeaturedProjects";
 
-// FeaturedProject tipini burada tanımlayalım
-export interface FeaturedProject {
-  id: string;
-  title: string;
-  description: string;
-  slug: string;
-  cover_image: string;
-  category?: string;
-  haspointcloud?: boolean;
-  pointcloudpath?: string;
-}
-
 export default function ProjectsSection() {
   const {
     featuredProjects,
