@@ -1,17 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { ArrowDown, ArrowRight, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-const HERO_TEXTS = [
-  "Mimariye Dijital Dokunuş",
-  "3D Lazer Tarama Teknolojisi",
-  "Kültürel Mirasın Korunması",
-  "Dijital İkizler"
-];
-
+const HERO_TEXTS = ["Mimariye Dijital Dokunuş", "3D Lazer Tarama Teknolojisi", "Kültürel Mirasın Korunması", "Dijital İkizler"];
 export default function HeroSection() {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -20,14 +12,12 @@ export default function HeroSection() {
   useEffect(() => {
     const textInterval = setInterval(() => {
       setIsVisible(false);
-      
       setTimeout(() => {
-        setCurrentTextIndex((prevIndex) => (prevIndex + 1) % HERO_TEXTS.length);
+        setCurrentTextIndex(prevIndex => (prevIndex + 1) % HERO_TEXTS.length);
         setIsVisible(true);
       }, 500); // Metin değişme gecikmesi
-      
     }, 4000); // Metin değişim süresi
-    
+
     return () => clearInterval(textInterval);
   }, []);
 
@@ -35,12 +25,12 @@ export default function HeroSection() {
   const scrollToSection = () => {
     const servicesSection = document.getElementById("services");
     if (servicesSection) {
-      servicesSection.scrollIntoView({ behavior: "smooth" });
+      servicesSection.scrollIntoView({
+        behavior: "smooth"
+      });
     }
   };
-
-  return (
-    <section className="min-h-screen relative flex items-center justify-center overflow-hidden">
+  return <section className="min-h-screen relative flex items-center justify-center overflow-hidden">
       {/* Arka plan gradient ve desen */}
       <div className="absolute inset-0 bg-gradient-to-br from-background to-muted/20 z-0"></div>
       <div className="absolute inset-0 bg-grid-pattern opacity-10 z-0"></div>
@@ -60,12 +50,7 @@ export default function HeroSection() {
             </h1>
             
             <div className="h-16 flex items-center">
-              <p 
-                className={cn(
-                  "text-xl md:text-2xl text-muted-foreground transition-all duration-500",
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                )}
-              >
+              <p className={cn("text-xl md:text-2xl text-muted-foreground transition-all duration-500", isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
                 {HERO_TEXTS[currentTextIndex]}
               </p>
             </div>
@@ -88,15 +73,10 @@ export default function HeroSection() {
           <div className="lg:col-span-6 relative reveal">
             <div className="aspect-square max-w-lg mx-auto relative">
               {/* 3D model görseli veya animasyon buraya eklenebilir */}
-              <img 
-                src="/assets/hero-3d-model.png" 
-                alt="3D Dijitalleştirme" 
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/placeholder.svg";
-                }}
-              />
+              <img alt="3D Dijitalleştirme" className="w-full h-full object-contain" onError={e => {
+              const target = e.target as HTMLImageElement;
+              target.src = "/placeholder.svg";
+            }} src="/lovable-uploads/f4e7f291-d8c4-4f35-9728-2660bef865f8.jpg" />
               
               {/* Arka plan efektleri */}
               <div className="absolute -z-10 -inset-10 bg-gradient-radial from-primary/20 to-transparent opacity-60 blur-2xl"></div>
@@ -107,15 +87,10 @@ export default function HeroSection() {
         
         {/* Aşağı kaydırma düğmesi */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-          <button 
-            onClick={scrollToSection}
-            aria-label="Aşağı kaydır"
-            className="flex items-center justify-center w-12 h-12 rounded-full border border-border/50 bg-background/60 backdrop-blur-sm shadow-sm hover:bg-background transition-colors animate-bounce hover:animate-none"
-          >
+          <button onClick={scrollToSection} aria-label="Aşağı kaydır" className="flex items-center justify-center w-12 h-12 rounded-full border border-border/50 bg-background/60 backdrop-blur-sm shadow-sm hover:bg-background transition-colors animate-bounce hover:animate-none">
             <ArrowDown className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }
