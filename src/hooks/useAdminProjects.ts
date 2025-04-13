@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Project } from "@/components/admin/ProjectsTable";
+import { Project } from "@/components/admin/projectsTable/types";
 
 export function useAdminProjects() {
   const [searchTerm, setSearchTerm] = useState("");
