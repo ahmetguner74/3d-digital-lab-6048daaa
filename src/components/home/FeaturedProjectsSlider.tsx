@@ -4,7 +4,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ProjectCard } from "./ProjectCard";
+// ProjectCard artık bu dosyada tanımlandığı için ayrıca import edilmesine gerek yok
 
 export interface FeaturedProject {
   id: string;
@@ -77,7 +77,7 @@ export default function FeaturedProjectsSlider({ className = "" }: FeaturedProje
           ];
           setFeaturedProjects(demoProjects);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Öne çıkan proje yüklenirken beklenmeyen hata:', err);
       } finally {
         setLoading(false);
