@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Project } from "@/components/projects/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectImage {
   id: string;
@@ -12,6 +13,7 @@ interface ProjectImage {
 }
 
 export function useProjectData(slug: string) {
+  const { toast } = useToast();
   const [project, setProject] = useState<Project | null>(null);
   const [projectImages, setProjectImages] = useState<ProjectImage[]>([]);
   const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
@@ -37,48 +39,47 @@ export function useProjectData(slug: string) {
           
           // Eğer gerçek veri yoksa, test verisi olarak göster
           if (projectError.code === "PGRST116") {
+            console.log("Proje bulunamadı, test verisi yükleniyor");
             loadTestData(slug);
-            setLoading(false);
-            return;
           } else {
             throw projectError;
           }
-        }
-        
-        if (!projectData) {
-          setError('Proje bulunamadı.');
-          setLoading(false);
-          return;
-        }
-        
-        console.log("Proje verileri:", projectData);
-        setProject(projectData);
-        
-        const { data: imagesData, error: imagesError } = await supabase
-          .from('project_images')
-          .select('*')
-          .eq('project_id', projectData.id)
-          .order('sequence_order', { ascending: true });
-        
-        if (imagesError) {
-          console.error('Proje görselleri yüklenirken hata:', imagesError);
         } else {
-          console.log("Proje görselleri:", imagesData);
-          setProjectImages(imagesData || []);
-        }
-        
-        const { data: relatedData, error: relatedError } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('status', 'Yayında')
-          .eq('category', projectData.category)
-          .neq('id', projectData.id)
-          .limit(3);
-        
-        if (relatedError) {
-          console.error('İlgili projeler yüklenirken hata:', relatedError);
-        } else {
-          setRelatedProjects(relatedData || []);
+          console.log("Proje verileri:", projectData);
+          setProject(projectData);
+          
+          const { data: imagesData, error: imagesError } = await supabase
+            .from('project_images')
+            .select('*')
+            .eq('project_id', projectData.id)
+            .order('sequence_order', { ascending: true });
+          
+          if (imagesError) {
+            console.error('Proje görselleri yüklenirken hata:', imagesError);
+            toast({
+              title: "Uyarı",
+              description: "Proje görselleri yüklenirken bir sorun oluştu.",
+              variant: "destructive"
+            });
+          } else {
+            console.log("Proje görselleri:", imagesData);
+            setProjectImages(imagesData || []);
+          }
+          
+          const { data: relatedData, error: relatedError } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('status', 'Yayında')
+            .eq('category', projectData.category)
+            .neq('id', projectData.id)
+            .limit(3);
+          
+          if (relatedError) {
+            console.error('İlgili projeler yüklenirken hata:', relatedError);
+          } else {
+            console.log("İlgili projeler:", relatedData);
+            setRelatedProjects(relatedData || []);
+          }
         }
       } catch (err) {
         console.error('Proje detayları yüklenirken hata:', err);
@@ -89,7 +90,7 @@ export function useProjectData(slug: string) {
     };
     
     fetchProjectDetails();
-  }, [slug]);
+  }, [slug, toast]);
 
   const loadTestData = (slug: string) => {
     // Test proje verisi

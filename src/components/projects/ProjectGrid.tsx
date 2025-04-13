@@ -12,12 +12,13 @@ export default function ProjectGrid({ projects, className = "" }: ProjectGridPro
     return (
       <div className="text-center py-12">
         <p className="text-lg text-muted-foreground mb-4">Henüz yayınlanmış proje bulunmamaktadır.</p>
+        <p className="text-sm text-muted-foreground">Admin panelinden projeler ekleyebilir veya mevcut projeleri "Yayında" durumuna getirebilirsiniz.</p>
       </div>
     );
   }
   
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 ${className}`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ${className}`}>
       {projects.map((project) => (
         <ProjectCard key={project.id} project={project} />
       ))}

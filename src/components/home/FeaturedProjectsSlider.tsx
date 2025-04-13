@@ -40,15 +40,14 @@ export default function FeaturedProjectsSlider({ className = "" }: FeaturedProje
           
         if (error) {
           console.error('Öne çıkan proje yüklenirken hata:', error);
-          setLoading(false);
-          return;
+          throw error;
         }
         
         if (data && data.length > 0) {
-          console.log("Öne çıkan projeler verileri:", data);
+          console.log("Öne çıkan projeler yüklendi:", data);
           setFeaturedProjects(data);
         } else {
-          console.log("Öne çıkan proje bulunamadı");
+          console.log("Öne çıkan proje bulunamadı, demo veriler yükleniyor");
           // Demo veriler
           const demoProjects = [
             {
@@ -97,7 +96,8 @@ export default function FeaturedProjectsSlider({ className = "" }: FeaturedProje
           table: 'projects',
           filter: 'featured=eq.true' 
         }, 
-        () => {
+        payload => {
+          console.log('Öne çıkan projelerde değişiklik algılandı:', payload);
           // Öne çıkan projelerde değişiklik olduğunda yeniden yükle
           fetchFeaturedProjects();
         })

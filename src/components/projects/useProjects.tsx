@@ -24,7 +24,7 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
   // Sayfa değiştirme işlevi
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Sayfayı yukarı kaydır (isteğe bağlı)
+    // Sayfayı yukarı kaydır
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -48,13 +48,13 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
     const fetchProjects = async () => {
       try {
         setLoading(true);
+        console.log("Projeler yükleniyor...", { currentPage, selectedCategory, featuredOnly, projectsPerPage });
         
         // Sorgu parametrelerini hazırla
         let query = supabase
           .from('projects')
           .select('*', { count: 'exact' })
-          .eq('status', 'Yayında')
-          .order('created_at', { ascending: false });
+          .eq('status', 'Yayında');
           
         // Kategori filtresini ekle
         if (selectedCategory) {
@@ -66,6 +66,9 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
           query = query.eq('featured', true);
         }
         
+        // Sıralama ekle
+        query = query.order('created_at', { ascending: false });
+        
         // Sayfalama ekle
         const from = (currentPage - 1) * projectsPerPage;
         const to = from + projectsPerPage - 1;
@@ -74,7 +77,12 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
         // Sorguyu çalıştır
         const { data, error, count } = await query;
         
-        if (error) throw error;
+        if (error) {
+          console.error("Projeler yüklenirken hata:", error);
+          throw error;
+        }
+        
+        console.log("Projeler yüklendi:", { data, count });
         
         setProjects(data || []);
         setTotalCount(count || 0);
@@ -87,7 +95,10 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
             .eq('status', 'Yayında')
             .order('category');
             
-          if (categoryError) throw categoryError;
+          if (categoryError) {
+            console.error("Kategoriler yüklenirken hata:", categoryError);
+            throw categoryError;
+          }
           
           // Benzersiz kategorileri al
           const uniqueCategories = Array.from(
@@ -97,6 +108,7 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
             label: category
           }));
           
+          console.log("Benzersiz kategoriler:", uniqueCategories);
           setCategories(uniqueCategories);
         }
       } catch (err) {
@@ -108,6 +120,27 @@ export function useProjects({ projectsPerPage = 9, featuredOnly = false }: UsePr
     };
 
     fetchProjects();
+    
+    // Realtime değişiklikleri dinle
+    const channel = supabase
+      .channel('projects-list-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'projects',
+          filter: 'status=eq.Yayında' 
+        }, 
+        payload => {
+          console.log('Projelerde değişiklik algılandı:', payload);
+          // Değişiklik olduğunda projeleri yeniden yükle
+          fetchProjects();
+        })
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [currentPage, selectedCategory, featuredOnly, projectsPerPage]);
 
   return {

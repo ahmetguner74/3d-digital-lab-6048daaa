@@ -33,19 +33,32 @@ export default function AllProjectsSection() {
           data,
           error,
           count
-        } = await supabase.from('projects').select('id, title, slug, description, cover_image, category', {
-          count: 'exact'
-        }).eq('status', 'Yayında').order('created_at', {
-          ascending: false
-        });
+        } = await supabase
+          .from('projects')
+          .select('id, title, slug, description, cover_image, category', {
+            count: 'exact'
+          })
+          .eq('status', 'Yayında')
+          .order('created_at', {
+            ascending: false
+          })
+          .range((currentPage - 1) * projectsPerPage, currentPage * projectsPerPage - 1);
+        
         if (error) {
+          console.error('Projeler yüklenirken hata:', error);
           throw error;
         }
-        console.log("Ana sayfa projeleri:", data);
-        setProjects(data || []);
+        
+        console.log("Ana sayfa projeleri yüklendi:", data);
+        
+        if (data && data.length > 0) {
+          setProjects(data);
+        } else {
+          console.log("Yayında proje bulunamadı, demo projeler gösteriliyor");
+        }
 
         // Toplam sayfa sayısını hesapla
-        if (count) {
+        if (count !== null) {
           setTotalPages(Math.ceil(count / projectsPerPage));
         }
       } catch (err) {
@@ -55,15 +68,30 @@ export default function AllProjectsSection() {
         setLoading(false);
       }
     };
+    
     fetchProjects();
-  }, []);
-
-  // Geçerli sayfadaki projeleri hesapla
-  const getCurrentPageProjects = () => {
-    const startIndex = (currentPage - 1) * projectsPerPage;
-    const endIndex = startIndex + projectsPerPage;
-    return projects.slice(startIndex, endIndex);
-  };
+    
+    // Realtime değişiklikleri dinle
+    const channel = supabase
+      .channel('projects-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'projects',
+          filter: 'status=eq.Yayında' 
+        }, 
+        payload => {
+          console.log('Projelerde değişiklik algılandı:', payload);
+          // Projelerde değişiklik olduğunda yeniden yükle
+          fetchProjects();
+        })
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentPage, projectsPerPage]);
 
   // Sayfa değiştirme işlevi
   const handlePageChange = (page: number) => {
@@ -75,7 +103,7 @@ export default function AllProjectsSection() {
   };
 
   // Veri yoksa varsayılan projeleri göster
-  const displayProjects = projects.length > 0 ? getCurrentPageProjects() : [{
+  const displayProjects = projects.length > 0 ? projects : [{
     id: "1",
     title: "Sivil Mimari Örneği",
     description: "Sivil mimari örnekleri üzerinde yaptığımız çalışmalar, kültürel mirasın dijital belgelenmesine katkı sağlamaktadır.",
@@ -119,7 +147,8 @@ export default function AllProjectsSection() {
     category: "Koruma"
   }];
 
-  return <section className="min-h-screen bg-muted/30 dark:bg-background">
+  return (
+    <section className="min-h-screen bg-muted/30 dark:bg-background">
       <div className="section-container py-20">
         <div className="text-center mb-16 reveal">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">Projelerimiz</h2>
@@ -130,62 +159,86 @@ export default function AllProjectsSection() {
         </div>
         
         {/* Yükleniyor durumu */}
-        {loading && <div className="flex justify-center py-12">
+        {loading && (
+          <div className="flex justify-center py-12">
             <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
-          </div>}
+          </div>
+        )}
         
         {/* Hata durumu */}
-        {error && !loading && <div className="text-center py-4 mb-8">
+        {error && !loading && (
+          <div className="text-center py-4 mb-8">
             <p className="text-red-500 text-sm">{error}</p>
-          </div>}
+          </div>
+        )}
         
         {/* Projeler grid görünümü - Sadece kapak fotoğrafı */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {displayProjects.map((project) => (
-            <Link 
-              key={project.id} 
-              to={`/projects/${project.slug}`}
-              className="group overflow-hidden rounded-lg border border-muted shadow-sm hover:shadow-md transition-all duration-300"
-            >
-              <div className="aspect-[4/3] relative overflow-hidden">
-                <img 
-                  src={project.cover_image || "/placeholder.svg"} 
-                  alt={project.title}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                />
-                
-                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
-                  <h3 className="text-xl font-semibold text-white">{project.title}</h3>
-                  <p className="text-sm text-white/80">{project.category}</p>
+        {!loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 reveal">
+            {displayProjects.map((project) => (
+              <Link 
+                key={project.id} 
+                to={`/projects/${project.slug}`}
+                className="group overflow-hidden rounded-lg border border-muted shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                <div className="aspect-[4/3] relative overflow-hidden">
+                  <img 
+                    src={project.cover_image || "/placeholder.svg"} 
+                    alt={project.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                    }}
+                  />
+                  
+                  <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
+                    <h3 className="text-xl font-semibold text-white">{project.title}</h3>
+                    <p className="text-sm text-white/80">{project.category}</p>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
         
         {/* Sayfalama */}
-        {projects.length > projectsPerPage && <div className="mt-12">
+        {totalPages > 1 && !loading && (
+          <div className="mt-12 flex justify-center reveal">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
+                  <PaginationPrevious 
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} 
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
                 </PaginationItem>
                 
-                {Array.from({length: totalPages}).map((_, index) => <PaginationItem key={index}>
-                    <PaginationLink isActive={currentPage === index + 1} onClick={() => handlePageChange(index + 1)} className={`cursor-pointer ${currentPage === index + 1 ? 'bg-primary text-primary-foreground' : 'bg-muted/50'}`}>
+                {Array.from({length: totalPages}).map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink 
+                      isActive={currentPage === index + 1} 
+                      onClick={() => handlePageChange(index + 1)} 
+                      className="cursor-pointer"
+                    >
                       {index + 1}
                     </PaginationLink>
-                  </PaginationItem>)}
+                  </PaginationItem>
+                ))}
                 
                 <PaginationItem>
-                  <PaginationNext onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)} className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} />
+                  <PaginationNext 
+                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)} 
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
-          </div>}
+          </div>
+        )}
         
         <div className="flex justify-center mt-12">
-          <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
+          <Button asChild size="lg">
             <Link to="/projects" className="flex items-center">
               Tüm Projeleri Görüntüle
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -193,5 +246,6 @@ export default function AllProjectsSection() {
           </Button>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 }

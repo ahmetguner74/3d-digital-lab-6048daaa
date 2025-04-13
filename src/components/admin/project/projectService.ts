@@ -42,6 +42,8 @@ export async function saveProject({
   deletedImageIds,
   previewImages
 }: SaveProjectParams) {
+  console.log("Proje kaydetme işlemi başlatıldı:", { project, isNew });
+  
   const projectData = {
     title: project.title,
     slug: project.slug,
@@ -59,31 +61,41 @@ export async function saveProject({
   let projectId = project.id;
   
   if (isNew) {
+    console.log("Yeni proje oluşturuluyor...");
     const { data, error } = await supabase
       .from('projects')
       .insert([projectData])
-      .select('id');
+      .select('id')
+      .single();
     
     if (error) {
+      console.error("Proje oluşturma hatası:", error);
       throw error;
     }
     
-    if (data && data.length > 0) {
-      projectId = data[0].id;
+    if (data) {
+      projectId = data.id;
+      console.log("Yeni proje ID'si:", projectId);
     } else {
       throw new Error("Proje kaydedildi ancak ID alınamadı");
     }
-  } else {
+  } else if (projectId) {
+    console.log("Mevcut proje güncelleniyor, ID:", projectId);
     const { error } = await supabase
       .from('projects')
       .update(projectData)
-      .eq('id', project.id);
+      .eq('id', projectId);
     
     if (error) {
+      console.error("Proje güncelleme hatası:", error);
       throw error;
     }
+  } else {
+    // Hem ID null hem de yeni değilse (bu durumda gerçekleşmemeli)
+    throw new Error("Proje ID'si bulunamadı ve yeni proje değil");
   }
   
+  // Proje ID'si kontrolü
   if (!projectId) {
     throw new Error("Proje ID'si alınamadı");
   }
@@ -113,6 +125,8 @@ export async function saveProject({
 }
 
 async function saveBeforeAfterImages(projectId: string, previewImages: {[key: string]: string}) {
+  console.log("Önce-sonra görselleri kaydediliyor:", { projectId, previewImages });
+  
   for (const imageType of ['before', 'after']) {
     const imageUrl = getImageUrlFromPreview(imageType, previewImages);
     if (imageUrl) {
@@ -142,6 +156,8 @@ async function saveBeforeAfterImages(projectId: string, previewImages: {[key: st
 }
 
 async function saveAdditionalImages(projectId: string, additionalImages: any[]) {
+  console.log("Ek görseller kaydediliyor:", { projectId, additionalImagesCount: additionalImages.length });
+  
   const { data: existingImages } = await supabase
     .from('project_images')
     .select('*')

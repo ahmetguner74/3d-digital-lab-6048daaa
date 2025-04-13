@@ -1,10 +1,12 @@
 
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProjectGrid from "./ProjectGrid";
 import ProjectPagination from "./ProjectPagination";
 import { useProjects } from "./useProjects";
 import ProjectFilters from "./ProjectFilters";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface ProjectsListProps {
   className?: string;
@@ -12,6 +14,9 @@ interface ProjectsListProps {
 }
 
 export default function ProjectsList({ className = "", projectsPerPage = 9 }: ProjectsListProps) {
+  const { toast } = useToast();
+  const [refreshing, setRefreshing] = useState(false);
+  
   const { 
     projects, 
     loading, 
@@ -25,6 +30,18 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
     resetFilters
   } = useProjects({ projectsPerPage });
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    // Sayfayı yenilemek için bir süre bekletin
+    setTimeout(() => {
+      window.location.reload();
+      setRefreshing(false);
+    }, 500);
+    toast({
+      description: "Projeler yenileniyor...",
+    });
+  };
+
   if (loading) {
     return (
       <div className={`${className} flex flex-col items-center justify-center py-12`}>
@@ -37,9 +54,13 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
   return (
     <div className={className}>
       {error && (
-        <div className="text-center py-4 mb-6">
-          <p className="text-red-500">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="mt-2">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            <p className="text-destructive font-medium">{error}</p>
+          </div>
+          <Button onClick={handleRefresh} variant="outline" size="sm" className="mt-2">
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Yeniden Dene
           </Button>
         </div>
@@ -52,7 +73,7 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
         onResetFilters={resetFilters}
       />
 
-      <ProjectGrid projects={projects} />
+      <ProjectGrid projects={projects} className="my-8" />
       
       {totalPages > 1 && (
         <ProjectPagination 
@@ -61,6 +82,14 @@ export default function ProjectsList({ className = "", projectsPerPage = 9 }: Pr
           onPageChange={handlePageChange}
           className="mt-12"
         />
+      )}
+      
+      {projects.length > 0 && (
+        <div className="mt-6 text-sm text-muted-foreground text-center">
+          {selectedCategory ? 
+            `"${selectedCategory}" kategorisinde ${projects.length} proje gösteriliyor` : 
+            `Toplam ${projects.length} proje gösteriliyor`}
+        </div>
       )}
     </div>
   );
