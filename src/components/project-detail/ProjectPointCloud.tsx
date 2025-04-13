@@ -1,10 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Box, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { Project } from "@/components/projects/types";
-import PointCloudViewer from "@/components/PointCloudViewer";
+import PointCloudViewer from "@/components/point-cloud/PointCloudViewer";
 
 interface ProjectPointCloudProps {
   project: Project;
@@ -41,7 +40,10 @@ export default function ProjectPointCloud({ project }: ProjectPointCloudProps) {
         </div>
         
         <div className={`relative overflow-hidden rounded-md border border-muted ${isExpanded ? 'h-[70vh]' : 'aspect-video'} transition-all duration-300`}>
-          <PointCloudViewer pointCloudPath={project.pointcloudpath} />
+          <PointCloudViewer 
+            pointCloudPath={project.pointcloudpath} 
+            height="100%" 
+          />
         </div>
         
         <p className="mt-4 text-sm text-muted-foreground">

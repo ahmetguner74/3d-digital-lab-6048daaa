@@ -1,11 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Download, Share2, ZoomIn, ZoomOut, Maximize, Minimize } from "lucide-react";
-import PointCloudViewer from "@/components/PointCloudViewer";
+import PointCloudViewer from "@/components/point-cloud/PointCloudViewer";
 import ThreeViewerControls from "@/components/three/ThreeViewerControls";
 import ThreeViewerInfo from "@/components/three/ThreeViewerInfo";
 import ThreeViewerAdvantages from "@/components/three/ThreeViewerAdvantages";
@@ -21,7 +20,6 @@ export default function ThreeDViewer() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
 
-  // Potree görüntüleyicisi yüklendikten sonra yükleme durumunu güncelleyelim
   const handleViewerLoad = () => {
     setIsLoading(false);
   };
@@ -53,7 +51,6 @@ export default function ThreeDViewer() {
     }
   };
   
-  // Nokta bulutu yolu yoksa
   if (!pointcloudPath && !isEmbedded) {
     return (
       <Layout>
@@ -77,7 +74,6 @@ export default function ThreeDViewer() {
     );
   }
   
-  // Gömülü mod için basitleştirilmiş görünüm
   if (isEmbedded) {
     return (
       <>
@@ -109,11 +105,11 @@ export default function ThreeDViewer() {
             </Button>
           </div>
           
-          {/* Nokta bulutu görüntüleyici bileşeni */}
           <div className="h-full w-full">
             {pointcloudPath && (
               <PointCloudViewer 
-                pointCloudPath={pointcloudPath} 
+                pointCloudPath={pointcloudPath}
+                height="100%"
               />
             )}
           </div>
@@ -122,7 +118,6 @@ export default function ThreeDViewer() {
     );
   }
   
-  // Tam görüntüleyici sayfası
   return (
     <Layout>
       <Helmet>
@@ -179,11 +174,11 @@ export default function ThreeDViewer() {
             </div>
           )}
           
-          {/* Nokta bulutu görüntüleyici bileşeni */}
           <div className="h-full w-full">
             {pointcloudPath && (
               <PointCloudViewer 
                 pointCloudPath={pointcloudPath}
+                height="100%"
               />
             )}
           </div>

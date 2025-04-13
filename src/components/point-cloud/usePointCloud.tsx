@@ -1,19 +1,40 @@
+import { useState, useRef, useEffect } from "react";
 
-import { useEffect, useRef, useState } from "react";
-import { Loader2, ZoomIn, ZoomOut, RotateCcw, Maximize, Minimize } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-interface PointCloudViewerProps {
+interface UsePointCloudProps {
   pointCloudPath: string;
+  containerRef: React.RefObject<HTMLDivElement>;
 }
 
-export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+interface UsePointCloudReturn {
+  loading: boolean;
+  error: string | null;
+  viewerInstance: any;
+  isFullscreen: boolean;
+  handleZoomIn: () => void;
+  handleZoomOut: () => void;
+  handleReset: () => void;
+  handleFullscreen: () => void;
+}
+
+export default function usePointCloud({ pointCloudPath, containerRef }: UsePointCloudProps): UsePointCloudReturn {
   const viewerInitialized = useRef<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewerInstance, setViewerInstance] = useState<any>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Tam ekran durumunu izleyelim
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     // Check if container exists
@@ -154,19 +175,6 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
     };
   }, [pointCloudPath]);
 
-  // Tam ekran durumunu izleyelim
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-
   // Viewer control functions
   const handleZoomIn = () => {
     if (viewerInstance) {
@@ -198,91 +206,14 @@ export default function PointCloudViewer({ pointCloudPath }: PointCloudViewerPro
     }
   };
 
-  return (
-    <div className="potree-container w-full relative" style={{ height: "500px" }}>
-      <div ref={containerRef} className="w-full h-full"></div>
-      
-      {/* Yükleniyor durumu */}
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-            <p className="text-sm">Nokta bulutu yükleniyor...</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Hata durumu */}
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/90 z-10">
-          <div className="text-center max-w-sm p-4">
-            <p className="text-red-500 mb-2">{error}</p>
-            <p className="text-xs text-muted-foreground">
-              Tarayıcınız WebGL'i desteklemiyor olabilir veya nokta bulutu dosyası erişilemiyor olabilir.
-            </p>
-          </div>
-        </div>
-      )}
-      
-      {!loading && !error && (
-        <>
-          {/* Görüntüleyici kontrolleri */}
-          <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
-            <Button
-              variant="secondary"
-              size="icon"
-              className="bg-background/70 backdrop-blur-sm shadow-sm"
-              onClick={handleZoomIn}
-              title="Yakınlaştır"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="bg-background/70 backdrop-blur-sm shadow-sm"
-              onClick={handleZoomOut}
-              title="Uzaklaştır"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="bg-background/70 backdrop-blur-sm shadow-sm"
-              onClick={handleReset}
-              title="Görünümü Sıfırla"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="bg-background/70 backdrop-blur-sm shadow-sm"
-              onClick={handleFullscreen}
-              title="Tam Ekran"
-            >
-              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-            </Button>
-          </div>
-          
-          <div className="absolute bottom-2 left-2 text-xs text-white bg-black/50 p-1 rounded">
-            Potree v1.8 | Nokta bulutu: {pointCloudPath.split('/').pop()}
-          </div>
-          
-          {/* LAS formatı bilgisi */}
-          <div className="absolute top-2 right-2 text-xs text-white bg-black/50 p-1 rounded">
-            <a 
-              href="https://potree.org/potree/converter.html" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-300 hover:underline"
-            >
-              LAS dosyanızı Potree formatına dönüştürmek için tıklayın
-            </a>
-          </div>
-        </>
-      )}
-    </div>
-  );
+  return {
+    loading,
+    error,
+    viewerInstance,
+    isFullscreen,
+    handleZoomIn,
+    handleZoomOut,
+    handleReset,
+    handleFullscreen
+  };
 }
