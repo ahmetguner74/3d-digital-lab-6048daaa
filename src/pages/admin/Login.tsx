@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -22,25 +23,50 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // Sabit admin bilgileri ile giriş kontrolü
-      if (email === "ahmetguner74@gmail.com" && password === "selim-16") {
-        // Başarılı giriş mesajı
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
         toast({
-          title: "Giriş başarılı",
+          title: "Giriş Hatası",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (data.user) {
+        // Süper admin kontrolü
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .eq('role', 'superadmin')
+          .single();
+
+        if (roleError || !roleData) {
+          setError("Bu kullanıcı için yönetici izni bulunmuyor.");
+          toast({
+            title: "Yetkisiz Giriş",
+            description: "Bu kullanıcı için yönetici izni bulunmuyor.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Başarılı giriş
+        toast({
+          title: "Giriş Başarılı",
           description: "Yönetim paneline yönlendiriliyorsunuz.",
         });
-        
-        // localStorage'a kimlik doğrulama işareti ekle
-        localStorage.setItem("adminAuthenticated", "true");
-        localStorage.setItem("adminEmail", email);
-        
-        // Admin paneline yönlendir
+
         navigate("/admin/dashboard");
-      } else {
-        setError("Geçersiz e-posta veya şifre.");
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err: any) {
+      console.error("Login error:", err);
       setError("Giriş sırasında bir hata oluştu.");
     } finally {
       setLoading(false);
