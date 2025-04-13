@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { ProjectsFilter } from "@/components/admin/ProjectsFilter";
-import { ProjectsTable } from "@/components/admin/ProjectsTable";
+import { ProjectsTable } from "@/components/admin/projectsTable";
 import { useAdminProjects } from "@/hooks/useAdminProjects";
 import ProjectsErrorView from "@/components/admin/ProjectsErrorView";
 
