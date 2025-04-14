@@ -20,7 +20,10 @@ export function useAdminProjects() {
 
   // Filtreleme ve sıralama mantığı
   useEffect(() => {
-    if (!projects.length) return;
+    if (!projects.length) {
+      setFilteredProjects([]);
+      return;
+    }
     
     let result = [...projects];
     
@@ -45,10 +48,13 @@ export function useAdminProjects() {
     // Sıralama
     if (sortConfig.key) {
       result.sort((a, b) => {
-        if (a[sortConfig.key as keyof typeof a] < b[sortConfig.key as keyof typeof b]) {
+        const aValue = a[sortConfig.key as keyof typeof a];
+        const bValue = b[sortConfig.key as keyof typeof b];
+        
+        if (aValue < bValue) {
           return sortConfig.direction === "asc" ? -1 : 1;
         }
-        if (a[sortConfig.key as keyof typeof a] > b[sortConfig.key as keyof typeof b]) {
+        if (aValue > bValue) {
           return sortConfig.direction === "asc" ? 1 : -1;
         }
         return 0;
@@ -79,21 +85,28 @@ export function useAdminProjects() {
       if (data) {
         // Supabase'den gelen veriyi Project tipine dönüştür
         const formattedProjects: Project[] = data.map(item => ({
-          id: item.id,
-          title: item.title,
-          category: item.category,
-          status: item.status,
+          id: item.id || "",
+          title: item.title || "",
+          category: item.category || "",
+          status: item.status || "Taslak",
           featured: item.featured || false,
-          lastUpdated: new Date(item.updated_at || Date.now()).toISOString().split('T')[0],
-          slug: item.slug
+          lastUpdated: item.updated_at ? new Date(item.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          slug: item.slug || ""
         }));
         
         setProjects(formattedProjects);
         console.log("Admin paneli - projeler yüklendi:", formattedProjects.length);
         
         // Benzersiz kategorileri ayarla
-        const categories = Array.from(new Set(formattedProjects.map(project => project.category)));
-        setUniqueCategories(categories);
+        if (formattedProjects.length > 0) {
+          const categories = Array.from(new Set(formattedProjects.map(project => project.category).filter(Boolean)));
+          setUniqueCategories(categories);
+        } else {
+          setUniqueCategories([]);
+        }
+      } else {
+        setProjects([]);
+        setUniqueCategories([]);
       }
     } catch (err: any) {
       console.error('Projeler yüklenirken beklenmeyen hata:', err);

@@ -74,14 +74,14 @@ export const ProjectsFilter = ({
             <SelectItem value="Arşiv">Arşiv</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Button asChild className="whitespace-nowrap">
+          <Link to="/admin/projects/new" className="flex items-center">
+            <Plus className="mr-2 h-4 w-4" />
+            Yeni Proje
+          </Link>
+        </Button>
       </div>
-      
-      <Button asChild className="whitespace-nowrap">
-        <Link to="/admin/projects/new" className="flex items-center">
-          <Plus className="mr-2 h-4 w-4" />
-          Yeni Proje
-        </Link>
-      </Button>
     </div>
   );
 };
