@@ -35,6 +35,7 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
     }
 
     try {
+      console.log("Kaydetme işlemi başlıyor, isNew değeri:", isNew);
       await saveProject({
         project,
         isNew,

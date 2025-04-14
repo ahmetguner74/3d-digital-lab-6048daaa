@@ -26,6 +26,7 @@ export default function ProjectEdit() {
     additionalImages: [],
     cover_image: "",
     haspointcloud: false,
+    pointcloudpath: "",
     lastUpdated: new Date().toISOString().split('T')[0]
   });
   
@@ -133,6 +134,8 @@ export default function ProjectEdit() {
       </AdminLayout>
     );
   }
+
+  console.log("ProjectEdit sayfası, isNew değeri:", isNew);
 
   return (
     <AdminLayout title={isNew ? "Yeni Proje" : "Proje Düzenle"}>

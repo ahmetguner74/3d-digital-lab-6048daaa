@@ -63,18 +63,18 @@ export async function saveProject({
       console.error("Proje güncelleme hatası:", error);
       throw error;
     }
-  } else {
-    // Hem ID null hem de yeni değilse (bu durumda gerçekleşmemeli)
+  } else if (!isNew) {
+    // Bu kontrol hata veriyor, isNew değilse ve ID yoksa hata vermemeliyiz
     throw new Error("Proje ID'si bulunamadı ve yeni proje değil");
   }
   
   // Proje ID'si kontrolü
-  if (!projectId) {
+  if (!projectId && !isNew) {
     throw new Error("Proje ID'si alınamadı");
   }
 
   // Silinmiş görselleri veritabanından kaldır
-  if (deletedImageIds.length > 0) {
+  if (projectId && deletedImageIds.length > 0) {
     console.log("Silinecek görseller:", deletedImageIds);
     const { error: deleteError } = await supabase
       .from('project_images')
@@ -87,12 +87,15 @@ export async function saveProject({
     }
   }
 
-  // Önce-sonra görselleri için
-  await saveBeforeAfterImages(projectId, previewImages);
+  // Proje ID'si alındıktan sonra diğer işlemleri yap
+  if (projectId) {
+    // Önce-sonra görselleri için
+    await saveBeforeAfterImages(projectId, previewImages);
 
-  // Ek görseller için
-  if (project.additionalImages && project.additionalImages.length > 0) {
-    await saveAdditionalImages(projectId, project.additionalImages);
+    // Ek görseller için
+    if (project.additionalImages && project.additionalImages.length > 0) {
+      await saveAdditionalImages(projectId, project.additionalImages);
+    }
   }
   
   return projectId;
