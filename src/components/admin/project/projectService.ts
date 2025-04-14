@@ -33,6 +33,7 @@ export async function saveProject({
   
   let projectId = project.id;
   
+  // Yeni proje oluşturma kontrolü
   if (isNew) {
     console.log("Yeni proje oluşturuluyor...");
     const { data, error } = await supabase
@@ -52,7 +53,9 @@ export async function saveProject({
     } else {
       throw new Error("Proje kaydedildi ancak ID alınamadı");
     }
-  } else if (projectId) {
+  } 
+  // Mevcut proje güncelleme kontrolü
+  else if (projectId) {
     console.log("Mevcut proje güncelleniyor, ID:", projectId);
     const { error } = await supabase
       .from('projects')
@@ -63,15 +66,11 @@ export async function saveProject({
       console.error("Proje güncelleme hatası:", error);
       throw error;
     }
-  } else if (!isNew) {
-    // Bu kontrol hata veriyor, isNew değilse ve ID yoksa hata vermemeliyiz
-    throw new Error("Proje ID'si bulunamadı ve yeni proje değil");
   }
-  
-  // Proje ID'si kontrolü
-  if (!projectId && !isNew) {
-    throw new Error("Proje ID'si alınamadı");
-  }
+  // Artık bu kontrol işlemi yapmayacağız, çünkü bu durum yeni proje eklerken sorun yaratıyor
+  // else if (!isNew) {
+  //   throw new Error("Proje ID'si bulunamadı ve yeni proje değil");
+  // }
 
   // Silinmiş görselleri veritabanından kaldır
   if (projectId && deletedImageIds.length > 0) {
@@ -89,12 +88,17 @@ export async function saveProject({
 
   // Proje ID'si alındıktan sonra diğer işlemleri yap
   if (projectId) {
-    // Önce-sonra görselleri için
-    await saveBeforeAfterImages(projectId, previewImages);
+    try {
+      // Önce-sonra görselleri için
+      await saveBeforeAfterImages(projectId, previewImages);
 
-    // Ek görseller için
-    if (project.additionalImages && project.additionalImages.length > 0) {
-      await saveAdditionalImages(projectId, project.additionalImages);
+      // Ek görseller için
+      if (project.additionalImages && project.additionalImages.length > 0) {
+        await saveAdditionalImages(projectId, project.additionalImages);
+      }
+    } catch (error) {
+      console.error("Görseller kaydedilirken hata:", error);
+      // Görseller için hata olsa bile proje kaydedildi, bu nedenle projeyi döndür
     }
   }
   

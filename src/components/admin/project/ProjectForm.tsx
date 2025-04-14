@@ -36,12 +36,14 @@ export default function ProjectForm({ initialProject, isNew }: ProjectFormProps)
 
     try {
       console.log("Kaydetme işlemi başlıyor, isNew değeri:", isNew);
-      await saveProject({
+      const savedProjectId = await saveProject({
         project,
         isNew,
         deletedImageIds,
         previewImages
       });
+      
+      console.log("Proje başarıyla kaydedildi, ID:", savedProjectId);
       
       toast({
         title: "Başarılı",
